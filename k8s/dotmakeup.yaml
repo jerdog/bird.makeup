@@ -67,7 +67,7 @@ spec:
                   name: dotmakeup-db
                   key: host
             - name: db__port
-              value: "20184"
+              value: "5432"
             - name: db__name
               valueFrom:
                 secretKeyRef:
@@ -89,27 +89,13 @@ spec:
                   name: dotmakeup-app-insights
                   key: ConnectionString
                   optional: true
-          volumeMounts:
-            - mountPath: "/app/secrets"
-              name: key
-              readOnly: true
           livenessProbe:
             httpGet:
               path: /About
               port: 80
             initialDelaySeconds: 15
             periodSeconds: 10
-          lifecycle:
-            postStart:
-              exec:
-                command:
-                  - /bin/sh
-                  - -c
-                  - cp /app/secrets/key.json /app/key.json
-      volumes:
-        - name: key
-          secret:
-            secretName: dotmakeup-key
+
 ---
 apiVersion: v1
 kind: Service

@@ -16,6 +16,9 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using OpenTelemetry;
+using OpenTelemetry.Trace;
+using Grafana.OpenTelemetry;
 
 namespace BirdsiteLive
 {
@@ -45,6 +48,10 @@ namespace BirdsiteLive
             aiOptions.EnableRequestTrackingTelemetryModule = false;
             //aiOptions.EnableAdaptiveSampling = false;
             services.AddApplicationInsightsTelemetry(aiOptions);
+            
+            using var tracerProvider = Sdk.CreateTracerProviderBuilder()
+                .UseGrafana()
+                .Build();
 
             services.AddControllersWithViews();
 

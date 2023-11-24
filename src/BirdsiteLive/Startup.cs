@@ -19,6 +19,8 @@ using Microsoft.Extensions.Hosting;
 using OpenTelemetry;
 using OpenTelemetry.Trace;
 using Grafana.OpenTelemetry;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Metrics;
 
 namespace BirdsiteLive
 {
@@ -49,9 +51,10 @@ namespace BirdsiteLive
             //aiOptions.EnableAdaptiveSampling = false;
             services.AddApplicationInsightsTelemetry(aiOptions);
             
-            using var tracerProvider = Sdk.CreateTracerProviderBuilder()
-                .UseGrafana()
-                .Build();
+            services.AddOpenTelemetry()
+                .ConfigureResource(builder => builder.AddService(serviceName: "dotmakeup"))
+                .WithMetrics(builder => builder.AddAspNetCoreInstrumentation())
+                .UseGrafana();
 
             services.AddControllersWithViews();
 

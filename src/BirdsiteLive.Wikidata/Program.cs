@@ -11,3 +11,4 @@ var dal = new TwitterUserPostgresDal(settings);
 var wikiService = new WikidataService(dal);
 
 await wikiService.SyncQcodes();
+await wikiService.SyncNotableWork();

@@ -5,6 +5,7 @@ using System.Threading;
 using System.Timers;
 using BirdsiteLive.Twitter.Models;
 using Microsoft.ApplicationInsights;
+using System.Diagnostics.Metrics;
 
 namespace BirdsiteLive.Statistics.Domain
 {
@@ -28,6 +29,9 @@ namespace BirdsiteLive.Statistics.Domain
         private static System.Timers.Timer _resetTimer;
         private TelemetryClient _telemetryClient;
 
+        static Meter s_meter = new("DotMakeup.Twitter", "1.0.0");
+        static Counter<int> newTweets = s_meter.CreateCounter<int>("NewTweets");
+        
         #region Ctor
         public TwitterStatisticsHandler(TelemetryClient telemetryClient)
         {
@@ -73,6 +77,7 @@ namespace BirdsiteLive.Statistics.Domain
         {
             var metric = _telemetryClient.GetMetric("Twitter.NewTweets");
             metric.TrackValue(number);
+            newTweets.Add(number);
         }
 
         public ApiStatistics GetStatistics()

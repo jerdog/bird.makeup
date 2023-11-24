@@ -53,7 +53,7 @@ namespace BirdsiteLive
             
             services.AddOpenTelemetry()
                 .ConfigureResource(builder => builder.AddService(serviceName: "dotmakeup"))
-                .WithMetrics(builder => builder.AddAspNetCoreInstrumentation())
+                .WithMetrics(config => config.AddMeter("DotMakeup.Twitter"))
                 .UseGrafana();
 
             services.AddControllersWithViews();

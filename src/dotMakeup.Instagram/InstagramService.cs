@@ -16,6 +16,11 @@ public class InstagramService : ISocialMediaService
         }
         #endregion
 
+        public async Task<SocialMediaPost?> GetPostAsync(long id)
+        {
+            return null;
+        }
+
         public string ServiceName { get; } = "Instagram";
         public SocialMediaUserDal UserDal { get; }
         public async Task<SocialMediaUser> GetUserAsync(string username)

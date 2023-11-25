@@ -156,7 +156,7 @@ namespace BirdsiteLive.Controllers
             if (!long.TryParse(statusId, out var parsedStatusId))
                 return NotFound();
 
-            var tweet = await _twitterTweetService.GetTweetAsync(parsedStatusId);
+            var tweet = await _socialMediaService.GetPostAsync(parsedStatusId);
             if (tweet == null)
                 return NotFound();
 

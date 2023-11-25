@@ -17,7 +17,7 @@ namespace BirdsiteLive.Twitter.Models
         public bool IsRetweet { get; set; }
         public string RetweetUrl { get; set; }
         public long RetweetId { get; set; }
-        public TwitterUser OriginalAuthor { get; set; }
-        public TwitterUser Author { get; set; }
+        public SocialMediaUser OriginalAuthor { get; set; }
+        public SocialMediaUser Author { get; set; }
     }
 }

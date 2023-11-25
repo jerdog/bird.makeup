@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using BirdsiteLive.ActivityPub;
 using BirdsiteLive.ActivityPub.Converters;
 using BirdsiteLive.ActivityPub.Models;
+using BirdsiteLive.Common.Interfaces;
 using BirdsiteLive.Common.Settings;
 using BirdsiteLive.Domain.Repository;
 using BirdsiteLive.Domain.Statistics;
@@ -18,6 +19,7 @@ namespace BirdsiteLive.Domain
     public interface IStatusService
     {
         Note GetStatus(string username, ExtractedTweet tweet);
+        Note GetStatus(string username, SocialMediaPost post);
         ActivityCreateNote GetActivity(string username, ExtractedTweet tweet);
     }
 
@@ -36,16 +38,16 @@ namespace BirdsiteLive.Domain
         }
         #endregion
 
-        public Note GetStatus(string username, ExtractedTweet tweet)
+        public Note GetStatus(string username, SocialMediaPost post)
         {
             var actorUrl = UrlFactory.GetActorUrl(_instanceSettings.Domain, username);
-            var noteUrl = UrlFactory.GetNoteUrl(_instanceSettings.Domain, username, tweet.Id.ToString());
+            var noteUrl = UrlFactory.GetNoteUrl(_instanceSettings.Domain, username, post.Id.ToString());
             String announceId = null;
-            if (tweet.IsRetweet)
+            if (post.IsRetweet)
             {
-                actorUrl = UrlFactory.GetActorUrl(_instanceSettings.Domain, tweet.OriginalAuthor.Acct);
-                noteUrl = UrlFactory.GetNoteUrl(_instanceSettings.Domain, tweet.OriginalAuthor.Acct, tweet.RetweetId.ToString());
-                announceId  = UrlFactory.GetNoteUrl(_instanceSettings.Domain, username, tweet.Id.ToString());
+                actorUrl = UrlFactory.GetActorUrl(_instanceSettings.Domain, post.OriginalAuthor.Acct);
+                noteUrl = UrlFactory.GetNoteUrl(_instanceSettings.Domain, post.OriginalAuthor.Acct, post.RetweetId.ToString());
+                announceId  = UrlFactory.GetNoteUrl(_instanceSettings.Domain, username, post.Id.ToString());
             }
 
             var to = $"{actorUrl}/followers";
@@ -54,12 +56,12 @@ namespace BirdsiteLive.Domain
             
             string summary = null;
 
-            var extractedTags = _statusExtractor.Extract(tweet.MessageContent);
+            var extractedTags = _statusExtractor.Extract(post.MessageContent);
             _statisticsHandler.ExtractedStatus(extractedTags.tags.Count(x => x.type == "Mention"));
 
             // Replace RT by a link
             var content = extractedTags.content;
-            if (tweet.IsRetweet)
+            if (post.IsRetweet)
             {
                 // content = "RT: " + content;
                 cc = new[] {"https://www.w3.org/ns/activitystreams#Public"};
@@ -67,15 +69,15 @@ namespace BirdsiteLive.Domain
             cc = new[] {"https://www.w3.org/ns/activitystreams#Public"};
 
             string inReplyTo = null;
-            if (tweet.InReplyToStatusId != default)
-                inReplyTo = $"https://{_instanceSettings.Domain}/users/{tweet.InReplyToAccount.ToLowerInvariant()}/statuses/{tweet.InReplyToStatusId}";
+            if (post.InReplyToStatusId != default)
+                inReplyTo = $"https://{_instanceSettings.Domain}/users/{post.InReplyToAccount.ToLowerInvariant()}/statuses/{post.InReplyToStatusId}";
 
             var note = new Note
             {
                 id = noteUrl,
                 announceId = announceId,
 
-                published = tweet.CreatedAt.ToString("s") + "Z",
+                published = post.CreatedAt.ToString("s") + "Z",
                 url = noteUrl,
                 attributedTo = actorUrl,
 
@@ -87,12 +89,18 @@ namespace BirdsiteLive.Domain
                 sensitive = false,
                 summary = summary,
                 content = $"<p>{content}</p>",
-                attachment = Convert(tweet.Media),
+                attachment = Convert(post.Media),
                 tag = extractedTags.tags
             };
 
             return note;
         }
+
+        public Note GetStatus(string username, ExtractedTweet tweet)
+        {
+            return GetStatus(username, (SocialMediaPost)tweet);
+        }
+
         public ActivityCreateNote GetActivity(string username, ExtractedTweet tweet)
         {
             var note = GetStatus(username, tweet);

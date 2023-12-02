@@ -14,4 +14,5 @@ public class InstagramUserPostgresDal : UserPostgresDal, IInstagramUserDal
         #endregion
 
         public override string tableName { get; set; }
+        public override string FollowingColumnName { get; set; } = "following_ig";
 }

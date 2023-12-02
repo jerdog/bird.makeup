@@ -41,7 +41,7 @@ namespace BirdsiteLive.Domain.BusinessUseCases
             {
                 var followers = await _followersDal.GetFollowersAsync(following);
                 if (followers.Length == 1 && followers.First().Id == follower.Id)
-                    await _twitterUserDal.DeleteTwitterUserAsync(following);
+                    await _twitterUserDal.DeleteUserAsync(following);
             }
 
             // Remove follower from DB

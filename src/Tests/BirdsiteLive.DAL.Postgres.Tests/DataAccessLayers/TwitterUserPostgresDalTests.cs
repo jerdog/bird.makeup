@@ -32,7 +32,7 @@ namespace BirdsiteLive.DAL.Postgres.Tests.DataAccessLayers
         public async Task GetTwitterUserAsync_NoUser()
         {
             var dal = new TwitterUserPostgresDal(_settings);
-            var result = await dal.GetTwitterUserAsync("dontexist");
+            var result = await dal.GetUserAsync("dontexist");
             Assert.IsNull(result);
         }
 
@@ -40,15 +40,13 @@ namespace BirdsiteLive.DAL.Postgres.Tests.DataAccessLayers
         public async Task CreateAndGetUser()
         {
             var acct = "myid";
-            var lastTweetId = 1548L;
 
             var dal = new TwitterUserPostgresDal(_settings);
 
-            await dal.CreateTwitterUserAsync(acct, lastTweetId);
-            var result = await dal.GetTwitterUserAsync(acct);
+            await dal.CreateUserAsync(acct);
+            var result = await dal.GetUserAsync(acct);
 
             Assert.AreEqual(acct, result.Acct);
-            Assert.AreEqual(lastTweetId, result.LastTweetPostedId);
             Assert.AreEqual(0, result.FetchingErrorCount);
             Assert.IsTrue(result.Id > 0);
         }
@@ -57,16 +55,14 @@ namespace BirdsiteLive.DAL.Postgres.Tests.DataAccessLayers
         public async Task CreateAndGetUser_byId()
         {
             var acct = "myid";
-            var lastTweetId = 1548L;
 
             var dal = new TwitterUserPostgresDal(_settings);
 
-            await dal.CreateTwitterUserAsync(acct, lastTweetId);
-            var result = await dal.GetTwitterUserAsync(acct);
-            var resultById = await dal.GetTwitterUserAsync(result.Id);
+            await dal.CreateUserAsync(acct);
+            var result = await dal.GetUserAsync(acct);
+            var resultById = await dal.GetUserAsync(result.Id);
 
             Assert.AreEqual(acct, resultById.Acct);
-            Assert.AreEqual(lastTweetId, resultById.LastTweetPostedId);
             Assert.AreEqual(result.Id, resultById.Id);
         }
 
@@ -78,8 +74,8 @@ namespace BirdsiteLive.DAL.Postgres.Tests.DataAccessLayers
 
             var dal = new TwitterUserPostgresDal(_settings);
 
-            await dal.CreateTwitterUserAsync(acct, lastTweetId);
-            var result = await dal.GetTwitterUserAsync(acct);
+            await dal.CreateUserAsync(acct);
+            var result = await dal.GetUserAsync(acct);
 
 
             var updatedLastTweetId = 1600L;
@@ -88,7 +84,7 @@ namespace BirdsiteLive.DAL.Postgres.Tests.DataAccessLayers
             var errors = 15;
             await dal.UpdateTwitterUserAsync(result.Id, updatedLastTweetId, errors, now);
 
-            result = await dal.GetTwitterUserAsync(acct);
+            result = await dal.GetUserAsync(acct);
 
             Assert.AreEqual(acct, result.Acct);
             Assert.AreEqual(updatedLastTweetId, result.LastTweetPostedId);
@@ -104,8 +100,8 @@ namespace BirdsiteLive.DAL.Postgres.Tests.DataAccessLayers
 
             var dal = new TwitterUserPostgresDal(_settings);
 
-            await dal.CreateTwitterUserAsync(acct, lastTweetId);
-            var result = await dal.GetTwitterUserAsync(acct);
+            await dal.CreateUserAsync(acct);
+            var result = await dal.GetUserAsync(acct);
 
 
             var updatedLastTweetId = 1600L;
@@ -118,7 +114,7 @@ namespace BirdsiteLive.DAL.Postgres.Tests.DataAccessLayers
             result.LastSync = now;
             await dal.UpdateTwitterUserAsync((SyncTwitterUser) result);
 
-            result = await dal.GetTwitterUserAsync(acct);
+            result = await dal.GetUserAsync(acct);
 
             Assert.AreEqual(acct, result.Acct);
             Assert.AreEqual(updatedLastTweetId, result.LastTweetPostedId);
@@ -134,8 +130,8 @@ namespace BirdsiteLive.DAL.Postgres.Tests.DataAccessLayers
 
             var dal = new TwitterUserPostgresDal(_settings);
 
-            await dal.CreateTwitterUserAsync(acct, lastTweetId);
-            var result = await dal.GetTwitterUserAsync(acct);
+            await dal.CreateUserAsync(acct);
+            var result = await dal.GetUserAsync(acct);
 
 
             var updatedLastTweetId = 1600L;
@@ -148,7 +144,7 @@ namespace BirdsiteLive.DAL.Postgres.Tests.DataAccessLayers
             result.LastSync = now;
             await dal.UpdateTwitterUserAsync((SyncTwitterUser) result);
 
-            result = await dal.GetTwitterUserAsync(acct);
+            result = (SyncTwitterUser) await dal.GetUserAsync(acct);
 
             Assert.AreEqual(acct, result.Acct);
             Assert.AreEqual(updatedLastTweetId, result.LastTweetPostedId);
@@ -189,12 +185,12 @@ namespace BirdsiteLive.DAL.Postgres.Tests.DataAccessLayers
 
             var dal = new TwitterUserPostgresDal(_settings);
 
-            await dal.CreateTwitterUserAsync(acct, lastTweetId);
-            var result = await dal.GetTwitterUserAsync(acct);
+            await dal.CreateUserAsync(acct);
+            var result = await dal.GetUserAsync(acct);
             Assert.IsNotNull(result);
 
-            await dal.DeleteTwitterUserAsync(acct);
-            result = await dal.GetTwitterUserAsync(acct);
+            await dal.DeleteUserAsync(acct);
+            result = await dal.GetUserAsync(acct);
             Assert.IsNull(result);
         }
 
@@ -203,7 +199,7 @@ namespace BirdsiteLive.DAL.Postgres.Tests.DataAccessLayers
         public async Task DeleteUser_NotAcct()
         {
             var dal = new TwitterUserPostgresDal(_settings);
-            await dal.DeleteTwitterUserAsync(string.Empty);
+            await dal.DeleteUserAsync(string.Empty);
         }
 
         [TestMethod]
@@ -214,12 +210,12 @@ namespace BirdsiteLive.DAL.Postgres.Tests.DataAccessLayers
 
             var dal = new TwitterUserPostgresDal(_settings);
 
-            await dal.CreateTwitterUserAsync(acct, lastTweetId);
-            var result = await dal.GetTwitterUserAsync(acct);
+            await dal.CreateUserAsync(acct);
+            var result = await dal.GetUserAsync(acct);
             Assert.IsNotNull(result);
 
-            await dal.DeleteTwitterUserAsync(result.Id);
-            result = await dal.GetTwitterUserAsync(acct);
+            await dal.DeleteUserAsync(result.Id);
+            result = await dal.GetUserAsync(acct);
             Assert.IsNull(result);
         }
 
@@ -228,7 +224,7 @@ namespace BirdsiteLive.DAL.Postgres.Tests.DataAccessLayers
         public async Task DeleteUser_NotAcct_byId()
         {
             var dal = new TwitterUserPostgresDal(_settings);
-            await dal.DeleteTwitterUserAsync(default(int));
+            await dal.DeleteUserAsync(default(int));
         }
 
         [TestMethod]
@@ -240,7 +236,7 @@ namespace BirdsiteLive.DAL.Postgres.Tests.DataAccessLayers
                 var acct = $"myid{i}";
                 var lastTweetId = 1548L;
 
-                await dal.CreateTwitterUserAsync(acct, lastTweetId);
+                await dal.CreateUserAsync(acct);
             }
 
             var result = await dal.GetAllTwitterUsersAsync(1000);
@@ -260,7 +256,7 @@ namespace BirdsiteLive.DAL.Postgres.Tests.DataAccessLayers
                 var acct = $"myid{i}";
                 var lastTweetId = i+10;
 
-                await dal.CreateTwitterUserAsync(acct, lastTweetId);
+                await dal.CreateUserAsync(acct);
             }
 
             // Update accounts
@@ -274,12 +270,10 @@ namespace BirdsiteLive.DAL.Postgres.Tests.DataAccessLayers
             }
 
             // Create a not init account
-            await dal.CreateTwitterUserAsync("not_init", -1);
+            await dal.CreateUserAsync("not_init");
 
             var result = await dal.GetAllTwitterUsersAsync(10);
 
-            Assert.IsTrue(result.Any(x => x.Acct == "myid0"));
-            Assert.IsTrue(result.Any(x => x.Acct == "myid8"));
             Assert.IsTrue(result.Any(x => x.Acct == "not_init"));
         }
 
@@ -296,7 +290,7 @@ namespace BirdsiteLive.DAL.Postgres.Tests.DataAccessLayers
                 var acct = $"myid{i}";
                 var lastTweetId = 1548L;
 
-                await dal.CreateTwitterUserAsync(acct, lastTweetId);
+                await dal.CreateUserAsync(acct);
             }
 
             var allUsers = await dal.GetAllTwitterUsersAsync(100);
@@ -326,7 +320,7 @@ namespace BirdsiteLive.DAL.Postgres.Tests.DataAccessLayers
                 var acct = $"myid{i}";
                 var lastTweetId = 1548L;
 
-                await dal.CreateTwitterUserAsync(acct, lastTweetId);
+                await dal.CreateUserAsync(acct);
             }
 
             var result = await dal.GetAllTwitterUsersAsync();
@@ -345,7 +339,7 @@ namespace BirdsiteLive.DAL.Postgres.Tests.DataAccessLayers
                 var acct = $"myid{i}";
                 var lastTweetId = 1548L;
 
-                await dal.CreateTwitterUserAsync(acct, lastTweetId);
+                await dal.CreateUserAsync(acct);
             }
 
             var result = await dal.GetTwitterUsersCountAsync();
@@ -361,11 +355,11 @@ namespace BirdsiteLive.DAL.Postgres.Tests.DataAccessLayers
                 var acct = $"myid{i}";
                 var lastTweetId = 1548L;
 
-                await dal.CreateTwitterUserAsync(acct, lastTweetId);
+                await dal.CreateUserAsync(acct);
 
                 if (i == 0 || i == 2 || i == 3)
                 {
-                    var t = await dal.GetTwitterUserAsync(acct);
+                    var t = await dal.GetUserAsync(acct);
                     await dal.UpdateTwitterUserAsync(t.Id ,1L, 50+i*2, DateTime.Now);
                 }
             }

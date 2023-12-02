@@ -63,7 +63,7 @@ namespace BirdsiteLive.Domain.Tests.BusinessUseCases
 
             var twitterUserDalMock = new Mock<ITwitterUserDal>(MockBehavior.Strict);
             twitterUserDalMock
-                .Setup(x => x.GetTwitterUserAsync(twitterName))
+                .Setup(x => x.GetUserAsync(twitterName))
                 .ReturnsAsync((SyncTwitterUser)null);
             #endregion
 
@@ -124,7 +124,7 @@ namespace BirdsiteLive.Domain.Tests.BusinessUseCases
 
             var twitterUserDalMock = new Mock<ITwitterUserDal>(MockBehavior.Strict);
             twitterUserDalMock
-                .Setup(x => x.GetTwitterUserAsync(twitterName))
+                .Setup(x => x.GetUserAsync(twitterName))
                 .ReturnsAsync(twitterUser);
             #endregion
 
@@ -182,11 +182,11 @@ namespace BirdsiteLive.Domain.Tests.BusinessUseCases
 
             var twitterUserDalMock = new Mock<ITwitterUserDal>(MockBehavior.Strict);
             twitterUserDalMock
-                .Setup(x => x.GetTwitterUserAsync(twitterName))
+                .Setup(x => x.GetUserAsync(twitterName))
                 .ReturnsAsync(twitterUser);
 
             twitterUserDalMock
-                .Setup(x => x.DeleteTwitterUserAsync(
+                .Setup(x => x.DeleteUserAsync(
                     It.Is<string>(y => y == twitterName)
                 ))
                 .Returns(Task.CompletedTask);

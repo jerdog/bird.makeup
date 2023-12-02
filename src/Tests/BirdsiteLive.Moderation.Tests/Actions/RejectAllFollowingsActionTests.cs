@@ -37,7 +37,7 @@ namespace BirdsiteLive.Moderation.Tests.Actions
             #region Mocks
             var twitterUserDalMock = new Mock<ITwitterUserDal>(MockBehavior.Strict);
             twitterUserDalMock
-                .Setup(x => x.GetTwitterUserAsync(
+                .Setup(x => x.GetUserAsync(
                     It.Is<int>(y => y == 24)))
                 .ReturnsAsync(new SyncTwitterUser
                 {
@@ -85,7 +85,7 @@ namespace BirdsiteLive.Moderation.Tests.Actions
             #region Mocks
             var twitterUserDalMock = new Mock<ITwitterUserDal>(MockBehavior.Strict);
             twitterUserDalMock
-                .Setup(x => x.GetTwitterUserAsync(
+                .Setup(x => x.GetUserAsync(
                     It.Is<int>(y => y == 24)))
                 .ReturnsAsync(new SyncTwitterUser
                 {

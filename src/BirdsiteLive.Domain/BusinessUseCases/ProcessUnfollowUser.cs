@@ -28,7 +28,7 @@ namespace BirdsiteLive.Domain.BusinessUseCases
             var follower = await _followerDal.GetFollowerAsync(followerUsername, followerDomain);
             if (follower == null) return;
 
-            var twitterUser = await _twitterUserDal.GetTwitterUserAsync(twitterUsername);
+            var twitterUser = await _twitterUserDal.GetUserAsync(twitterUsername);
             if (twitterUser == null) return;
 
             // Update Follower
@@ -45,7 +45,7 @@ namespace BirdsiteLive.Domain.BusinessUseCases
             // Check if TwitterUser has still followers
             var followers = await _followerDal.GetFollowersAsync(twitterUser.Id);
             if (!followers.Any())
-                await _twitterUserDal.DeleteTwitterUserAsync(twitterUsername);
+                await _twitterUserDal.DeleteUserAsync(twitterUsername);
         }
     }
 }

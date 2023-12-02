@@ -48,7 +48,7 @@ namespace BirdsiteLive.Moderation.Actions
             }
 
             // Remove twitter user
-            await _twitterUserDal.DeleteTwitterUserAsync(twitterUserId);
+            await _twitterUserDal.DeleteUserAsync(twitterUserId);
         }
     }
 }

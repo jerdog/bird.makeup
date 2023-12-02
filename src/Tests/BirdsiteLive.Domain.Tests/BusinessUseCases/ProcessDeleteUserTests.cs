@@ -36,7 +36,7 @@ namespace BirdsiteLive.Domain.Tests.BusinessUseCases
 
             var twitterUserDalMock = new Mock<ITwitterUserDal>(MockBehavior.Strict);
             twitterUserDalMock
-                .Setup(x => x.DeleteTwitterUserAsync(
+                .Setup(x => x.DeleteUserAsync(
                     It.Is<int>(y => y == 1)))
                 .Returns(Task.CompletedTask);
             #endregion

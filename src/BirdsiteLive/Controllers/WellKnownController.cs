@@ -201,7 +201,7 @@ namespace BirdsiteLive.Controllers
             if (!string.IsNullOrWhiteSpace(domain) && domain != _settings.Domain)
                 return NotFound();
 
-            var user = await _twitterUserDal.GetTwitterUserAsync(name);
+            var user = await _twitterUserDal.GetUserAsync(name);
             if (user is null)
             {
                 try

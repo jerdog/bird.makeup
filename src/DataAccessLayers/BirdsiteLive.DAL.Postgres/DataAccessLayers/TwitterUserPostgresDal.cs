@@ -25,44 +25,7 @@ namespace BirdsiteLive.DAL.Postgres.DataAccessLayers
         #endregion
 
         public override string tableName { get; set; } 
-
-
-        public async Task CreateTwitterUserAsync(string acct, long lastTweetPostedId)
-        {
-            acct = acct.ToLowerInvariant();
-
-            using (var dbConnection = Connection)
-            {
-                await dbConnection.ExecuteAsync(
-                    $"INSERT INTO {_settings.TwitterUserTableName} (acct,lastTweetPostedId) VALUES(@acct,@lastTweetPostedId)",
-                    new { acct, lastTweetPostedId });
-            }
-        }
-
-
-        public async Task<SyncTwitterUser> GetTwitterUserAsync(int id)
-        {
-            var query = $"SELECT * FROM {_settings.TwitterUserTableName} WHERE id = $1";
-
-            await using var connection = DataSource.CreateConnection();
-            await connection.OpenAsync();
-            await using var command = new NpgsqlCommand(query, connection) {
-                Parameters = { new() { Value = id}}
-            };
-            var reader = await command.ExecuteReaderAsync();
-            if (!await reader.ReadAsync())
-                return null;
-            
-            return new SyncTwitterUser
-            {
-                Id = reader["id"] as int? ?? default,
-                Acct = reader["acct"] as string,
-                TwitterUserId = reader["twitterUserId"] as long? ?? default,
-                LastTweetPostedId = reader["lastTweetPostedId"] as long? ?? default,
-                LastSync = reader["lastSync"] as DateTime? ?? default,
-                FetchingErrorCount = reader["fetchingErrorCount"] as int? ?? default,
-            };
-        }
+        public override string FollowingColumnName { get; set; } = "followings";
 
         public async Task<TimeSpan> GetTwitterSyncLag()
         {
@@ -266,30 +229,5 @@ namespace BirdsiteLive.DAL.Postgres.DataAccessLayers
             await UpdateTwitterUserAsync(user.Id, user.LastTweetPostedId, user.FetchingErrorCount, user.LastSync);
         }
 
-        public async Task DeleteTwitterUserAsync(string acct)
-        {
-            if (string.IsNullOrWhiteSpace(acct)) throw new ArgumentException("acct");
-
-            acct = acct.ToLowerInvariant();
-
-            var query = $"DELETE FROM {_settings.TwitterUserTableName} WHERE acct = @acct";
-
-            using (var dbConnection = Connection)
-            {
-                await dbConnection.QueryAsync(query, new { acct });
-            }
-        }
-
-        public async Task DeleteTwitterUserAsync(int id)
-        {
-            if (id == default) throw new ArgumentException("id");
-            
-            var query = $"DELETE FROM {_settings.TwitterUserTableName} WHERE id = @id";
-
-            using (var dbConnection = Connection)
-            {
-                await dbConnection.QueryAsync(query, new { id });
-            }
-        }
     }
 }

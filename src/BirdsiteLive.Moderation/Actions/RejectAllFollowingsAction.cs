@@ -35,7 +35,7 @@ namespace BirdsiteLive.Moderation.Actions
             {
                 try
                 {
-                    var f = await _twitterUserDal.GetTwitterUserAsync(following);
+                    var f = await _twitterUserDal.GetUserAsync(following);
                     var activityFollowing = new ActivityFollow
                     {
                         type = "Follow",

@@ -192,7 +192,7 @@ namespace BirdsiteLive.Domain
             }
 
             // Validate User 
-            var userDal = await _twitterUserDal.GetTwitterUserAsync(twitterUser);
+            var userDal = await _twitterUserDal.GetUserAsync(twitterUser);
             if (userDal is null)
             {
                 // this will fail if the username doesn't exist

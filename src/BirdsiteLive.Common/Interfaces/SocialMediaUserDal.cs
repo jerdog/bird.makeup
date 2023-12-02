@@ -5,7 +5,11 @@ namespace BirdsiteLive.Common.Interfaces;
 
 public interface SocialMediaUserDal
 { 
-        Task<SyncUser> GetTwitterUserAsync(string acct);
+        Task<SyncUser> GetUserAsync(string acct);
+        Task<SyncUser> GetUserAsync(int acct);
+        Task DeleteUserAsync(int id);
+        Task DeleteUserAsync(string acct);
+        Task CreateUserAsync(string acct);
 }
 
 public interface SyncUser

@@ -45,7 +45,7 @@ namespace BirdsiteLive.Moderation.Tests.Actions
 
             var twitterUserDalMock = new Mock<ITwitterUserDal>(MockBehavior.Strict);
             twitterUserDalMock
-                .Setup(x => x.DeleteTwitterUserAsync(
+                .Setup(x => x.DeleteUserAsync(
                     It.Is<int>(y => y == 24)))
                 .Returns(Task.CompletedTask);
 
@@ -103,7 +103,7 @@ namespace BirdsiteLive.Moderation.Tests.Actions
 
             var twitterUserDalMock = new Mock<ITwitterUserDal>(MockBehavior.Strict);
             twitterUserDalMock
-                .Setup(x => x.DeleteTwitterUserAsync(
+                .Setup(x => x.DeleteUserAsync(
                     It.Is<int>(y => y == 24)))
                 .Returns(Task.CompletedTask);
 

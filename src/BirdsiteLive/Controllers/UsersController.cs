@@ -123,7 +123,7 @@ namespace BirdsiteLive.Controllers
             Follower[] followers = new Follower[] { };
 
             string fediAccount = null;
-            var userDal = await _socialMediaService.UserDal.GetTwitterUserAsync(user.Acct);
+            var userDal = await _socialMediaService.UserDal.GetUserAsync(user.Acct);
             if (userDal != null)
             {
                 followers = await _followersDal.GetFollowersAsync(userDal.Id);

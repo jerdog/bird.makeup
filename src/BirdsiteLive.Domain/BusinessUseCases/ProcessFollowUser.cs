@@ -31,11 +31,11 @@ namespace BirdsiteLive.Domain.BusinessUseCases
                 follower = await _followerDal.GetFollowerAsync(followerUsername, followerDomain);
             }
 
-            var twitterUser = await _twitterUserDal.GetTwitterUserAsync(twitterUsername);
+            var twitterUser = await _twitterUserDal.GetUserAsync(twitterUsername);
             if (twitterUser == null)
             {
-                await _twitterUserDal.CreateTwitterUserAsync(twitterUsername, -1);
-                twitterUser = await _twitterUserDal.GetTwitterUserAsync(twitterUsername);
+                await _twitterUserDal.CreateUserAsync(twitterUsername);
+                twitterUser = await _twitterUserDal.GetUserAsync(twitterUsername);
             }
 
             // Update Follower

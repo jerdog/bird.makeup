@@ -30,7 +30,7 @@ spec:
           image: cloutier/bird.makeup:latest
           imagePullPolicy: Always
           ports:
-            - containerPort: 80
+            - containerPort: 8080
               name: web
           resources:
             requests:
@@ -92,7 +92,7 @@ spec:
           livenessProbe:
             httpGet:
               path: /About
-              port: 80
+              port: 8080
             initialDelaySeconds: 15
             periodSeconds: 10
 
@@ -108,5 +108,5 @@ spec:
   ports:
     - protocol: TCP
       port: 80
-      targetPort: 80
+      targetPort: 8080
       nodePort: 30500

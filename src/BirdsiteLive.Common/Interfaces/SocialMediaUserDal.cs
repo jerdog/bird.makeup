@@ -1,4 +1,5 @@
 using System;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace BirdsiteLive.Common.Interfaces;
@@ -26,4 +27,9 @@ public interface SyncUser
         public int FetchingErrorCount { get; set; } //TODO: update DAL
         public long Followers { get; set; } 
         public long StatusesCount { get; set; }
+        public JsonElement ExtraData { get; set; }
+        public string PreDescriptionHook { get; }
+        public string PostDescriptionHook { get; }
+        public string DisclaimerReplacementHook { get; }
+        public (string, string)[] AdditionnalAttachments { get; }
 }

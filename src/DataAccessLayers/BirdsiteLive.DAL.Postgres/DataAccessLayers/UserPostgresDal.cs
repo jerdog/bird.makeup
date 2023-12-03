@@ -1,4 +1,5 @@
 using System;
+using System.Text.Json;
 using System.Threading.Tasks;
 using BirdsiteLive.Common.Interfaces;
 using BirdsiteLive.DAL.Models;
@@ -50,6 +51,7 @@ public abstract class UserPostgresDal : PostgresBase, SocialMediaUserDal
             if (!await reader.ReadAsync())
                 return null;
             
+            var extradata = JsonDocument.Parse(reader["extradata"] as string ?? "{}").RootElement;
             return new SyncTwitterUser
             {
                 Id = reader["id"] as int? ?? default,
@@ -59,6 +61,7 @@ public abstract class UserPostgresDal : PostgresBase, SocialMediaUserDal
                 LastSync = reader["lastSync"] as DateTime? ?? default,
                 FetchingErrorCount = reader["fetchingErrorCount"] as int? ?? default,
                 FediAcct = reader["fediverseaccount"] as string,
+                ExtraData = extradata,
             };
 
         }

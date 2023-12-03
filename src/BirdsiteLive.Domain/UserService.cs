@@ -46,11 +46,12 @@ namespace BirdsiteLive.Domain
 
         private readonly ITwitterUserService _twitterUserService;
         private readonly ITwitterUserDal _twitterUserDal;
+        private readonly ISocialMediaService _socialMediaService;
 
         private readonly IModerationRepository _moderationRepository;
 
         #region Ctor
-        public UserService(InstanceSettings instanceSettings, ICryptoService cryptoService, IActivityPubService activityPubService, IProcessFollowUser processFollowUser, IProcessUndoFollowUser processUndoFollowUser, IStatusExtractor statusExtractor, IExtractionStatisticsHandler statisticsHandler, ITwitterUserService twitterUserService, IModerationRepository moderationRepository, IProcessDeleteUser processDeleteUser, ITwitterUserDal twitterUserDal)
+        public UserService(InstanceSettings instanceSettings, ICryptoService cryptoService, IActivityPubService activityPubService, IProcessFollowUser processFollowUser, IProcessUndoFollowUser processUndoFollowUser, IStatusExtractor statusExtractor, IExtractionStatisticsHandler statisticsHandler, ITwitterUserService twitterUserService, IModerationRepository moderationRepository, IProcessDeleteUser processDeleteUser, ITwitterUserDal twitterUserDal, ISocialMediaService socialMediaService)
         {
             _instanceSettings = instanceSettings;
             _cryptoService = cryptoService;
@@ -63,6 +64,7 @@ namespace BirdsiteLive.Domain
             _moderationRepository = moderationRepository;
             _processDeleteUser = processDeleteUser;
             _twitterUserDal = twitterUserDal;
+            _socialMediaService = socialMediaService;
         }
         #endregion
 
@@ -116,6 +118,23 @@ namespace BirdsiteLive.Domain
                 attachment.Insert(0, locationAttachment);
             }
 
+            var userDal = await _socialMediaService.UserDal.GetUserAsync(twitterUser.Acct);
+            if (userDal is not null)
+            {
+                description = userDal.PreDescriptionHook + description + userDal.PostDescriptionHook;
+                foreach ((string name, string value) in userDal.AdditionnalAttachments)
+                {
+                    
+                    var locationAttachment = new UserAttachment()
+                    {
+                        type = "PropertyValue",
+                        name = name,
+                        value = value,
+                    };
+                    attachment = attachment.Append( locationAttachment).ToList();
+                }
+            }
+
             var user = new Actor
             {
                 id = actorUrl,
@@ -124,7 +143,7 @@ namespace BirdsiteLive.Domain
                 preferredUsername = acct,
                 name = twitterUser.Name,
                 inbox = $"{actorUrl}/inbox",
-                summary = "This account is a replica from Twitter. Its author can't see your replies. If you find this service useful, please consider supporting us via our Patreon. <br>" + description,
+                summary = description + "This account is a replica from Twitter. Its author can't see your replies. If you find this service useful, please consider supporting us via our Patreon. <br>",
                 url = actorUrl,
                 featured = featured,
                 manuallyApprovesFollowers = twitterUser.Protected,

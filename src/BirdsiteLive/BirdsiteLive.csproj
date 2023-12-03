@@ -15,7 +15,7 @@
     <PackageReference Include="Microsoft.Extensions.Options" Version="8.0.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="8.0.0" />
     <PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.21.0" />
-    <PackageReference Include="Microsoft.NET.Build.Containers" Version="7.0.400" />
+    <PackageReference Include="Microsoft.NET.Build.Containers" Version="8.0.100" />
     <PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.6.0" />
   </ItemGroup>
 

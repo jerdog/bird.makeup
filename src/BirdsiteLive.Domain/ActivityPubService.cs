@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
@@ -17,7 +18,7 @@ namespace BirdsiteLive.Domain
 {
     public interface IActivityPubService
     {
-        Task<Actor> GetUser(string objectId);
+        Task<Actor> GetUser(string actor, string objectId);
         Task<HttpStatusCode> PostDataAsync<T>(T data, string targetHost, string actorUrl, string inbox = null);
         Task PostNewActivity(ActivityCreateNote note, string username, string noteId, string targetHost,
             string targetInbox);
@@ -42,11 +43,29 @@ namespace BirdsiteLive.Domain
         }
         #endregion
 
-        public async Task<Actor> GetUser(string objectId)
+        public async Task<Actor> GetUser(string actor, string objectId)
         {
+            var userUri = new System.Uri(objectId);
+            var httpDate = DateTime.Now.ToString("r");
+            var sig64 = await _cryptoService.SignString($"(request-target): get {userUri.AbsolutePath}\nhost: {userUri.Host}\ndate: {httpDate}");
+            var sigHeader = "keyId=\"" + actor + "\",algorithm=\"rsa-sha256\",headers=\"(request-target) host date\",signature=\"" + sig64 + "\"";
+
             var httpClient = _httpClientFactory.CreateClient();
-            httpClient.DefaultRequestHeaders.Add("Accept", "application/activity+json");
-            var result = await httpClient.GetAsync(objectId);
+            var httpRequestMessage = new HttpRequestMessage
+            {
+                Method = HttpMethod.Get,
+                RequestUri = userUri,
+                Headers =
+                {
+                    { "Host", userUri.Host },
+                    { "Date", httpDate },
+                    { "Accept", "application/activity+json" },
+                    { "User-Agent", "System.Net (Bird.MakeUp; +" + _instanceSettings.Domain + ")" },
+                    { "Signature", sigHeader  }
+                }
+            };
+
+            var result = await httpClient.SendAsync(httpRequestMessage);
 
             if (result.StatusCode == HttpStatusCode.Gone)
                 throw new FollowerIsGoneException();
@@ -55,9 +74,9 @@ namespace BirdsiteLive.Domain
 
             var content = await result.Content.ReadAsStringAsync();
 
-            var actor = JsonSerializer.Deserialize<Actor>(content);
-            if (string.IsNullOrWhiteSpace(actor.url)) actor.url = objectId;
-            return actor;
+            var resultingActor = JsonSerializer.Deserialize<Actor>(content);
+            if (string.IsNullOrWhiteSpace(resultingActor.url)) resultingActor.url = objectId;
+            return resultingActor;
         }
 
         public async Task PostNewActivity(ActivityCreateNote noteActivity, string username, string noteId, string targetHost, string targetInbox)
@@ -118,10 +137,13 @@ namespace BirdsiteLive.Domain
                     { "Host", targetHost },
                     { "Date", httpDate },
                     { "Signature", signature },
-                    { "Digest", $"SHA-256={digest}" }
+                    { "Digest", $"SHA-256={digest}" },
+                    { "User-Agent", "System.Net (Bird.MakeUp; +" + _instanceSettings.Domain + ")"}
                 },
                 Content = new StringContent(json, Encoding.UTF8, "application/ld+json")
             };
+
+            httpRequestMessage.Content.Headers.ContentType = new MediaTypeHeaderValue("application/activity+json");
 
             return httpRequestMessage;
         }

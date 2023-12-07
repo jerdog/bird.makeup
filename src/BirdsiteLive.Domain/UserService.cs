@@ -174,8 +174,9 @@ namespace BirdsiteLive.Domain
 
         public async Task<bool> FollowRequestedAsync(string signature, string method, string path, string queryString, Dictionary<string, string> requestHeaders, ActivityFollow activity, string body)
         {
+
             // Validate
-            var sigValidation = await ValidateSignature(activity.actor, signature, method, path, queryString, requestHeaders, body);
+            var sigValidation = await ValidateSignature(activity.apObject, activity.actor, signature, method, path, queryString, requestHeaders, body);
             if (!sigValidation.SignatureIsValidated) return false;
 
             // Prepare data
@@ -225,13 +226,13 @@ namespace BirdsiteLive.Domain
             // Execute
             await _processFollowUser.ExecuteAsync(followerUserName, followerHost, twitterUser, followerInbox,
                 followerSharedInbox, activity.actor);
-            return await SendAcceptFollowAsync(activity, followerHost);
+            return await SendAcceptFollowAsync(activity, followerHost, followerInbox);
         }
         
-        private async Task<bool> SendAcceptFollowAsync(ActivityFollow activity, string followerHost)
+        private async Task<bool> SendAcceptFollowAsync(ActivityFollow activity, string followerHost, string followerInbox)
         {
             var acceptFollow = _activityPubService.BuildAcceptFollow(activity);
-            var result = await _activityPubService.PostDataAsync(acceptFollow, followerHost, activity.apObject);
+            var result = await _activityPubService.PostDataAsync(acceptFollow, followerHost, activity.apObject, followerInbox);
             return result == HttpStatusCode.Accepted ||
                    result == HttpStatusCode.OK; //TODO: revamp this for better error handling
 
@@ -273,7 +274,7 @@ namespace BirdsiteLive.Domain
             Dictionary<string, string> requestHeaders, ActivityUndoFollow activity, string body)
         {
             // Validate
-            var sigValidation = await ValidateSignature(activity.actor, signature, method, path, queryString, requestHeaders, body);
+            var sigValidation = await ValidateSignature(activity.apObject.apObject, activity.actor, signature, method, path, queryString, requestHeaders, body);
             if (!sigValidation.SignatureIsValidated) return false;
 
             // Save Follow in DB
@@ -307,7 +308,7 @@ namespace BirdsiteLive.Domain
             ActivityDelete activity, string body)
         {
             // Validate
-            var sigValidation = await ValidateSignature(activity.actor, signature, method, path, queryString, requestHeaders, body);
+            var sigValidation = await ValidateSignature(null, activity.actor, signature, method, path, queryString, requestHeaders, body);
             if (!sigValidation.SignatureIsValidated) return false;
 
             // Remove user and followings
@@ -319,9 +320,9 @@ namespace BirdsiteLive.Domain
             return true;
         }
 
-        private async Task<SignatureValidationResult> ValidateSignature(string actor, string rawSig, string method, string path, string queryString, Dictionary<string, string> requestHeaders, string body)
+        private async Task<SignatureValidationResult> ValidateSignature(string localActor, string actor, string rawSig, string method, string path, string queryString, Dictionary<string, string> requestHeaders, string body)
         {
-            var remoteUser2 = await _activityPubService.GetUser(actor);
+            var remoteUser2 = await _activityPubService.GetUser(localActor, actor);
             return new SignatureValidationResult()
             {
                 SignatureIsValidated = true,
@@ -356,7 +357,7 @@ namespace BirdsiteLive.Domain
             var sig = Convert.FromBase64String(signature_header["signature"]);
 
             // Retrieve User
-            var remoteUser = await _activityPubService.GetUser(actor);
+            var remoteUser = await _activityPubService.GetUser(null, actor);
 
 	                Console.WriteLine(remoteUser.publicKey.publicKeyPem);
 

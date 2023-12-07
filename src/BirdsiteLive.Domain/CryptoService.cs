@@ -10,6 +10,8 @@ namespace BirdsiteLive.Domain
     {
         Task<string> GetUserPem(string id);
         Task<string> SignAndGetSignatureHeader(DateTime date, string actor, string host, string digest, string inbox);
+        Task<string> SignString(string toSign);
+        
         string ComputeSha256Hash(string data);
     }
 
@@ -44,15 +46,17 @@ namespace BirdsiteLive.Domain
                 usedInbox = inbox;
 
             var httpDate = date.ToString("r");
-
-            var signedString = $"(request-target): post {usedInbox}\nhost: {targethost}\ndate: {httpDate}\ndigest: SHA-256={digest}";
-            var signedStringBytes = Encoding.UTF8.GetBytes(signedString);
-            var key = await _magicKeyFactory.GetMagicKey();
-            var signature = key.Sign(signedStringBytes);
-            var sig64 = Convert.ToBase64String(signature);
+            var sig64 = await SignString($"(request-target): post {usedInbox}\nhost: {targethost}\ndate: {httpDate}\ndigest: SHA-256={digest}");
 
             var header = "keyId=\"" + actor + "\",algorithm=\"rsa-sha256\",headers=\"(request-target) host date digest\",signature=\"" + sig64 + "\"";
             return header;
+        }
+
+        public async Task<string> SignString(string toSign) {
+            var signedStringBytes = Encoding.UTF8.GetBytes(toSign);
+            var key = await _magicKeyFactory.GetMagicKey();
+            var signature = key.Sign(signedStringBytes);
+            return Convert.ToBase64String(signature);
         }
 
         public string ComputeSha256Hash(string data)

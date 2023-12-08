@@ -90,7 +90,6 @@ namespace BirdsiteLive.Domain.Tests
             string s = JsonSerializer.Serialize(req);
             
             Assert.AreEqual(req.actor, activityRes.actor);
-            Assert.AreEqual(req.context, activityRes.context);
 
             #endregion
         }

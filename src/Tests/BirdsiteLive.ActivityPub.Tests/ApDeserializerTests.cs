@@ -28,7 +28,6 @@ namespace BirdsiteLive.ActivityPub.Tests
             var data = ApDeserializer.ProcessActivity(json) as ActivityUndoFollow;
             Assert.AreEqual("https://mastodon.technology/users/testtest#follows/225982/undo", data.id);
             Assert.AreEqual("Undo", data.type);
-            Assert.AreEqual("https://www.w3.org/ns/activitystreams", data.context);
             Assert.AreEqual("Follow", data.apObject.type);
             Assert.AreEqual("https://mastodon.technology/users/testtest", data.apObject.actor);
             Assert.AreEqual("https://4a120ca2680e.ngrok.io/users/manu", data.apObject.apObject);

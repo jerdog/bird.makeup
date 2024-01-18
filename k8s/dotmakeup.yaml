@@ -67,7 +67,7 @@ spec:
                   name: dotmakeup-db
                   key: host
             - name: db__port
-              value: "5432"
+              value: "20184"
             - name: db__name
               valueFrom:
                 secretKeyRef:

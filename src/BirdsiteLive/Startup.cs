@@ -52,7 +52,7 @@ namespace BirdsiteLive
             services.AddApplicationInsightsTelemetry(aiOptions);
 
             services.AddOpenTelemetry()
-                .ConfigureResource(builder => builder.AddService(serviceName: "dotmakeup"))
+                .ConfigureResource(builder => builder.AddService(serviceName: "dotmakeup", serviceInstanceId: Environment.MachineName))
                 .WithMetrics(config => config.AddMeter("DotMakeup.Twitter"))
                 .UseGrafana(config =>
                 {

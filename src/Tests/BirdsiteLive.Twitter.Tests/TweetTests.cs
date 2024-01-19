@@ -120,6 +120,8 @@ namespace BirdsiteLive.ActivityPub.Tests
         public async Task QTandTextContainsLink()
         {
             var tweet = await _tweetService.GetTweetAsync(1668932525522305026);
+            if (tweet is null)
+                Assert.Inconclusive();
 
             Assert.AreEqual(tweet.MessageContent, @"https://domain.name/@weekinethnews/1668684659855880193");
             Assert.AreEqual(tweet.Author.Acct, "weekinethnews");

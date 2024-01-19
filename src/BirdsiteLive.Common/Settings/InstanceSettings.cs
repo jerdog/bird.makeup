@@ -29,5 +29,8 @@ namespace BirdsiteLive.Common.Settings
         public int TwitterRequestDelay { get; set; } = 0;
         public int ParallelFediversePosts { get; set; } = 10;
         public int PipelineStartupDelay { get; set; } = 5 * 60;
+        public string ProxyURL { get; set; }
+        public string ProxyUser { get; set; }
+        public string ProxyPassword { get; set; }
     }
 }

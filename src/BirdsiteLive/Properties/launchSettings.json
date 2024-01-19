@@ -1,12 +1,5 @@
 {
   "profiles": {
-    "IIS Express": {
-      "commandName": "IISExpress",
-      "launchBrowser": true,
-      "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
-      }
-    },
     "BirdsiteLive (IG)": {
       "commandName": "Project",
       "launchBrowser": true,
@@ -23,6 +16,7 @@
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
         "Instance__ParallelTwitterRequests": "0"
+
       },
       "applicationUrl": "http://localhost:5042"
     },

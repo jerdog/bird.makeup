@@ -32,6 +32,7 @@ namespace BirdsiteLive.Twitter.Tools
         private RateLimiter _rateLimiter;
         private const int _targetClients = 3;
         private InstanceSettings _instanceSettings;
+        private WebProxy _proxy;
         private readonly (string, string)[] _apiKeys = new[]
         {
             ("IQKbtAYlXLripLGPWd0HUA", "GgDYlkSvaPxGxC4X8liwpUoqKwwr3lCADbz8A7ADU"), // iPhone
@@ -107,7 +108,7 @@ namespace BirdsiteLive.Twitter.Tools
         private async Task<(string, string)> GetCred()
         {
             string token;
-            var httpClient = _httpClientFactory.CreateClient();
+            var httpClient = _httpClientFactory.CreateClient("WithProxy");
             string bearer = await GenerateBearerToken();
             using RateLimitLease lease = await _rateLimiter.AcquireAsync(permitCount: 1);
             using var request = new HttpRequestMessage(new HttpMethod("POST"),

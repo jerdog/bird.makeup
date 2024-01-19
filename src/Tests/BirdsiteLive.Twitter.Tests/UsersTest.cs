@@ -28,6 +28,7 @@ namespace BirdsiteLive.ActivityPub.Tests
                 Domain = "domain.name"
             };
             httpFactory.Setup(_ => _.CreateClient(string.Empty)).Returns(new HttpClient());
+            httpFactory.Setup(_ => _.CreateClient("WithProxy")).Returns(new HttpClient());
             ITwitterAuthenticationInitializer auth = new TwitterAuthenticationInitializer(httpFactory.Object, settings, logger1.Object);
             _tweetService = new TwitterUserService(auth, stats.Object, logger3.Object);
         }

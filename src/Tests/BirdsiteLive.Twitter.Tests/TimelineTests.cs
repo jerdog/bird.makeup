@@ -34,6 +34,7 @@ namespace BirdsiteLive.ActivityPub.Tests
                 .ReturnsAsync(JsonDocument.Parse("""{"endpoints": ["nitter.x86-64-unknown-linux-gnu.zip"], "allowboosts": true, "postnitterdelay": 0, "followersThreshold": 10, "twitterFollowersThreshold":  10}""").RootElement);
             var httpFactory = new Mock<IHttpClientFactory>();
             httpFactory.Setup(_ => _.CreateClient(string.Empty)).Returns(new HttpClient());
+            httpFactory.Setup(_ => _.CreateClient("WithProxy")).Returns(new HttpClient());
             var settings = new InstanceSettings
             {
                 Domain = "domain.name"

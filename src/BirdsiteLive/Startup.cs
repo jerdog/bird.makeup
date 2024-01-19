@@ -64,7 +64,6 @@ namespace BirdsiteLive
 
             services.AddControllersWithViews();
 
-            services.AddHttpClient();
         }
 
         public void ConfigureContainer(ServiceRegistry services)
@@ -113,6 +112,9 @@ namespace BirdsiteLive
             
             services.For<ICachedStatisticsService>().Use<CachedStatisticsService>().Singleton();
 
+            services.AddHttpClient();
+            services.AddHttpClient("WithProxy").AddProxySupport(instanceSettings.ProxyURL, instanceSettings.ProxyUser, instanceSettings.ProxyPassword);
+            
             services.Scan(_ =>
             {
                 _.Assembly("BirdsiteLive.Twitter");

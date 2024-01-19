@@ -32,6 +32,7 @@ namespace BirdsiteLive.ActivityPub.Tests
             var settingsDal = new Mock<ISettingsDal>();
             var httpFactory = new Mock<IHttpClientFactory>();
             httpFactory.Setup(_ => _.CreateClient(string.Empty)).Returns(new HttpClient());
+            httpFactory.Setup(_ => _.CreateClient("WithProxy")).Returns(new HttpClient());
             var settings = new InstanceSettings
             {
                 Domain = "domain.name"

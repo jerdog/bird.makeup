@@ -36,6 +36,9 @@ spec:
             requests:
               memory: "900Mi"
               cpu: "500m"
+          envFrom:
+            - secretRef:
+                name: grafana
           env:
             - name: Instance__domain
               value: "bird.makeup"

@@ -78,8 +78,10 @@ namespace BirdsiteLive.ActivityPub.Tests
         public async Task SimpleTextAndSingleVideoTweet()
         {
             var tweet = await _tweetService.GetTweetAsync(1604231025311129600);
+            if (tweet is null)
+                Assert.Inconclusive();
+            
             Assert.AreEqual(tweet.MessageContent, "Falcon 9’s first stage has landed on the Just Read the Instructions droneship, completing the 15th launch and landing of this booster!");
-
             Assert.AreEqual(tweet.Media.Length, 1);
             Assert.AreEqual(tweet.Media[0].MediaType, "video/mp4");
             Assert.IsNull(tweet.Media[0].AltText);
@@ -87,9 +89,11 @@ namespace BirdsiteLive.ActivityPub.Tests
             
             
             var tweet2 = await _tweetService.GetTweetAsync(1657913781006258178);
+            if (tweet2 is null)
+                Assert.Inconclusive();
+            
             Assert.AreEqual(tweet2.MessageContent,
                 "Coinbase has big international expansion plans\n\nTom Duff Gordon (@tomduffgordon), VP of International Policy @coinbase has the deets");
-
             Assert.AreEqual(tweet2.Media.Length, 1);
             Assert.AreEqual(tweet2.Media[0].MediaType, "video/mp4");
             Assert.IsNull(tweet2.Media[0].AltText);

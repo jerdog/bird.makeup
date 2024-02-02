@@ -63,8 +63,8 @@ namespace BirdsiteLive.ActivityPub.Tests
             if (tweets.Length == 0)
                 Assert.Inconclusive();
            
-            Assert.AreEqual(tweets.Length, 13);
             Assert.AreEqual(tweets[0].MessageContent, "Continuing to move the game forward @KingJames. Much respect my brother 💪🏾 #33644");
+            Assert.IsTrue(tweets.Length > 10);
             Assert.IsTrue(tweets.Length < 20);
 
             

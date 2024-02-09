@@ -240,8 +240,10 @@ namespace BirdsiteLive.Twitter
                 var cred = await _settings.Get("twitteraccounts");
                 string username = String.Empty;
                 string password = String.Empty;
-                
-                foreach (JsonElement account in cred.Value.GetProperty("accounts").EnumerateArray())
+
+                var candidates = cred.Value.GetProperty("accounts").EnumerateArray().ToArray();
+                Random.Shared.Shuffle(candidates);
+                foreach (JsonElement account in candidates)
                 {
                     username = account.EnumerateArray().First().GetString();
                     password = account.EnumerateArray().Last().GetString();

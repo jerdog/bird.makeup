@@ -26,6 +26,12 @@ spec:
               topologyKey: "kubernetes.io/hostname"
       terminationGracePeriodSeconds: 30
       containers:
+        - name: dotmakeup-social-sidecar
+          image: cloutier/dotmakeup-social-sidecar:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 5000
+              name: sidecar
         - name: dotmakeup
           image: cloutier/bird.makeup:latest
           imagePullPolicy: Always

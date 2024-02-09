@@ -209,7 +209,12 @@ namespace BirdsiteLive.Twitter
             }
             else if (user.StatusesCount != twitterUser.StatusCount && user.Followers > 90)
             {
-                extractedTweets = await TweetFromSidecar(user, fromTweetId);
+                extractedTweets = await TweetFromSidecar(user, fromTweetId, true);
+                await _twitterUserDal.UpdateTwitterStatusesCountAsync(username, twitterUser.StatusCount);
+            }
+            else if (user.StatusesCount != twitterUser.StatusCount && user.Followers > 50)
+            {
+                extractedTweets = await TweetFromSidecar(user, fromTweetId, false);
                 await _twitterUserDal.UpdateTwitterStatusesCountAsync(username, twitterUser.StatusCount);
             }
             else if (user.StatusesCount != twitterUser.StatusCount && user.Followers > followersThreshold)
@@ -227,7 +232,7 @@ namespace BirdsiteLive.Twitter
             return extractedTweets.ToArray();
         }
 
-        private async Task<List<ExtractedTweet>> TweetFromSidecar(SyncTwitterUser user, long fromId)
+        private async Task<List<ExtractedTweet>> TweetFromSidecar(SyncTwitterUser user, long fromId, bool withReplies)
         {
             try
             {
@@ -243,7 +248,12 @@ namespace BirdsiteLive.Twitter
                 }
 
                 var client = _httpClientFactory.CreateClient();
-                var request = new HttpRequestMessage(HttpMethod.Get, "http://localhost:5000/twitter/postbyuser/" + user.TwitterUserId);
+                string requestUrl;
+                if (withReplies)
+                    requestUrl = "http://localhost:5000/twitter/postbyuserwithreplies/" + user.TwitterUserId;
+                else
+                    requestUrl = "http://localhost:5000/twitter/postbyuser/" + user.TwitterUserId;
+                var request = new HttpRequestMessage(HttpMethod.Get, requestUrl);
                 request.Headers.TryAddWithoutValidation("dotmakeup-user", username);
                 request.Headers.TryAddWithoutValidation("dotmakeup-password", password);
 
@@ -268,8 +278,6 @@ namespace BirdsiteLive.Twitter
                         var tweet = await GetTweetAsync(title.GetInt64());
                         if (tweet.Author.Acct != user.Acct)
                         {
-                            continue; // need further tests before enabling
-                            
                             tweet.IsRetweet = true;
                             tweet.OriginalAuthor = tweet.Author;
                             tweet.Author = await _twitterUserService.GetUserAsync(user.Acct);

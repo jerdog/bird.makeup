@@ -229,63 +229,71 @@ namespace BirdsiteLive.Twitter
 
         private async Task<List<ExtractedTweet>> TweetFromSidecar(SyncTwitterUser user, long fromId)
         {
-            var tweets = new List<ExtractedTweet>();
-            var cred = await _settings.Get("twitteraccounts");
-            string username = String.Empty;
-            string password = String.Empty;
-            
-            foreach (JsonElement account in cred.Value.GetProperty("accounts").EnumerateArray())
+            try
             {
-                username = account.EnumerateArray().First().GetString();
-                password = account.EnumerateArray().Last().GetString();
-            }
-
-            var client = _httpClientFactory.CreateClient();
-            var request = new HttpRequestMessage(HttpMethod.Get, "http://localhost:5000/twitter/postbyuser/" + user.TwitterUserId);
-            request.Headers.TryAddWithoutValidation("dotmakeup-user", username);
-            request.Headers.TryAddWithoutValidation("dotmakeup-password", password);
-
-            var httpResponse = await client.SendAsync(request);
-
-            if (httpResponse.StatusCode != HttpStatusCode.OK)
-                return new List<ExtractedTweet>();
-            
-            var c = await httpResponse.Content.ReadAsStringAsync();
-            var tweetsDocument = JsonDocument.Parse(c);
-            
-            _statisticsHandler.CalledApi("sidecar.Success");
-            
-            foreach (JsonElement title in tweetsDocument.RootElement.EnumerateArray())
-            {
-                if (title.GetInt64() <= fromId)
-                    continue;
-
-                try
+                var tweets = new List<ExtractedTweet>();
+                var cred = await _settings.Get("twitteraccounts");
+                string username = String.Empty;
+                string password = String.Empty;
+                
+                foreach (JsonElement account in cred.Value.GetProperty("accounts").EnumerateArray())
                 {
-                    //var tweet = await TweetFromSyndication(match);
-                    var tweet = await GetTweetAsync(title.GetInt64());
-                    if (tweet.Author.Acct != user.Acct)
+                    username = account.EnumerateArray().First().GetString();
+                    password = account.EnumerateArray().Last().GetString();
+                }
+
+                var client = _httpClientFactory.CreateClient();
+                var request = new HttpRequestMessage(HttpMethod.Get, "http://localhost:5000/twitter/postbyuser/" + user.TwitterUserId);
+                request.Headers.TryAddWithoutValidation("dotmakeup-user", username);
+                request.Headers.TryAddWithoutValidation("dotmakeup-password", password);
+
+                var httpResponse = await client.SendAsync(request);
+
+                if (httpResponse.StatusCode != HttpStatusCode.OK)
+                    return new List<ExtractedTweet>();
+                
+                var c = await httpResponse.Content.ReadAsStringAsync();
+                var tweetsDocument = JsonDocument.Parse(c);
+                
+                _statisticsHandler.CalledApi("sidecar.Success");
+                
+                foreach (JsonElement title in tweetsDocument.RootElement.EnumerateArray())
+                {
+                    if (title.GetInt64() <= fromId)
+                        continue;
+
+                    try
                     {
-                        continue; // need further tests before enabling
-                        
-                        tweet.IsRetweet = true;
-                        tweet.OriginalAuthor = tweet.Author;
-                        tweet.Author = await _twitterUserService.GetUserAsync(user.Acct);
-                        tweet.RetweetId = tweet.Id;
-                        // Sadly not given by Nitter UI
-                        var gen = new TwitterSnowflakeGenerator(1, 1);
-                        tweet.Id = gen.NextId();
+                        //var tweet = await TweetFromSyndication(match);
+                        var tweet = await GetTweetAsync(title.GetInt64());
+                        if (tweet.Author.Acct != user.Acct)
+                        {
+                            continue; // need further tests before enabling
+                            
+                            tweet.IsRetweet = true;
+                            tweet.OriginalAuthor = tweet.Author;
+                            tweet.Author = await _twitterUserService.GetUserAsync(user.Acct);
+                            tweet.RetweetId = tweet.Id;
+                            // Sadly not given by Nitter UI
+                            var gen = new TwitterSnowflakeGenerator(1, 1);
+                            tweet.Id = gen.NextId();
+                        }
+                        tweets.Add(tweet);
                     }
-                    tweets.Add(tweet);
+                    catch (Exception e)
+                    {
+                        _logger.LogError($"error fetching tweet {title.GetInt64()} from user {user.Acct}");
+                    }
+                    await Task.Delay(100);
                 }
-                catch (Exception e)
-                {
-                    _logger.LogError($"error fetching tweet {title.GetInt64()} from user {user.Acct}");
-                }
-                await Task.Delay(100);
+                
+                return tweets;
             }
-            
-            return tweets;
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                return new List<ExtractedTweet>();
+            }
         }
         private async Task<List<ExtractedTweet>> TweetFromNitter(SyncTwitterUser user, long fromId, bool withReplies, bool lowtrust)
         {

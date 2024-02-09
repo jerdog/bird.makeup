@@ -1,4 +1,5 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using System;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.Extensions.Logging;
 using System.Threading.Tasks;
 using BirdsiteLive.Twitter;
@@ -20,6 +21,7 @@ namespace BirdsiteLive.ActivityPub.Tests
         private ITwitterTweetsService _tweetService;
         private ICachedTwitterUserService _twitterUserService;
         private ITwitterUserDal _twitterUserDalMoq;
+        private ITwitterAuthenticationInitializer _tweetAuth = null;
 
         [TestInitialize]
         public async Task TestInit()
@@ -32,6 +34,8 @@ namespace BirdsiteLive.ActivityPub.Tests
             var settingsDal = new Mock<ISettingsDal>();
             settingsDal.Setup(_ => _.Get("nitter"))
                 .ReturnsAsync(JsonDocument.Parse("""{"endpoints": ["nitter.x86-64-unknown-linux-gnu.zip"], "allowboosts": true, "postnitterdelay": 0, "followersThreshold": 10, "twitterFollowersThreshold":  10}""").RootElement);
+            settingsDal.Setup(_ => _.Get("twitteraccounts"))
+                .ReturnsAsync(JsonDocument.Parse("""{"accounts": [["xxx", "xxx"]]}""").RootElement);
             var httpFactory = new Mock<IHttpClientFactory>();
             httpFactory.Setup(_ => _.CreateClient(string.Empty)).Returns(new HttpClient());
             httpFactory.Setup(_ => _.CreateClient("WithProxy")).Returns(new HttpClient());
@@ -47,13 +51,26 @@ namespace BirdsiteLive.ActivityPub.Tests
                 .ReturnsAsync((string username) => new SyncTwitterUser { Acct = username, TwitterUserId = default });
             _twitterUserDalMoq = twitterDal.Object;
 
-            ITwitterAuthenticationInitializer auth = new TwitterAuthenticationInitializer(httpFactory.Object, settings, logger1.Object);
-            ITwitterUserService user = new TwitterUserService(auth, stats.Object, logger2.Object);
+            _tweetAuth = new TwitterAuthenticationInitializer(httpFactory.Object, settings, settingsDal.Object, logger1.Object);
+            ITwitterUserService user = new TwitterUserService(_tweetAuth, stats.Object, logger2.Object);
             _twitterUserService = new CachedTwitterUserService(user, settings);
-            _tweetService = new TwitterTweetsService(auth, stats.Object, _twitterUserService, twitterDal.Object, settings, httpFactory.Object, settingsDal.Object, logger3.Object);
+            _tweetService = new TwitterTweetsService(_tweetAuth, stats.Object, _twitterUserService, twitterDal.Object, settings, httpFactory.Object, settingsDal.Object, logger3.Object);
 
         }
 
+
+        [TestMethod]
+        public async Task Login()
+        {
+            try
+            {
+                var tweet = await _tweetAuth.Login();
+            }
+            catch (Exception e)
+            {
+                Assert.Inconclusive();
+            }
+        }
         [TestMethod]
         public async Task TimelineKobe()
         {

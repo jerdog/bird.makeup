@@ -8,6 +8,7 @@ using BirdsiteLive.Statistics.Domain;
 using Moq;
 using System.Net.Http;
 using BirdsiteLive.Common.Settings;
+using BirdsiteLive.DAL.Contracts;
 
 namespace BirdsiteLive.ActivityPub.Tests
 {
@@ -27,9 +28,10 @@ namespace BirdsiteLive.ActivityPub.Tests
             {
                 Domain = "domain.name"
             };
+            var settingsDal = new Mock<ISettingsDal>();
             httpFactory.Setup(_ => _.CreateClient(string.Empty)).Returns(new HttpClient());
             httpFactory.Setup(_ => _.CreateClient("WithProxy")).Returns(new HttpClient());
-            ITwitterAuthenticationInitializer auth = new TwitterAuthenticationInitializer(httpFactory.Object, settings, logger1.Object);
+            ITwitterAuthenticationInitializer auth = new TwitterAuthenticationInitializer(httpFactory.Object, settings, settingsDal.Object, logger1.Object);
             _tweetService = new TwitterUserService(auth, stats.Object, logger3.Object);
         }
 

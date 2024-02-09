@@ -38,7 +38,7 @@ namespace BirdsiteLive.ActivityPub.Tests
             {
                 Domain = "domain.name"
             };
-            _tweetAuth = new TwitterAuthenticationInitializer(httpFactory.Object, settings, logger1.Object);
+            _tweetAuth = new TwitterAuthenticationInitializer(httpFactory.Object, settings, settingsDal.Object, logger1.Object);
             ITwitterUserService user = new TwitterUserService(_tweetAuth, stats.Object, logger2.Object);
             ICachedTwitterUserService user2 = new CachedTwitterUserService(user, settings);
             _tweetService = new TwitterTweetsService(_tweetAuth, stats.Object, user2, twitterDal.Object, settings, httpFactory.Object, settingsDal.Object, logger3.Object);
@@ -66,19 +66,6 @@ namespace BirdsiteLive.ActivityPub.Tests
             Assert.AreEqual(tweet.Media[0].MediaType, "image/jpeg");
             Assert.AreEqual(tweet.Media.Length, 1);
             Assert.AreEqual(tweet.Media[0].AltText, "President Obama with Speaker Nancy Pelosi in DC.");
-        }
-
-        [TestMethod]
-        public async Task Login()
-        {
-            try
-            {
-                var tweet = await _tweetAuth.Login();
-            }
-            catch (Exception e)
-            {
-                Assert.Inconclusive();
-            }
         }
         [TestMethod]
         public async Task SimpleTextAndSingleLinkTweet()

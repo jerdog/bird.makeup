@@ -12,6 +12,7 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 using System.Threading.RateLimiting;
+using BirdsiteLive.DAL.Contracts;
 
 namespace BirdsiteLive.Twitter.Tools
 {
@@ -33,6 +34,7 @@ namespace BirdsiteLive.Twitter.Tools
         private RateLimiter _rateLimiter;
         private const int _targetClients = 3;
         private InstanceSettings _instanceSettings;
+        private ISettingsDal _settingsDal;
         private WebProxy _proxy;
 
         private readonly (string, string)[] _apiKeys = new[]
@@ -55,11 +57,12 @@ namespace BirdsiteLive.Twitter.Tools
 
         #region Ctor
 
-        public TwitterAuthenticationInitializer(IHttpClientFactory httpClientFactory, InstanceSettings settings,
+        public TwitterAuthenticationInitializer(IHttpClientFactory httpClientFactory, InstanceSettings settings, ISettingsDal settingsDal,
             ILogger<TwitterAuthenticationInitializer> logger)
         {
             _logger = logger;
             _instanceSettings = settings;
+            _settingsDal = settingsDal;
             _httpClientFactory = httpClientFactory;
 
             var concuOpt = new ConcurrencyLimiterOptions();
@@ -167,8 +170,17 @@ namespace BirdsiteLive.Twitter.Tools
 
         public async Task<JsonDocument> Login()
         {
-            string username = "xxxxxx";
-            string password = "xxxxxx";
+            var cred = await _settingsDal.Get("twitteraccounts");
+            string username = String.Empty;
+            string password = String.Empty;
+            
+            foreach (JsonElement account in cred.Value.GetProperty("accounts").EnumerateArray())
+            {
+                username = account.EnumerateArray().First().GetString();
+                password = account.EnumerateArray().Last().GetString();
+            }
+
+            
             string TW_CONSUMER_KEY = "3nVuSoBZnx6U4vzUxf5w";
             string TW_CONSUMER_SECRET = "Bcs59EFbbsdF6Sl9Ng71smgStWEGwXXKSjYvPVt7qys";
             string TW_ANDROID_BASIC_TOKEN = "Basic " +

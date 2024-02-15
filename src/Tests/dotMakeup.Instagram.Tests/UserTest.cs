@@ -1,18 +1,35 @@
+using BirdsiteLive.Common.Interfaces;
+using BirdsiteLive.Common.Settings;
+using BirdsiteLive.DAL.Contracts;
 using dotMakeup.Instagram.Models;
+using Moq;
 
 namespace dotMakeup.Instagram.Tests;
 
 [TestClass]
 public class UserTest
 {
+    private ISocialMediaService _instaService;
+    [TestInitialize]
+    public async Task TestInit()
+    {
+        var userDal = new Mock<IInstagramUserDal>();
+        var httpFactory = new Mock<IHttpClientFactory>();
+        httpFactory.Setup(_ => _.CreateClient(string.Empty)).Returns(new HttpClient());
+        var settings = new InstanceSettings
+        {
+            Domain = "domain.name"
+        };
+
+        _instaService = new InstagramService(userDal.Object, httpFactory.Object, settings);
+    }
     [TestMethod]
     public async Task user_kobe()
     {
-        var userService = new InstagramUserService();
-        InstagramUser user;
+        SocialMediaUser user;
         try
         {
-            user = await userService.GetUserAsync("kobebryant");
+            user = await _instaService.GetUserAsync("kobebryant");
         }
         catch (Exception _)
         {

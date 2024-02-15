@@ -67,7 +67,7 @@ spec:
             - name: Instance__n_end
               value: "20"
             - name: Instance__m
-              value: "100"
+              value: "59"
             - name: db__type
               value: "postgres"
             - name: db__host

@@ -207,24 +207,24 @@ namespace BirdsiteLive.Twitter
             {
                 await _twitterUserDal.UpdateTwitterStatusesCountAsync(username, twitterUser.StatusCount);
             }
-            else if (user.StatusesCount != twitterUser.StatusCount && user.Followers > 80)
+            else if (user.StatusesCount != twitterUser.StatusCount && user.Followers > followersThreshold + 25)
             {
                 extractedTweets = await TweetFromSidecar(user, fromTweetId, true);
                 await _twitterUserDal.UpdateTwitterStatusesCountAsync(username, twitterUser.StatusCount);
             }
-            else if (user.StatusesCount != twitterUser.StatusCount && user.Followers > 45)
+            else if (user.StatusesCount != twitterUser.StatusCount && user.Followers > followersThreshold + 10)
             {
                 extractedTweets = await TweetFromSidecar(user, fromTweetId, false);
                 await _twitterUserDal.UpdateTwitterStatusesCountAsync(username, twitterUser.StatusCount);
             }
-            else if (user.StatusesCount != twitterUser.StatusCount && user.Followers > followersThreshold)
+            else if (user.StatusesCount != twitterUser.StatusCount && user.Followers > followersThreshold + 5)
             {
                 extractedTweets = await TweetFromNitter(user, fromTweetId, true, false);
                 await _twitterUserDal.UpdateTwitterStatusesCountAsync(username, twitterUser.StatusCount);
             }
-            else if (user.StatusesCount != twitterUser.StatusCount && user.Followers > 0 && twitterUser.FollowersCount > twitterFollowersThreshold)
+            else if (user.StatusesCount != twitterUser.StatusCount && user.Followers > followersThreshold)
             {
-                extractedTweets = await TweetFromNitter(user, fromTweetId, false, true);
+                extractedTweets = await TweetFromNitter(user, fromTweetId, false, false);
                 await _twitterUserDal.UpdateTwitterStatusesCountAsync(username, twitterUser.StatusCount);
             }
 

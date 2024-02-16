@@ -11,6 +11,8 @@ public interface SocialMediaUserDal
         Task DeleteUserAsync(int id);
         Task DeleteUserAsync(string acct);
         Task CreateUserAsync(string acct);
+        Task AddFollower(int follower, int followed);
+        Task RemoveFollower(int follower, int followed);
 }
 
 public interface SyncUser

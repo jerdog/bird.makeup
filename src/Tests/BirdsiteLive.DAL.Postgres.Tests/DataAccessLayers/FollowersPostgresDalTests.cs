@@ -58,6 +58,43 @@ namespace BirdsiteLive.DAL.Postgres.Tests.DataAccessLayers
             Assert.AreEqual(following.Length, result.Followings.Count);
             Assert.AreEqual(following[0], result.Followings[0]);
         }
+        [TestMethod]
+        public async Task CreateGetAndRemoveFollower_Abstract()
+        {
+            var acct = "myhandle";
+            var host = "domain.ext";
+            var following = new[] { 12, 19, 23 };
+            var inboxRoute = "/myhandle/inbox";
+            var sharedInboxRoute = "/inbox";
+            var actorId = $"https://{host}/{acct}";
+
+            var dalF = new FollowersPostgresDal(_settings);
+            var dalT = new TwitterUserPostgresDal(_settings);
+            await dalF.CreateFollowerAsync(acct, host, inboxRoute, sharedInboxRoute, actorId, Array.Empty<int>());
+
+            var result1 = await dalF.GetFollowerAsync(acct, host);
+            foreach (int f in following)
+            {
+                await dalT.AddFollower(result1.Id, f);
+            }
+            var result = await dalF.GetFollowerAsync(acct, host);
+
+            Assert.IsNotNull(result);
+            Assert.AreEqual(acct, result.Acct);
+            Assert.AreEqual(host, result.Host);
+            Assert.AreEqual(inboxRoute, result.InboxRoute);
+            Assert.AreEqual(sharedInboxRoute, result.SharedInboxRoute);
+            Assert.AreEqual(actorId, result.ActorId);
+            Assert.AreEqual(0, result.PostingErrorCount);
+            Assert.AreEqual(following.Length, result.Followings.Count);
+            Assert.AreEqual(following[0], result.Followings[0]);
+            
+            await dalT.RemoveFollower(result1.Id, 19);
+            var result3 = await dalF.GetFollowerAsync(acct, host);
+            Assert.AreEqual(12, result3.Followings[0]);
+            Assert.AreEqual(23, result3.Followings[1]);
+            Assert.AreEqual(2, result3.Followings.Count);
+        }
 
         [TestMethod]
         public async Task CreateAndGetFollower_NoFollowings()

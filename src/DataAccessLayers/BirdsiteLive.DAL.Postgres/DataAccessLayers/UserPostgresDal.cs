@@ -119,4 +119,38 @@ public abstract class UserPostgresDal : PostgresBase, SocialMediaUserDal
             
             await command.ExecuteNonQueryAsync();
         }
+        public async Task AddFollower(int follower, int followed)
+        {
+
+            var query = $"UPDATE {_settings.FollowersTableName} SET {FollowingColumnName} = array_append({FollowingColumnName}, $2) WHERE id = $1";
+                
+            await using var connection = DataSource.CreateConnection();
+            await connection.OpenAsync();
+            await using var command = new NpgsqlCommand(query, connection) {
+                Parameters = 
+                { 
+                    new() { Value = follower },
+                    new() { Value = followed },
+                }
+            };
+            
+            await command.ExecuteNonQueryAsync();
+        }
+        public async Task RemoveFollower(int follower, int followed)
+        {
+
+            var query = $"UPDATE {_settings.FollowersTableName} SET {FollowingColumnName} = array_remove({FollowingColumnName}, $2) WHERE id = $1";
+                
+            await using var connection = DataSource.CreateConnection();
+            await connection.OpenAsync();
+            await using var command = new NpgsqlCommand(query, connection) {
+                Parameters = 
+                { 
+                    new() { Value = follower },
+                    new() { Value = followed },
+                }
+            };
+            
+            await command.ExecuteNonQueryAsync();
+        }
 }

@@ -1,4 +1,5 @@
 ﻿using System.Threading.Tasks;
+using BirdsiteLive.Common.Interfaces;
 using BirdsiteLive.DAL.Contracts;
 
 namespace BirdsiteLive.Domain.BusinessUseCases
@@ -12,12 +13,14 @@ namespace BirdsiteLive.Domain.BusinessUseCases
     {
         private readonly IFollowersDal _followerDal;
         private readonly ITwitterUserDal _twitterUserDal;
+        private readonly ISocialMediaService _socialMediaService;
 
         #region Ctor
-        public ProcessFollowUser(IFollowersDal followerDal, ITwitterUserDal twitterUserDal)
+        public ProcessFollowUser(IFollowersDal followerDal, ITwitterUserDal twitterUserDal, ISocialMediaService socialMediaService)
         {
             _followerDal = followerDal;
             _twitterUserDal = twitterUserDal;
+            _socialMediaService = socialMediaService;
         }
         #endregion
 

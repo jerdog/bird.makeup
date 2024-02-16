@@ -212,11 +212,11 @@ namespace BirdsiteLive.Domain
             }
 
             // Validate User 
-            var userDal = await _twitterUserDal.GetUserAsync(twitterUser);
+            var userDal = await _socialMediaService.UserDal.GetUserAsync(twitterUser);
             if (userDal is null)
             {
                 // this will fail if the username doesn't exist
-                var user = await _twitterUserService.GetUserAsync(twitterUser);
+                var user = await _socialMediaService.GetUserAsync(twitterUser);
                 if (user.Protected)
                 {
 

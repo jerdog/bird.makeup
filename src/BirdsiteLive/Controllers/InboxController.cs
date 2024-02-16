@@ -50,6 +50,7 @@ namespace BirdsiteLive.Controllers
                             {
                                 var succeeded = await _userService.FollowRequestedAsync(signature, r.Method, r.Path,
                                     r.QueryString.ToString(), HeaderHandler.RequestHeaders(r.Headers), activity as ActivityFollow, body);
+                                _logger.LogInformation($"New follow request: {body} {signature} {HeaderHandler.RequestHeaders(r.Headers)["date"]} {HeaderHandler.RequestHeaders(r.Headers)["digest"]}");
                                 if (succeeded) return Accepted();
                                 else return Unauthorized();
                             }

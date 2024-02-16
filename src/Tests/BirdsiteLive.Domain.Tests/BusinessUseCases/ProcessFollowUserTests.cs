@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+using BirdsiteLive.Common.Interfaces;
 using BirdsiteLive.DAL.Contracts;
 using BirdsiteLive.DAL.Models;
 using BirdsiteLive.Domain.BusinessUseCases;
@@ -73,9 +74,12 @@ namespace BirdsiteLive.Domain.Tests.BusinessUseCases
                 .Setup(x => x.CreateUserAsync(
                     It.Is<string>(y => y == twitterName)))
                 .Returns(Task.CompletedTask);
+
+            var socialMediaServiceMock = new Mock<ISocialMediaService>();
+            //socialMediaServiceMock.Setups(x => x.)
             #endregion
 
-            var action = new ProcessFollowUser(followersDalMock.Object, twitterUserDalMock.Object);
+            var action = new ProcessFollowUser(followersDalMock.Object, twitterUserDalMock.Object, socialMediaServiceMock.Object);
             await action.ExecuteAsync(username, domain, twitterName, followerInbox, inbox, actorId);
 
             #region Validations
@@ -129,9 +133,11 @@ namespace BirdsiteLive.Domain.Tests.BusinessUseCases
             twitterUserDalMock
                 .Setup(x => x.GetUserAsync(twitterName))
                 .ReturnsAsync(twitterUser);
+            
+            var socialMediaServiceMock = new Mock<ISocialMediaService>();
             #endregion
 
-            var action = new ProcessFollowUser(followersDalMock.Object, twitterUserDalMock.Object);
+            var action = new ProcessFollowUser(followersDalMock.Object, twitterUserDalMock.Object, socialMediaServiceMock.Object);
             await action.ExecuteAsync(username, domain, twitterName, followerInbox, inbox, actorId);
 
             #region Validations

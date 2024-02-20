@@ -8,6 +8,7 @@ using BirdsiteLive.ActivityPub.Models;
 using BirdsiteLive.Common.Interfaces;
 using BirdsiteLive.Common.Regexes;
 using BirdsiteLive.Common.Settings;
+using BirdsiteLive.Common.Exceptions;
 using BirdsiteLive.DAL.Contracts;
 using BirdsiteLive.DAL.Models;
 using BirdsiteLive.Domain;

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace BirdsiteLive.Twitter
+namespace BirdsiteLive.Common.Exceptions
 {
     public class UserHasBeenSuspendedException : Exception
     {

@@ -5,7 +5,7 @@ using System.Net;
 using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
-using BirdsiteLive.Common.Settings;
+using BirdsiteLive.Common.Exceptions;
 using BirdsiteLive.Statistics.Domain;
 using BirdsiteLive.Twitter.Models;
 using BirdsiteLive.Twitter.Tools;

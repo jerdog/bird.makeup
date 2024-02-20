@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using BirdsiteLive.ActivityPub.Converters;
 using BirdsiteLive.Common.Regexes;
 using BirdsiteLive.Common.Settings;
+using BirdsiteLive.Common.Exceptions;
 using BirdsiteLive.DAL.Contracts;
 using BirdsiteLive.Domain.Repository;
 using BirdsiteLive.Models;

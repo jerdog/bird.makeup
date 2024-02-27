@@ -207,17 +207,17 @@ namespace BirdsiteLive.Twitter
             {
                 await _twitterUserDal.UpdateTwitterStatusesCountAsync(username, twitterUser.StatusCount);
             }
-            else if (user.StatusesCount != twitterUser.StatusCount && user.Followers > followersThreshold + 25)
+            else if (user.StatusesCount != twitterUser.StatusCount && user.Followers > followersThreshold + 12)
             {
                 extractedTweets = await TweetFromSidecar(user, fromTweetId, true);
                 await _twitterUserDal.UpdateTwitterStatusesCountAsync(username, twitterUser.StatusCount);
             }
-            else if (user.StatusesCount != twitterUser.StatusCount && user.Followers > followersThreshold + 10)
+            else if (user.StatusesCount != twitterUser.StatusCount && user.Followers > followersThreshold + 2)
             {
                 extractedTweets = await TweetFromSidecar(user, fromTweetId, false);
                 await _twitterUserDal.UpdateTwitterStatusesCountAsync(username, twitterUser.StatusCount);
             }
-            else if (user.StatusesCount != twitterUser.StatusCount && user.Followers > followersThreshold + 5)
+            else if (user.StatusesCount != twitterUser.StatusCount && user.Followers > followersThreshold + 1)
             {
                 extractedTweets = await TweetFromNitter(user, fromTweetId, true, false);
                 await _twitterUserDal.UpdateTwitterStatusesCountAsync(username, twitterUser.StatusCount);
@@ -298,6 +298,8 @@ namespace BirdsiteLive.Twitter
                     }
                     await Task.Delay(100);
                 }
+                
+                await Task.Delay(2000);
                 
                 return tweets;
             }

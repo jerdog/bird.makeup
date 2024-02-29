@@ -12,6 +12,7 @@ namespace dotMakeup.Instagram;
 public class InstagramService : ISocialMediaService
 {
         private readonly IHttpClientFactory _httpClientFactory;
+        private readonly InstanceSettings _settings;
         
         private readonly MemoryCache _userCache;
         private readonly MemoryCacheEntryOptions _cacheEntryOptions = new MemoryCacheEntryOptions()
@@ -36,6 +37,7 @@ public class InstagramService : ISocialMediaService
         public InstagramService(IInstagramUserDal userDal, IHttpClientFactory httpClientFactory, InstanceSettings settings)
         {
             _httpClientFactory = httpClientFactory;
+            _settings = settings;
             UserDal = userDal;
             
             _userCache = new MemoryCache(new MemoryCacheOptions()
@@ -58,7 +60,7 @@ public class InstagramService : ISocialMediaService
             {
                 var client = _httpClientFactory.CreateClient();
                 string requestUrl;
-                requestUrl = "http://localhost:5000/instagram/user/" + username;
+                requestUrl = _settings.SidecarURL + "/instagram/user/" + username;
                 var request = new HttpRequestMessage(HttpMethod.Get, requestUrl);
 
                 var httpResponse = await client.SendAsync(request);

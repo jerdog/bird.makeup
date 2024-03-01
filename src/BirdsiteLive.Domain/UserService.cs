@@ -139,7 +139,7 @@ namespace BirdsiteLive.Domain
                 preferredUsername = acct,
                 name = twitterUser.Name,
                 inbox = $"{actorUrl}/inbox",
-                summary = description + $"This account is a replica from {_socialMediaService.ServiceName}. Its author can't see your replies. If you find this service useful, please consider supporting us via our Patreon. <br>",
+                summary = description + $"<br>This account is a replica from {_socialMediaService.ServiceName}. Its author can't see your replies. If you find this service useful, please consider supporting us via our Patreon. <br>",
                 url = actorUrl,
                 featured = featured,
                 manuallyApprovesFollowers = twitterUser.Protected,

@@ -27,6 +27,48 @@ namespace BirdsiteLive.DAL.Postgres.DataAccessLayers
         public override string tableName { get; set; } 
         public override string FollowingColumnName { get; set; } = "followings";
 
+        public async Task<SyncTwitterUser> GetUserAsync(int id)
+        {
+            return await GetUserAsync(null, id);
+        }
+        public async Task<SyncTwitterUser> GetUserAsync(string acct)
+        {
+            return await GetUserAsync(acct, null);
+        }
+        private async Task<SyncTwitterUser> GetUserAsync(string acct, int? id)
+        {
+            var query = $"SELECT * FROM {tableName} WHERE acct = $1 OR id = $2";
+
+            if (acct is not null)
+                acct = acct.ToLowerInvariant();
+
+            await using var connection = DataSource.CreateConnection();
+            await connection.OpenAsync();
+            await using var command = new NpgsqlCommand(query, connection) {
+                Parameters =
+                {
+                    new() { Value = (object) acct ?? DBNull.Value},
+                    new() { Value = (object) id ?? DBNull.Value, NpgsqlDbType = NpgsqlDbType.Integer}
+                },
+            };
+            var reader = await command.ExecuteReaderAsync();
+            if (!await reader.ReadAsync())
+                return null;
+            
+            var extradata = JsonDocument.Parse(reader["extradata"] as string ?? "{}").RootElement;
+            return new SyncTwitterUser
+            {
+                Id = reader["id"] as int? ?? default,
+                Acct = reader["acct"] as string,
+                TwitterUserId = reader["twitterUserId"] as long? ?? default,
+                LastTweetPostedId = reader["lastTweetPostedId"] as long? ?? default,
+                LastSync = reader["lastSync"] as DateTime? ?? default,
+                FetchingErrorCount = reader["fetchingErrorCount"] as int? ?? default,
+                FediAcct = reader["fediverseaccount"] as string,
+                ExtraData = extradata,
+            };
+
+        }
         public async Task<TimeSpan> GetTwitterSyncLag()
         {
             var query = $"SELECT max(lastsync) - min(lastsync) as diff FROM (SELECT unnest(followings) as follow FROM followers GROUP BY follow) AS f INNER JOIN twitter_users ON f.follow=twitter_users.id;";

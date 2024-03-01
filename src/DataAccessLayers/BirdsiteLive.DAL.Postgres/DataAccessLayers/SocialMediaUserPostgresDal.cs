@@ -56,11 +56,6 @@ public abstract class SocialMediaUserPostgresDal : PostgresBase, SocialMediaUser
             {
                 Id = reader["id"] as int? ?? default,
                 Acct = reader["acct"] as string,
-                TwitterUserId = reader["twitterUserId"] as long? ?? default,
-                LastTweetPostedId = reader["lastTweetPostedId"] as long? ?? default,
-                LastSync = reader["lastSync"] as DateTime? ?? default,
-                FetchingErrorCount = reader["fetchingErrorCount"] as int? ?? default,
-                FediAcct = reader["fediverseaccount"] as string,
                 ExtraData = extradata,
             };
 

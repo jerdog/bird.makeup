@@ -83,6 +83,7 @@ public class InstagramService : ISocialMediaService
                         Acct = username,
                         ProfileImageUrl = userDocument.RootElement.GetProperty("profilePic").GetString(),
                         Name = userDocument.RootElement.GetProperty("name").GetString(),
+                        PinnedPosts = new List<long>(),
                     };
 
                 }

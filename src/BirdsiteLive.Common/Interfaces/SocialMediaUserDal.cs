@@ -13,6 +13,7 @@ public interface SocialMediaUserDal
         Task CreateUserAsync(string acct);
         Task AddFollower(int follower, int followed);
         Task RemoveFollower(int follower, int followed);
+        Task<long> GetFollowersCountAsync(int id);
 }
 
 public interface SyncUser

@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+using BirdsiteLive.Common.Interfaces;
 using BirdsiteLive.DAL.Contracts;
 using BirdsiteLive.DAL.Models;
 using BirdsiteLive.Domain.BusinessUseCases;
@@ -26,7 +27,7 @@ namespace BirdsiteLive.Domain.Tests.BusinessUseCases
                 .Setup(x => x.GetFollowerAsync(username, domain))
                 .ReturnsAsync((Follower) null);
 
-            var twitterUserDalMock = new Mock<ITwitterUserDal>(MockBehavior.Strict);
+            var twitterUserDalMock = new Mock<ISocialMediaService>(MockBehavior.Strict);
             #endregion
 
             var action = new ProcessUndoFollowUser(followersDalMock.Object, twitterUserDalMock.Object);
@@ -61,10 +62,10 @@ namespace BirdsiteLive.Domain.Tests.BusinessUseCases
                 .Setup(x => x.GetFollowerAsync(username, domain))
                 .ReturnsAsync(follower);
 
-            var twitterUserDalMock = new Mock<ITwitterUserDal>(MockBehavior.Strict);
+            var twitterUserDalMock = new Mock<ISocialMediaService>(MockBehavior.Strict);
             twitterUserDalMock
-                .Setup(x => x.GetUserAsync(twitterName))
-                .ReturnsAsync((SyncTwitterUser)null);
+                .Setup(x => x.UserDal.GetUserAsync(twitterName))
+                .ReturnsAsync((SyncUser)null);
             #endregion
 
             var action = new ProcessUndoFollowUser(followersDalMock.Object, twitterUserDalMock.Object);
@@ -90,6 +91,7 @@ namespace BirdsiteLive.Domain.Tests.BusinessUseCases
                 Acct = username,
                 Host = domain,
                 Followings = new List<int> { 2, 3 },
+                TotalFollowings = 2,
             };
 
             var twitterUser = new SyncTwitterUser
@@ -112,20 +114,23 @@ namespace BirdsiteLive.Domain.Tests.BusinessUseCases
                 .Setup(x => x.GetFollowerAsync(username, domain))
                 .ReturnsAsync(follower);
 
-            followersDalMock
-                .Setup(x => x.UpdateFollowerAsync(
-                    It.Is<Follower>(y => !y.Followings.Contains(twitterUser.Id) )
-                ))
-                .Returns(Task.CompletedTask);
-
-            followersDalMock
-                .Setup(x => x.GetFollowersAsync(twitterUser.Id))
-                .ReturnsAsync(followerList.ToArray());
-
-            var twitterUserDalMock = new Mock<ITwitterUserDal>(MockBehavior.Strict);
+            var twitterUserDalMock = new Mock<ISocialMediaService>(MockBehavior.Strict);
             twitterUserDalMock
-                .Setup(x => x.GetUserAsync(twitterName))
+                .Setup(x => x.UserDal.GetUserAsync(twitterName))
                 .ReturnsAsync(twitterUser);
+            
+            twitterUserDalMock
+                .Setup(x => x.UserDal.RemoveFollower(
+                    It.Is<int>(y => y == 1),
+                    It.Is<int>(y => y == 2)
+                    ))
+                .Returns(Task.CompletedTask);
+            
+            twitterUserDalMock
+                .Setup(x => x.UserDal.GetFollowersCountAsync(
+                    It.Is<int>(y => y == 2)
+                    ))
+                .ReturnsAsync(1);
             #endregion
 
             var action = new ProcessUndoFollowUser(followersDalMock.Object, twitterUserDalMock.Object);
@@ -153,7 +158,7 @@ namespace BirdsiteLive.Domain.Tests.BusinessUseCases
                 Followings = new List<int> { 2 },
             };
 
-            var twitterUser = new SyncTwitterUser
+            SyncUser twitterUser = new SyncTwitterUser
             {
                 Id = 2,
                 Acct = twitterName,
@@ -175,21 +180,31 @@ namespace BirdsiteLive.Domain.Tests.BusinessUseCases
                     It.Is<string>(y => y == domain)
                     ))
                 .Returns(Task.CompletedTask);
+            
 
-            followersDalMock
-                .Setup(x => x.GetFollowersAsync(twitterUser.Id))
-                .ReturnsAsync(followerList.ToArray());
-
-            var twitterUserDalMock = new Mock<ITwitterUserDal>(MockBehavior.Strict);
+            var twitterUserDalMock = new Mock<ISocialMediaService>(MockBehavior.Strict);
             twitterUserDalMock
-                .Setup(x => x.GetUserAsync(twitterName))
+                .Setup(x => x.UserDal.GetUserAsync(twitterName))
                 .ReturnsAsync(twitterUser);
 
             twitterUserDalMock
-                .Setup(x => x.DeleteUserAsync(
+                .Setup(x => x.UserDal.DeleteUserAsync(
                     It.Is<string>(y => y == twitterName)
                 ))
                 .Returns(Task.CompletedTask);
+            
+            twitterUserDalMock
+                .Setup(x => x.UserDal.RemoveFollower(
+                    It.Is<int>(y => y == 1),
+                    It.Is<int>(y => y == 2)
+                    ))
+                .Returns(Task.CompletedTask);
+            
+            twitterUserDalMock
+                .Setup(x => x.UserDal.GetFollowersCountAsync(
+                    It.Is<int>(y => y == 2)
+                    ))
+                .ReturnsAsync(0);
             #endregion
 
             var action = new ProcessUndoFollowUser(followersDalMock.Object, twitterUserDalMock.Object);

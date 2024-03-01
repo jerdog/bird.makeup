@@ -42,7 +42,7 @@ namespace BirdsiteLive.Domain.Tests.BusinessUseCases
             #endregion
 
             #region Mocks
-            var followersDalMock = new Mock<IFollowersDal>(MockBehavior.Strict);
+            var followersDalMock = new Mock<IFollowersDal>();
             followersDalMock
                 .SetupSequence(x => x.GetFollowerAsync(username, domain))
                 .ReturnsAsync((Follower)null)
@@ -58,13 +58,7 @@ namespace BirdsiteLive.Domain.Tests.BusinessUseCases
                     null ))
                 .Returns(Task.CompletedTask);
 
-            followersDalMock
-                .Setup(x => x.UpdateFollowerAsync(
-                    It.Is<Follower>(y => y.Followings.Contains(twitterUser.Id))
-                ))
-                .Returns(Task.CompletedTask);
-
-            var twitterUserDalMock = new Mock<ITwitterUserDal>(MockBehavior.Strict);
+            var twitterUserDalMock = new Mock<SocialMediaUserDal>();
             twitterUserDalMock
                 .SetupSequence(x => x.GetUserAsync(twitterName))
                 .ReturnsAsync((SyncTwitterUser)null)
@@ -76,10 +70,11 @@ namespace BirdsiteLive.Domain.Tests.BusinessUseCases
                 .Returns(Task.CompletedTask);
 
             var socialMediaServiceMock = new Mock<ISocialMediaService>();
-            //socialMediaServiceMock.Setups(x => x.)
+            socialMediaServiceMock.SetupGet(x => x.UserDal)
+                .Returns(twitterUserDalMock.Object);
             #endregion
 
-            var action = new ProcessFollowUser(followersDalMock.Object, twitterUserDalMock.Object, socialMediaServiceMock.Object);
+            var action = new ProcessFollowUser(followersDalMock.Object, socialMediaServiceMock.Object);
             await action.ExecuteAsync(username, domain, twitterName, followerInbox, inbox, actorId);
 
             #region Validations
@@ -118,26 +113,22 @@ namespace BirdsiteLive.Domain.Tests.BusinessUseCases
             #endregion
 
             #region Mocks
-            var followersDalMock = new Mock<IFollowersDal>(MockBehavior.Strict);
+            var followersDalMock = new Mock<IFollowersDal>();
             followersDalMock
                 .Setup(x => x.GetFollowerAsync(username, domain))
                 .ReturnsAsync(follower);
             
-            followersDalMock
-                .Setup(x => x.UpdateFollowerAsync(
-                    It.Is<Follower>(y => y.Followings.Contains(twitterUser.Id) )
-                ))
-                .Returns(Task.CompletedTask);
-
-            var twitterUserDalMock = new Mock<ITwitterUserDal>(MockBehavior.Strict);
+            var twitterUserDalMock = new Mock<SocialMediaUserDal>();
             twitterUserDalMock
                 .Setup(x => x.GetUserAsync(twitterName))
                 .ReturnsAsync(twitterUser);
             
             var socialMediaServiceMock = new Mock<ISocialMediaService>();
+            socialMediaServiceMock.SetupGet(x => x.UserDal)
+                .Returns(twitterUserDalMock.Object);
             #endregion
 
-            var action = new ProcessFollowUser(followersDalMock.Object, twitterUserDalMock.Object, socialMediaServiceMock.Object);
+            var action = new ProcessFollowUser(followersDalMock.Object, socialMediaServiceMock.Object);
             await action.ExecuteAsync(username, domain, twitterName, followerInbox, inbox, actorId);
 
             #region Validations

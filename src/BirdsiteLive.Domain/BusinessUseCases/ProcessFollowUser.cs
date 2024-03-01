@@ -12,14 +12,12 @@ namespace BirdsiteLive.Domain.BusinessUseCases
     public class ProcessFollowUser : IProcessFollowUser
     {
         private readonly IFollowersDal _followerDal;
-        private readonly ITwitterUserDal _twitterUserDal;
         private readonly ISocialMediaService _socialMediaService;
 
         #region Ctor
-        public ProcessFollowUser(IFollowersDal followerDal, ITwitterUserDal twitterUserDal, ISocialMediaService socialMediaService)
+        public ProcessFollowUser(IFollowersDal followerDal, ISocialMediaService socialMediaService)
         {
             _followerDal = followerDal;
-            _twitterUserDal = twitterUserDal;
             _socialMediaService = socialMediaService;
         }
         #endregion
@@ -34,20 +32,18 @@ namespace BirdsiteLive.Domain.BusinessUseCases
                 follower = await _followerDal.GetFollowerAsync(followerUsername, followerDomain);
             }
 
-            var twitterUser = await _twitterUserDal.GetUserAsync(twitterUsername);
+            var twitterUser = await _socialMediaService.UserDal.GetUserAsync(twitterUsername);
             if (twitterUser == null)
             {
-                await _twitterUserDal.CreateUserAsync(twitterUsername);
-                twitterUser = await _twitterUserDal.GetUserAsync(twitterUsername);
+                await _socialMediaService.UserDal.CreateUserAsync(twitterUsername);
+                twitterUser = await _socialMediaService.UserDal.GetUserAsync(twitterUsername);
             }
 
             // Update Follower
             var twitterUserId = twitterUser.Id;
-            if(!follower.Followings.Contains(twitterUserId))
-                follower.Followings.Add(twitterUserId);
             
             // Save Follower
-            await _followerDal.UpdateFollowerAsync(follower);
+            await _socialMediaService.UserDal.AddFollower(follower.Id, twitterUserId);
         }
     }
 }

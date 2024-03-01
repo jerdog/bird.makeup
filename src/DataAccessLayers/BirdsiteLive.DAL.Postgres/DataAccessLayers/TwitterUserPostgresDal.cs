@@ -14,7 +14,7 @@ using NpgsqlTypes;
 
 namespace BirdsiteLive.DAL.Postgres.DataAccessLayers
 {
-    public class TwitterUserPostgresDal : UserPostgresDal, ITwitterUserDal
+    public class TwitterUserPostgresDal : SocialMediaUserPostgresDal, ITwitterUserDal
     {
         #region Ctor
         public TwitterUserPostgresDal(PostgresSettings settings) : base(settings)

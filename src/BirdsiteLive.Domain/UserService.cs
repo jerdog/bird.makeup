@@ -44,8 +44,6 @@ namespace BirdsiteLive.Domain
         private readonly IStatusExtractor _statusExtractor;
         private readonly IExtractionStatisticsHandler _statisticsHandler;
 
-        private readonly ITwitterUserService _twitterUserService;
-        private readonly ITwitterUserDal _twitterUserDal;
         private readonly ISocialMediaService _socialMediaService;
 
         private readonly IModerationRepository _moderationRepository;
@@ -60,10 +58,8 @@ namespace BirdsiteLive.Domain
             _processUndoFollowUser = processUndoFollowUser;
             _statusExtractor = statusExtractor;
             _statisticsHandler = statisticsHandler;
-            _twitterUserService = twitterUserService;
             _moderationRepository = moderationRepository;
             _processDeleteUser = processDeleteUser;
-            _twitterUserDal = twitterUserDal;
             _socialMediaService = socialMediaService;
         }
         #endregion

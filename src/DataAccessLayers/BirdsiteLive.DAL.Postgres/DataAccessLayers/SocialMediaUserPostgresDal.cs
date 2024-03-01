@@ -65,6 +65,24 @@ public abstract class SocialMediaUserPostgresDal : PostgresBase, SocialMediaUser
             };
 
         }
+        public async Task<long> GetFollowersCountAsync(int id)
+        {
+            var query = $"SELECT COUNT({FollowingColumnName}) FROM {_settings.FollowersTableName} WHERE {FollowingColumnName} @> ARRAY[$1]";
+
+            await using var connection = DataSource.CreateConnection();
+            await connection.OpenAsync();
+            await using var command = new NpgsqlCommand(query, connection) {
+                Parameters =
+                {
+                    new() { Value = id },
+                },
+            };
+            var reader = await command.ExecuteReaderAsync();
+            await reader.ReadAsync();
+            
+            var count = reader["count"] as long ? ?? default ;
+            return count;
+        }
         public async Task DeleteUserAsync(string acct)
         {
             if (string.IsNullOrWhiteSpace(acct)) throw new ArgumentException("acct");
@@ -106,7 +124,10 @@ public abstract class SocialMediaUserPostgresDal : PostgresBase, SocialMediaUser
         {
             acct = acct.ToLowerInvariant();
 
-            var query = $"INSERT INTO {tableName} (acct) VALUES($1)";
+            var query = $"INSERT INTO {tableName} (acct,lastTweetPostedId) VALUES($1,-1)";
+            // TODO improve this
+            if (tableName == _settings.InstagramUserTableName)
+                query = $"INSERT INTO {tableName} (acct) VALUES($1)";
                 
             await using var connection = DataSource.CreateConnection();
             await connection.OpenAsync();

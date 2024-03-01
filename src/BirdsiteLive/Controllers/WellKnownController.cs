@@ -7,6 +7,7 @@ using BirdsiteLive.ActivityPub.Converters;
 using BirdsiteLive.Common.Regexes;
 using BirdsiteLive.Common.Settings;
 using BirdsiteLive.Common.Exceptions;
+using BirdsiteLive.Common.Interfaces;
 using BirdsiteLive.DAL.Contracts;
 using BirdsiteLive.Domain.Repository;
 using BirdsiteLive.Models;
@@ -22,16 +23,14 @@ namespace BirdsiteLive.Controllers
     public class WellKnownController : ControllerBase
     {
         private readonly IModerationRepository _moderationRepository;
-        private readonly ITwitterUserService _twitterUserService;
-        private readonly ITwitterUserDal _twitterUserDal;
+        private readonly ISocialMediaService _socialMediaService;
         private readonly InstanceSettings _settings;
         private readonly ILogger<WellKnownController> _logger;
         
         #region Ctor
-        public WellKnownController(InstanceSettings settings, ITwitterUserService twitterUserService, ITwitterUserDal twitterUserDal, IModerationRepository moderationRepository, ILogger<WellKnownController> logger)
+        public WellKnownController(InstanceSettings settings, ISocialMediaService socialMediaService, IModerationRepository moderationRepository, ILogger<WellKnownController> logger)
         {
-            _twitterUserService = twitterUserService;
-            _twitterUserDal = twitterUserDal;
+            _socialMediaService = socialMediaService;
             _moderationRepository = moderationRepository;
             _logger = logger;
             _settings = settings;
@@ -64,7 +63,7 @@ namespace BirdsiteLive.Controllers
         public async Task<IActionResult> NodeInfo(string id)
         {
             var version = System.Reflection.Assembly.GetEntryAssembly().GetName().Version.ToString(3);
-            var twitterUsersCount = await _twitterUserDal.GetTwitterUsersCountAsync();
+            var twitterUsersCount = 0;// await _twitterUserDal.GetTwitterUsersCountAsync();
             var isOpenRegistration = _moderationRepository.GetModerationType(ModerationEntityTypeEnum.Follower) != ModerationTypeEnum.WhiteListing;
 
             if (id == "2.0")
@@ -202,12 +201,12 @@ namespace BirdsiteLive.Controllers
             if (!string.IsNullOrWhiteSpace(domain) && domain != _settings.Domain)
                 return NotFound();
 
-            var user = await _twitterUserDal.GetUserAsync(name);
+            var user = await _socialMediaService.UserDal.GetUserAsync(name);
             if (user is null)
             {
                 try
                 {
-                    await _twitterUserService.GetUserAsync(name);
+                    await _socialMediaService.GetUserAsync(name);
                 }
                 catch (UserNotFoundException)
                 {

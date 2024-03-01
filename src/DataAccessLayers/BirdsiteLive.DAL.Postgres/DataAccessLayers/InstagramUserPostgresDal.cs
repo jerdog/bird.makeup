@@ -3,7 +3,7 @@ using BirdsiteLive.DAL.Postgres.Settings;
 
 namespace BirdsiteLive.DAL.Postgres.DataAccessLayers;
 
-public class InstagramUserPostgresDal : UserPostgresDal, IInstagramUserDal
+public class InstagramUserPostgresDal : SocialMediaUserPostgresDal, IInstagramUserDal
 {
     
         #region Ctor

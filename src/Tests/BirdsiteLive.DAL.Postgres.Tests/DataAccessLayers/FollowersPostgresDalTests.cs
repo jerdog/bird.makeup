@@ -59,6 +59,40 @@ namespace BirdsiteLive.DAL.Postgres.Tests.DataAccessLayers
             Assert.AreEqual(following[0], result.Followings[0]);
         }
         [TestMethod]
+        public async Task CreateAndGetFollower_multinetwork()
+        {
+            var acct = "myhandle";
+            var host = "domain.ext";
+            var following = new[] { 12, 19, 23 };
+            var inboxRoute = "/myhandle/inbox";
+            var sharedInboxRoute = "/inbox";
+            var actorId = $"https://{host}/{acct}";
+
+            var dal = new FollowersPostgresDal(_settings);
+            var dalIg = new InstagramUserPostgresDal(_settings);
+            var dalTwitter = new TwitterUserPostgresDal(_settings);
+            await dal.CreateFollowerAsync(acct, host, inboxRoute, sharedInboxRoute, actorId, following);
+
+
+            var result = await dal.GetFollowerAsync(acct, host);
+
+            Assert.IsNotNull(result);
+            Assert.AreEqual(acct, result.Acct);
+            Assert.AreEqual(host, result.Host);
+            Assert.AreEqual(inboxRoute, result.InboxRoute);
+            Assert.AreEqual(sharedInboxRoute, result.SharedInboxRoute);
+            Assert.AreEqual(actorId, result.ActorId);
+            Assert.AreEqual(0, result.PostingErrorCount);
+            Assert.AreEqual(following.Length, result.Followings.Count);
+            Assert.AreEqual(following[0], result.Followings[0]);
+            
+            await dalIg.AddFollower(result.Id, 99);
+            await dalTwitter.AddFollower(result.Id, 420);
+            
+            var result2 = await dal.GetFollowerAsync(acct, host);
+            Assert.AreEqual(5, result2.TotalFollowings);
+        }
+        [TestMethod]
         public async Task CreateGetAndRemoveFollower_Abstract()
         {
             var acct = "myhandle";
@@ -88,12 +122,18 @@ namespace BirdsiteLive.DAL.Postgres.Tests.DataAccessLayers
             Assert.AreEqual(0, result.PostingErrorCount);
             Assert.AreEqual(following.Length, result.Followings.Count);
             Assert.AreEqual(following[0], result.Followings[0]);
+
+            var count1 = await dalT.GetFollowersCountAsync(19);
+            Assert.AreEqual(count1, 1);
             
             await dalT.RemoveFollower(result1.Id, 19);
             var result3 = await dalF.GetFollowerAsync(acct, host);
             Assert.AreEqual(12, result3.Followings[0]);
             Assert.AreEqual(23, result3.Followings[1]);
             Assert.AreEqual(2, result3.Followings.Count);
+            
+            var count2 = await dalT.GetFollowersCountAsync(19);
+            Assert.AreEqual(count2, 0);
         }
 
         [TestMethod]

@@ -23,7 +23,6 @@ namespace BirdsiteLive.Controllers
 {
     public class UsersController : Controller
     {
-        private readonly ICachedTwitterUserService _twitterUserService;
         private readonly ICachedTwitterTweetsService _twitterTweetService;
         private readonly IUserService _userService;
         private readonly IStatusService _statusService;
@@ -34,11 +33,10 @@ namespace BirdsiteLive.Controllers
         private readonly ILogger<UsersController> _logger;
 
         #region Ctor
-        public UsersController(ICachedTwitterUserService twitterUserService, IUserService userService, IStatusService statusService, InstanceSettings instanceSettings, ICachedTwitterTweetsService twitterTweetService, IFollowersDal followersDal, ITwitterUserDal twitterUserDal, ISocialMediaService socialMediaService, ILogger<UsersController> logger)
+        public UsersController(IUserService userService, IStatusService statusService, InstanceSettings instanceSettings, ICachedTwitterTweetsService twitterTweetService, IFollowersDal followersDal, ITwitterUserDal twitterUserDal, ISocialMediaService socialMediaService, ILogger<UsersController> logger)
         {
-            _twitterUserService = twitterUserService;
-            _userService = userService;
             _statusService = statusService;
+            _userService = userService;
             _instanceSettings = instanceSettings;
             _twitterTweetService = twitterTweetService;
             _followersDal = followersDal;
@@ -112,7 +110,7 @@ namespace BirdsiteLive.Controllers
                 {
                     if (isSaturated) return new ObjectResult("Too Many Requests") { StatusCode = 429 };
                     if (notFound) return NotFound();
-                    var apUser = await _userService.GetUser(user);
+                    var apUser = await _socialMediaService.GetUserAsync(user.Acct);
                     var jsonApUser = System.Text.Json.JsonSerializer.Serialize(apUser);
                     return Content(jsonApUser, "application/activity+json; charset=utf-8");
                 }
@@ -199,7 +197,7 @@ namespace BirdsiteLive.Controllers
             if (tweet == null)
                 return NotFound();
             
-            var user = await _twitterUserService.GetUserAsync(tweet.Author.Acct);
+            var user = await _socialMediaService.GetUserAsync(tweet.Author.Acct);
             var status = _statusService.GetActivity(tweet.Author.Acct, tweet);
             var res = new MastodonPostApi()
             {
@@ -230,7 +228,7 @@ namespace BirdsiteLive.Controllers
         [Route("/users/{id}/collections/featured")]
         public async Task<IActionResult> Featured(string id)
         {
-            var user = await _twitterUserService.GetUserAsync(id);
+            var user = await _socialMediaService.GetUserAsync(id);
             if (user == null)
                 return NotFound();
 

@@ -75,10 +75,14 @@ namespace BirdsiteLive.DAL.Postgres.DataAccessLayers
             if (!await reader.ReadAsync())
                 return null;
 
+            var twitterFollowings = (reader["followings"] as int[] ?? new int[0]).ToList();
+            var igFollowings = (reader["followings_instagram"] as int[] ?? new int[0]).ToList();
+            
             return new Follower
             {
                 Id = reader["id"] as int? ?? default,
-                Followings = (reader["followings"] as int[] ?? new int[0]).ToList(),
+                Followings = twitterFollowings,
+                TotalFollowings = twitterFollowings.Count + igFollowings.Count,
                 ActorId = reader["actorId"] as string,
                 Acct = reader["acct"] as string,
                 Host = reader["host"] as string,

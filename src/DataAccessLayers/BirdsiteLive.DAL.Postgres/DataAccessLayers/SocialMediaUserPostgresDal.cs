@@ -10,11 +10,11 @@ using NpgsqlTypes;
 
 namespace BirdsiteLive.DAL.Postgres.DataAccessLayers;
 
-public abstract class UserPostgresDal : PostgresBase, SocialMediaUserDal
+public abstract class SocialMediaUserPostgresDal : PostgresBase, SocialMediaUserDal
 {
     
         #region Ctor
-        public UserPostgresDal(PostgresSettings settings) : base(settings)
+        public SocialMediaUserPostgresDal(PostgresSettings settings) : base(settings)
         {
             
         }
@@ -106,7 +106,7 @@ public abstract class UserPostgresDal : PostgresBase, SocialMediaUserDal
         {
             acct = acct.ToLowerInvariant();
 
-            var query = $"INSERT INTO {tableName} (acct,lastTweetPostedId) VALUES($1,-1)";
+            var query = $"INSERT INTO {tableName} (acct) VALUES($1)";
                 
             await using var connection = DataSource.CreateConnection();
             await connection.OpenAsync();

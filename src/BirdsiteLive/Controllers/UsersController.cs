@@ -110,7 +110,7 @@ namespace BirdsiteLive.Controllers
                 {
                     if (isSaturated) return new ObjectResult("Too Many Requests") { StatusCode = 429 };
                     if (notFound) return NotFound();
-                    var apUser = await _socialMediaService.GetUserAsync(user.Acct);
+                    var apUser = await _userService.GetUser(user);
                     var jsonApUser = System.Text.Json.JsonSerializer.Serialize(apUser);
                     return Content(jsonApUser, "application/activity+json; charset=utf-8");
                 }

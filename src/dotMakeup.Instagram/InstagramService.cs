@@ -1,5 +1,6 @@
 using System.Net;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using BirdsiteLive.Common.Interfaces;
 using BirdsiteLive.Common.Settings;
 using BirdsiteLive.DAL.Contracts;
@@ -53,6 +54,8 @@ public class InstagramService : ISocialMediaService
         }
 
         public string ServiceName { get; } = "Instagram";
+        public Regex ValidUsername { get;  } = new Regex(@"^[a-zA-Z0-9_\.]+$");
+        public Regex UserMention { get;  } = new Regex(@"(^|.?[ \n\.]+)@([a-zA-Z0-9_\.]+)(?=\s|$|[\[\]<>,;:'\.’!?/—\|-]|(. ))");
         public SocialMediaUserDal UserDal { get; }
         public async Task<SocialMediaUser> GetUserAsync(string username)
         {
@@ -84,6 +87,7 @@ public class InstagramService : ISocialMediaService
                         ProfileImageUrl = userDocument.RootElement.GetProperty("profilePic").GetString(),
                         Name = userDocument.RootElement.GetProperty("name").GetString(),
                         PinnedPosts = new List<long>(),
+                        ProfileUrl = "www.instagram.com/" + username,
                     };
 
                 }

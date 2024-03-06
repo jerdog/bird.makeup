@@ -92,7 +92,7 @@ namespace BirdsiteLive.Domain
                     type = "PropertyValue",
                     name = "Official",
                     value =
-                        $"<a href=\"https://twitter.com/{acct}\" rel=\"me nofollow noopener noreferrer\" target=\"_blank\"><span class=\"invisible\">https://</span><span class=\"ellipsis\">twitter.com/{acct}</span></a>"
+                        $"<a href=\"https://{twitterUser.ProfileUrl}\" rel=\"me nofollow noopener noreferrer\" target=\"_blank\"><span class=\"invisible\">https://</span><span class=\"ellipsis\">{twitterUser.ProfileUrl}</span></a>"
                 },
                 new UserAttachment
                 {

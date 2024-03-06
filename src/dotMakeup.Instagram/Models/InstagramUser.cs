@@ -13,6 +13,7 @@ public class InstagramUser : SocialMediaUser
         public string Url { get; set; }
         public string Acct { get; set; }
         public string Location { get; set; }
+        public string ProfileUrl { get; set; }
         public string ProfileImageUrl { get; set; }
         public string ProfileBannerURL { get; set; }
 }

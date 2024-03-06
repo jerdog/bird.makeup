@@ -7,6 +7,7 @@ using BirdsiteLive.Common.Settings;
 using BirdsiteLive.Twitter;
 using Microsoft.Extensions.Logging;
 using System;
+using BirdsiteLive.Common.Interfaces;
 
 namespace BirdsiteLive.Domain.Tools
 {
@@ -19,11 +20,13 @@ namespace BirdsiteLive.Domain.Tools
     {
         private readonly InstanceSettings _instanceSettings;
         private readonly ILogger<StatusExtractor> _logger;
+        private readonly ISocialMediaService _socialMediaService;
 
         #region Ctor
-        public StatusExtractor(InstanceSettings instanceSettings, ILogger<StatusExtractor> logger)
+        public StatusExtractor(InstanceSettings instanceSettings, ISocialMediaService socialMediaService, ILogger<StatusExtractor> logger)
         {
             _instanceSettings = instanceSettings;
+            _socialMediaService = socialMediaService;
             _logger = logger;
         }
         #endregion
@@ -93,12 +96,12 @@ namespace BirdsiteLive.Domain.Tools
             // Extract Mentions
             if (extractMentions)
             {
-                var mentionMatch = OrderByLength(UserRegexes.Mention.Matches(messageContent));
+                var mentionMatch = OrderByLength(_socialMediaService.UserMention.Matches(messageContent));
                 foreach (Match m in mentionMatch)
                 {
                     var mention = m.Groups[2].ToString();
 
-                    if (!UserRegexes.TwitterAccount.IsMatch(mention))
+                    if (!_socialMediaService.ValidUsername.IsMatch(mention))
                     {
                         _logger.LogError("Parsing Mention failed: {Mention} on {Content}", mention, messageContent);
                         continue;

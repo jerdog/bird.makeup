@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using BirdsiteLive.Common.Interfaces;
 using BirdsiteLive.Common.Settings;
@@ -32,6 +33,8 @@ namespace BirdsiteLive.Twitter
         }
 
         public string ServiceName { get; } = "Twitter";
+        public Regex ValidUsername { get;  } = new Regex(@"^[a-zA-Z0-9_]+$");
+        public Regex UserMention { get;  } = new Regex(@"(^|.?[ \n\.]+)@([a-zA-Z0-9_]+)(?=\s|$|[\[\]<>,;:'\.’!?/—\|-]|(. ))");
         public SocialMediaUserDal UserDal { get; }
         public async Task<SocialMediaUser> GetUserAsync(string user)
         {

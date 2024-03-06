@@ -73,7 +73,7 @@ namespace BirdsiteLive.Controllers
 
             // Ensure valid username 
             // https://help.twitter.com/en/managing-your-account/twitter-username-rules
-            if (!string.IsNullOrWhiteSpace(id) && UserRegexes.TwitterAccount.IsMatch(id) && id.Length <= 15)
+            if (!string.IsNullOrWhiteSpace(id) && _socialMediaService.ValidUsername.IsMatch(id) && id.Length <= 15)
             {
                 try
                 {

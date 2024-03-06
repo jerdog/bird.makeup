@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Linq;
+using System.Text.RegularExpressions;
+using BirdsiteLive.Common.Interfaces;
 using BirdsiteLive.Common.Settings;
 using BirdsiteLive.Domain.Tools;
 using BirdsiteLive.Twitter.Models;
@@ -13,6 +15,7 @@ namespace BirdsiteLive.Domain.Tests.Tools
     public class StatusExtractorTests
     {
         private readonly InstanceSettings _settings;
+        private readonly ISocialMediaService _service;
 
         #region Ctor
         public StatusExtractorTests()
@@ -21,6 +24,11 @@ namespace BirdsiteLive.Domain.Tests.Tools
             {
                 Domain = "domain.name"
             };
+
+            var service = new Mock<ISocialMediaService>();
+            service.Setup(x => x.ValidUsername).Returns(new Regex(@"^[a-zA-Z0-9_]+$"));
+            service.Setup(x => x.UserMention).Returns(new Regex(@"(^|.?[ \n\.]+)@([a-zA-Z0-9_]+)(?=\s|$|[\[\]<>,;:'\.’!?/—\|-]|(. ))"));
+            _service = service.Object;
         }
         #endregion
 
@@ -35,7 +43,7 @@ namespace BirdsiteLive.Domain.Tests.Tools
             var logger = new Mock<ILogger<StatusExtractor>>();
             #endregion
 
-            var service = new StatusExtractor(_settings, logger.Object);
+            var service = new StatusExtractor(_settings, _service, logger.Object);
             var result = service.Extract(message);
 
             #region Validations
@@ -56,7 +64,7 @@ namespace BirdsiteLive.Domain.Tests.Tools
             var logger = new Mock<ILogger<StatusExtractor>>();
             #endregion
 
-            var service = new StatusExtractor(_settings, logger.Object);
+            var service = new StatusExtractor(_settings, _service, logger.Object);
             var result = service.Extract(message);
 
             #region Validations
@@ -77,7 +85,7 @@ namespace BirdsiteLive.Domain.Tests.Tools
             var logger = new Mock<ILogger<StatusExtractor>>();
             #endregion
 
-            var service = new StatusExtractor(_settings, logger.Object);
+            var service = new StatusExtractor(_settings, _service, logger.Object);
             var result = service.Extract(message);
 
             #region Validations
@@ -100,7 +108,7 @@ namespace BirdsiteLive.Domain.Tests.Tools
             var logger = new Mock<ILogger<StatusExtractor>>();
             #endregion
 
-            var service = new StatusExtractor(_settings, logger.Object);
+            var service = new StatusExtractor(_settings, _service, logger.Object);
             var result = service.Extract(message);
 
             #region Validations
@@ -122,7 +130,7 @@ namespace BirdsiteLive.Domain.Tests.Tools
             var logger = new Mock<ILogger<StatusExtractor>>();
             #endregion
 
-            var service = new StatusExtractor(_settings, logger.Object);
+            var service = new StatusExtractor(_settings, _service, logger.Object);
             var result = service.Extract(message);
 
             #region Validations
@@ -144,7 +152,7 @@ namespace BirdsiteLive.Domain.Tests.Tools
             var logger = new Mock<ILogger<StatusExtractor>>();
             #endregion
 
-            var service = new StatusExtractor(_settings, logger.Object);
+            var service = new StatusExtractor(_settings, _service, logger.Object);
             var result = service.Extract(message);
 
             #region Validations
@@ -166,7 +174,7 @@ namespace BirdsiteLive.Domain.Tests.Tools
             var logger = new Mock<ILogger<StatusExtractor>>();
             #endregion
 
-            var service = new StatusExtractor(_settings, logger.Object);
+            var service = new StatusExtractor(_settings, _service, logger.Object);
             var result = service.Extract(message);
 
             #region Validations
@@ -189,7 +197,7 @@ namespace BirdsiteLive.Domain.Tests.Tools
             var logger = new Mock<ILogger<StatusExtractor>>();
             #endregion
 
-            var service = new StatusExtractor(_settings, logger.Object);
+            var service = new StatusExtractor(_settings, _service, logger.Object);
             var result = service.Extract(message);
 
             #region Validations
@@ -214,7 +222,7 @@ namespace BirdsiteLive.Domain.Tests.Tools
             var logger = new Mock<ILogger<StatusExtractor>>();
             #endregion
 
-            var service = new StatusExtractor(_settings, logger.Object);
+            var service = new StatusExtractor(_settings, _service, logger.Object);
             var result = service.Extract(message);
 
             #region Validations
@@ -233,7 +241,7 @@ namespace BirdsiteLive.Domain.Tests.Tools
             var logger = new Mock<ILogger<StatusExtractor>>();
             #endregion
 
-            var service = new StatusExtractor(_settings, logger.Object);
+            var service = new StatusExtractor(_settings, _service, logger.Object);
             var result = service.Extract(message);
 
             #region Validations
@@ -252,7 +260,7 @@ namespace BirdsiteLive.Domain.Tests.Tools
             var logger = new Mock<ILogger<StatusExtractor>>();
             #endregion
 
-            var service = new StatusExtractor(_settings, logger.Object);
+            var service = new StatusExtractor(_settings, _service, logger.Object);
             var result = service.Extract(message);
 
             #region Validations
@@ -271,7 +279,7 @@ namespace BirdsiteLive.Domain.Tests.Tools
             var logger = new Mock<ILogger<StatusExtractor>>();
             #endregion
 
-            var service = new StatusExtractor(_settings, logger.Object);
+            var service = new StatusExtractor(_settings, _service, logger.Object);
             var result = service.Extract(message);
 
             #region Validations
@@ -290,7 +298,7 @@ namespace BirdsiteLive.Domain.Tests.Tools
             var logger = new Mock<ILogger<StatusExtractor>>();
             #endregion
 
-            var service = new StatusExtractor(_settings, logger.Object);
+            var service = new StatusExtractor(_settings, _service, logger.Object);
             var result = service.Extract(message);
 
             #region Validations
@@ -316,7 +324,7 @@ namespace BirdsiteLive.Domain.Tests.Tools
             var logger = new Mock<ILogger<StatusExtractor>>();
             #endregion
 
-            var service = new StatusExtractor(_settings, logger.Object);
+            var service = new StatusExtractor(_settings, _service, logger.Object);
             var result = service.Extract(message);
 
             #region Validations
@@ -342,7 +350,7 @@ namespace BirdsiteLive.Domain.Tests.Tools
             var logger = new Mock<ILogger<StatusExtractor>>();
             #endregion
 
-            var service = new StatusExtractor(_settings, logger.Object);
+            var service = new StatusExtractor(_settings, _service, logger.Object);
             var result = service.Extract(message);
 
             #region Validations
@@ -368,7 +376,7 @@ namespace BirdsiteLive.Domain.Tests.Tools
             var logger = new Mock<ILogger<StatusExtractor>>();
             #endregion
 
-            var service = new StatusExtractor(_settings, logger.Object);
+            var service = new StatusExtractor(_settings, _service, logger.Object);
             var result = service.Extract(message);
 
             #region Validations
@@ -393,7 +401,7 @@ namespace BirdsiteLive.Domain.Tests.Tools
             var logger = new Mock<ILogger<StatusExtractor>>();
             #endregion
 
-            var service = new StatusExtractor(_settings, logger.Object);
+            var service = new StatusExtractor(_settings, _service, logger.Object);
             var result = service.Extract(message);
 
             #region Validations
@@ -418,7 +426,7 @@ namespace BirdsiteLive.Domain.Tests.Tools
             var logger = new Mock<ILogger<StatusExtractor>>();
             #endregion
 
-            var service = new StatusExtractor(_settings, logger.Object);
+            var service = new StatusExtractor(_settings, _service, logger.Object);
             var result = service.Extract(message);
 
             #region Validations
@@ -454,7 +462,7 @@ namespace BirdsiteLive.Domain.Tests.Tools
             var logger = new Mock<ILogger<StatusExtractor>>();
             #endregion
 
-            var service = new StatusExtractor(_settings, logger.Object);
+            var service = new StatusExtractor(_settings, _service, logger.Object);
             var result = service.Extract(message);
 
             #region Validations
@@ -479,7 +487,7 @@ namespace BirdsiteLive.Domain.Tests.Tools
             var logger = new Mock<ILogger<StatusExtractor>>();
             #endregion
 
-            var service = new StatusExtractor(_settings, logger.Object);
+            var service = new StatusExtractor(_settings, _service, logger.Object);
             var result = service.Extract(message);
 
             #region Validations
@@ -505,7 +513,7 @@ namespace BirdsiteLive.Domain.Tests.Tools
             var logger = new Mock<ILogger<StatusExtractor>>();
             #endregion
 
-            var service = new StatusExtractor(_settings, logger.Object);
+            var service = new StatusExtractor(_settings, _service, logger.Object);
             var result = service.Extract(message);
 
             #region Validations
@@ -532,7 +540,7 @@ namespace BirdsiteLive.Domain.Tests.Tools
             var logger = new Mock<ILogger<StatusExtractor>>();
             #endregion
 
-            var service = new StatusExtractor(_settings, logger.Object);
+            var service = new StatusExtractor(_settings, _service, logger.Object);
             var result = service.Extract(message);
 
             #region Validations
@@ -558,7 +566,7 @@ namespace BirdsiteLive.Domain.Tests.Tools
             var logger = new Mock<ILogger<StatusExtractor>>();
             #endregion
 
-            var service = new StatusExtractor(_settings, logger.Object);
+            var service = new StatusExtractor(_settings, _service, logger.Object);
             var result = service.Extract(message);
 
             #region Validations
@@ -584,7 +592,7 @@ namespace BirdsiteLive.Domain.Tests.Tools
             var logger = new Mock<ILogger<StatusExtractor>>();
             #endregion
 
-            var service = new StatusExtractor(_settings, logger.Object);
+            var service = new StatusExtractor(_settings, _service, logger.Object);
             var result = service.Extract(message);
 
             #region Validations
@@ -610,7 +618,7 @@ namespace BirdsiteLive.Domain.Tests.Tools
             var logger = new Mock<ILogger<StatusExtractor>>();
             #endregion
 
-            var service = new StatusExtractor(_settings, logger.Object);
+            var service = new StatusExtractor(_settings, _service, logger.Object);
             var result = service.Extract(message);
 
             #region Validations
@@ -635,7 +643,7 @@ namespace BirdsiteLive.Domain.Tests.Tools
             var logger = new Mock<ILogger<StatusExtractor>>();
             #endregion
 
-            var service = new StatusExtractor(_settings, logger.Object);
+            var service = new StatusExtractor(_settings, _service, logger.Object);
             var result = service.Extract(message);
 
             #region Validations
@@ -662,7 +670,7 @@ namespace BirdsiteLive.Domain.Tests.Tools
             var logger = new Mock<ILogger<StatusExtractor>>();
             #endregion
 
-            var service = new StatusExtractor(_settings, logger.Object);
+            var service = new StatusExtractor(_settings, _service, logger.Object);
             var result = service.Extract(message);
 
             #region Validations
@@ -688,7 +696,7 @@ namespace BirdsiteLive.Domain.Tests.Tools
             var logger = new Mock<ILogger<StatusExtractor>>();
             #endregion
 
-            var service = new StatusExtractor(_settings, logger.Object);
+            var service = new StatusExtractor(_settings, _service, logger.Object);
             var result = service.Extract(message);
 
             #region Validations

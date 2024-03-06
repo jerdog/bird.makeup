@@ -182,6 +182,7 @@ namespace BirdsiteLive.Twitter
                 StatusCount = result.GetProperty("legacy").GetProperty("statuses_count").GetInt32(),
                 FollowersCount = result.GetProperty("legacy").GetProperty("followers_count").GetInt32(),
                 Location = location,
+                ProfileUrl = "twitter.com/" + result.GetProperty("legacy").GetProperty("screen_name").GetString().ToLower(), 
             };
 
         }

@@ -43,14 +43,16 @@ namespace BirdsiteLive.Controllers
 
                     var activity = ApDeserializer.ProcessActivity(body);
                     var signature = r.Headers["Signature"].First();
-
+                    _logger.LogTrace("Signature: {Signature}", signature);
+                    _logger.LogTrace($"Date: {HeaderHandler.RequestHeaders(r.Headers)["date"]}");
+                    _logger.LogTrace($"Digest: {HeaderHandler.RequestHeaders(r.Headers)["digest"]}");
+                    
                     switch (activity?.type)
                     {
                         case "Follow":
                             {
                                 var succeeded = await _userService.FollowRequestedAsync(signature, r.Method, r.Path,
                                     r.QueryString.ToString(), HeaderHandler.RequestHeaders(r.Headers), activity as ActivityFollow, body);
-                                _logger.LogInformation($"New follow request: {body} {signature} {HeaderHandler.RequestHeaders(r.Headers)["date"]} {HeaderHandler.RequestHeaders(r.Headers)["digest"]}");
                                 if (succeeded) return Accepted();
                                 else return Unauthorized();
                             }

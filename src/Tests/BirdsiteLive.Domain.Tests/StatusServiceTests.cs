@@ -1,7 +1,10 @@
 ﻿using System;
+using System.Text.RegularExpressions;
+using BirdsiteLive.Common.Interfaces;
 using BirdsiteLive.Common.Settings;
 using BirdsiteLive.Domain.Statistics;
 using BirdsiteLive.Domain.Tools;
+using BirdsiteLive.Twitter;
 using BirdsiteLive.Twitter.Models;
 using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -42,7 +45,10 @@ Photo by Tim Tronckoe | @timtronckoe
             #endregion
 
             var logger1 = new Mock<ILogger<StatusExtractor>>();
-            var statusExtractor = new StatusExtractor(_settings, logger1.Object);
+            var socialMediaService = new Mock<ISocialMediaService>();
+            socialMediaService.Setup(x => x.ValidUsername).Returns(new Regex(@"^[a-zA-Z0-9_]+$"));
+            socialMediaService.Setup(x => x.UserMention).Returns(new Regex(@"(^|.?[ \n\.]+)@([a-zA-Z0-9_]+)(?=\s|$|[\[\]<>,;:'\.’!?/—\|-]|(. ))"));
+            var statusExtractor = new StatusExtractor(_settings, socialMediaService.Object, logger1.Object);
             var stats = new Mock<IExtractionStatisticsHandler>();
             var service = new StatusService(_settings, statusExtractor, stats.Object);
             var activity = service.GetActivity(username, extractedTweet);
@@ -70,7 +76,10 @@ Photo by Tim Tronckoe | @timtronckoe
             #endregion
 
             var logger1 = new Mock<ILogger<StatusExtractor>>();
-            var statusExtractor = new StatusExtractor(_settings, logger1.Object);
+            var socialMediaService = new Mock<ISocialMediaService>();
+            socialMediaService.Setup(x => x.ValidUsername).Returns(new Regex(@"^[a-zA-Z0-9_]+$"));
+            socialMediaService.Setup(x => x.UserMention).Returns(new Regex(@"(^|.?[ \n\.]+)@([a-zA-Z0-9_]+)(?=\s|$|[\[\]<>,;:'\.’!?/—\|-]|(. ))"));
+            var statusExtractor = new StatusExtractor(_settings, socialMediaService.Object, logger1.Object);
             var stats = new Mock<IExtractionStatisticsHandler>();
             var service = new StatusService(_settings, statusExtractor, stats.Object);
             var activity = service.GetActivity(username, extractedTweet);

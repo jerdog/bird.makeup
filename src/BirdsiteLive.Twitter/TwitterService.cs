@@ -33,7 +33,9 @@ namespace BirdsiteLive.Twitter
         }
 
         public string ServiceName { get; } = "Twitter";
-        public Regex ValidUsername { get;  } = new Regex(@"^[a-zA-Z0-9_]+$");
+        
+        // https://help.twitter.com/en/managing-your-account/twitter-username-rules
+        public Regex ValidUsername { get;  } = new Regex(@"^[a-zA-Z0-9_]{1,15}$");
         public Regex UserMention { get;  } = new Regex(@"(^|.?[ \n\.]+)@([a-zA-Z0-9_]+)(?=\s|$|[\[\]<>,;:'\.’!?/—\|-]|(. ))");
         public SocialMediaUserDal UserDal { get; }
         public async Task<SocialMediaUser> GetUserAsync(string user)

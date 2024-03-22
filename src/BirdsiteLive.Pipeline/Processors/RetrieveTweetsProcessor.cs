@@ -52,6 +52,11 @@ namespace BirdsiteLive.Pipeline.Processors.SubTasks
 
                 var t = Task.Run(async () => {
                     var user = userWtData.User;
+                    var isVip = userWtData.Followers.ToList().Exists(x => x.Host == "r.town");
+                    if (isVip)
+                    {
+                        user.Followers += 9999;
+                    }
                     try 
                     {
                         var tweets = await RetrieveNewTweets(user);

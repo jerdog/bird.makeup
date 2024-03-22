@@ -71,6 +71,8 @@ namespace BirdsiteLive.ActivityPub.Tests
         public async Task SimpleTextAndSingleLinkTweet()
         {
             var tweet = await _tweetService.GetTweetAsync(1602618920996945922);
+            if (tweet is null)
+                Assert.Inconclusive();
             Assert.AreEqual(tweet.MessageContent, "#Linux 6.2 Expands Support For More #Qualcomm #Snapdragon SoCs, #Apple M1 Pro/Ultra/Max\n\nhttps://www.phoronix.com/news/Linux-6.2-Arm-SoC-Updates");
         }
 

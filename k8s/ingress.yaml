@@ -1,0 +1,36 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: dotmakeup-bird
+spec:
+  dnsNames:
+    - k.bird.makeup
+    - bird.makeup
+  issuerRef:
+    name: letsencrypt
+    kind: ClusterIssuer
+  secretName: ssl-cert-bird-dotmakeup
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: dotmakeup-bird
+  annotations:
+    certmanager.k8s.io/cluster-issuer: "letsencrypt"
+spec:
+  ingressClassName: "nginx"
+  tls:
+    - hosts:
+        - bird.makeup
+      secretName: ssl-cert-bird-dotmakeup
+  rules:
+    - host: bird.makeup
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: dotmakeup
+                port:
+                  number: 80

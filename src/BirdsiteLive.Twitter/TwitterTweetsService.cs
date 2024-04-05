@@ -205,29 +205,21 @@ namespace BirdsiteLive.Twitter
             var twitterUser = await _twitterUserService.GetUserAsync(username);
             if (user.StatusesCount == -1)
             {
-                await _twitterUserDal.UpdateTwitterStatusesCountAsync(username, twitterUser.StatusCount);
             }
             else if (user.StatusesCount != twitterUser.StatusCount && user.Followers > followersThreshold + 12)
             {
                 extractedTweets = await TweetFromSidecar(user, fromTweetId, true);
-                await _twitterUserDal.UpdateTwitterStatusesCountAsync(username, twitterUser.StatusCount);
             }
             else if (user.StatusesCount != twitterUser.StatusCount && user.Followers > followersThreshold + 2)
             {
                 extractedTweets = await TweetFromSidecar(user, fromTweetId, false);
-                await _twitterUserDal.UpdateTwitterStatusesCountAsync(username, twitterUser.StatusCount);
             }
-            else if (user.StatusesCount != twitterUser.StatusCount && user.Followers > followersThreshold + 1)
-            {
-                extractedTweets = await TweetFromNitter(user, fromTweetId, true, false);
-                await _twitterUserDal.UpdateTwitterStatusesCountAsync(username, twitterUser.StatusCount);
-            }
-            else if (user.StatusesCount != twitterUser.StatusCount && user.Followers > followersThreshold)
+            else if (user.StatusesCount != twitterUser.StatusCount && user.Followers > followersThreshold && twitterUser.FollowersCount > twitterFollowersThreshold)
             {
                 extractedTweets = await TweetFromNitter(user, fromTweetId, false, false);
-                await _twitterUserDal.UpdateTwitterStatusesCountAsync(username, twitterUser.StatusCount);
             }
 
+            await _twitterUserDal.UpdateTwitterStatusesCountAsync(username, twitterUser.StatusCount);
             _statisticsHandler.GotNewTweets(extractedTweets.Count);
             return extractedTweets.ToArray();
         }
@@ -252,14 +244,18 @@ namespace BirdsiteLive.Twitter
                 _statisticsHandler.CalledApi("sidecar.Tries");
                 
                 var client = _httpClientFactory.CreateClient();
-                string requestUrl;
+                string endpoint;
                 if (withReplies)
-                    requestUrl = "http://localhost:5000/twitter/postbyuserwithreplies/" + user.TwitterUserId;
+                    endpoint = "postbyuserwithreplies";
                 else
-                    requestUrl = "http://localhost:5000/twitter/postbyuser/" + user.TwitterUserId;
-                var request = new HttpRequestMessage(HttpMethod.Get, requestUrl);
+                    endpoint = "postbyuser";
+                var request = new HttpRequestMessage(HttpMethod.Get,
+                    $"http://localhost:5000/twitter/{endpoint}/{user.TwitterUserId}");
                 request.Headers.TryAddWithoutValidation("dotmakeup-user", username);
                 request.Headers.TryAddWithoutValidation("dotmakeup-password", password);
+                
+                _statisticsHandler.CalledApi($"sidecar.Tries.{endpoint}");
+                _statisticsHandler.CalledApi("sidecar.Tries");
 
                 var httpResponse = await client.SendAsync(request);
 

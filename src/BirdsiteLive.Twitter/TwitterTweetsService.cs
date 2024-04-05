@@ -206,11 +206,11 @@ namespace BirdsiteLive.Twitter
             if (user.StatusesCount == -1)
             {
             }
-            else if (user.StatusesCount != twitterUser.StatusCount && user.Followers > followersThreshold + 12)
+            else if (user.StatusesCount != twitterUser.StatusCount && user.Followers > followersThreshold + 10)
             {
                 extractedTweets = await TweetFromSidecar(user, fromTweetId, true);
             }
-            else if (user.StatusesCount != twitterUser.StatusCount && user.Followers > followersThreshold + 2)
+            else if (user.StatusesCount != twitterUser.StatusCount && user.Followers > followersThreshold + 3)
             {
                 extractedTweets = await TweetFromSidecar(user, fromTweetId, false);
             }
@@ -241,8 +241,6 @@ namespace BirdsiteLive.Twitter
                     password = account.EnumerateArray().Last().GetString();
                 }
 
-                _statisticsHandler.CalledApi("sidecar.Tries");
-                
                 var client = _httpClientFactory.CreateClient();
                 string endpoint;
                 if (withReplies)

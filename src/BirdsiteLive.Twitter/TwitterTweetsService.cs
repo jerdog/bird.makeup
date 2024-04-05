@@ -295,7 +295,7 @@ namespace BirdsiteLive.Twitter
                     await Task.Delay(100);
                 }
                 
-                await Task.Delay(2000);
+                await Task.Delay(20000);
                 
                 return tweets;
             }

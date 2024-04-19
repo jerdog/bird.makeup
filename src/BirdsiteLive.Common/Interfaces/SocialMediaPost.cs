@@ -1,5 +1,5 @@
 using System;
-using BirdsiteLive.Twitter.Models;
+using BirdsiteLive.Common.Interfaces;
 
 namespace BirdsiteLive.Common.Interfaces;
 

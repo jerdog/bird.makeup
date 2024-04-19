@@ -151,10 +151,8 @@ namespace BirdsiteLive.Controllers
         public async Task<IActionResult> Tweet(string id, string statusId)
         {
             var acceptHeaders = Request.Headers["Accept"];
-            if (!long.TryParse(statusId, out var parsedStatusId))
-                return NotFound();
 
-            var tweet = await _socialMediaService.GetPostAsync(parsedStatusId);
+            var tweet = await _socialMediaService.GetPostAsync(statusId);
             if (tweet == null)
                 return NotFound();
 

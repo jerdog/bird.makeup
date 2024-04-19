@@ -26,9 +26,11 @@ namespace BirdsiteLive.Twitter
         }
         #endregion
 
-        public async Task<SocialMediaPost> GetPostAsync(long id)
+        public async Task<SocialMediaPost> GetPostAsync(string id)
         {
-            var post = await _twitterTweetsService.GetTweetAsync(id);
+            if (!long.TryParse(id, out var parsedStatusId))
+                return null;
+            var post = await _twitterTweetsService.GetTweetAsync(parsedStatusId);
             return post;
         }
 

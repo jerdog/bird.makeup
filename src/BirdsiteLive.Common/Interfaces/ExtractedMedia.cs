@@ -1,4 +1,4 @@
-﻿namespace BirdsiteLive.Twitter.Models
+﻿namespace BirdsiteLive.Common.Interfaces
 {
     public class ExtractedMedia
     {

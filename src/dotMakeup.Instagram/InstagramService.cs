@@ -5,6 +5,7 @@ using BirdsiteLive.Common.Interfaces;
 using BirdsiteLive.Common.Settings;
 using BirdsiteLive.DAL.Contracts;
 using BirdsiteLive.Common.Exceptions;
+using BirdsiteLive.Instagram.Models;
 using dotMakeup.Instagram.Models;
 using Microsoft.Extensions.Caching.Memory;
 
@@ -16,6 +17,7 @@ public class InstagramService : ISocialMediaService
         private readonly InstanceSettings _settings;
         
         private readonly MemoryCache _userCache;
+        private readonly MemoryCache _postCache;
         private readonly MemoryCacheEntryOptions _cacheEntryOptions = new MemoryCacheEntryOptions()
             .SetSize(1)//Size amount
             //Priority on removing when reaching size limit (memory pressure)
@@ -45,13 +47,13 @@ public class InstagramService : ISocialMediaService
             {
                 SizeLimit = settings.UserCacheCapacity
             });
+            _postCache = new MemoryCache(new MemoryCacheOptions()
+            {
+                SizeLimit = settings.TweetCacheCapacity
+            });
         }
         #endregion
 
-        public async Task<SocialMediaPost?> GetPostAsync(long id)
-        {
-            return null;
-        }
 
         public string ServiceName { get; } = "Instagram";
         public Regex ValidUsername { get;  } = new Regex(@"^[a-zA-Z0-9_\.]{1,30}$");
@@ -101,4 +103,31 @@ public class InstagramService : ISocialMediaService
 
             return user;
         }
+
+        public async Task<SocialMediaPost?> GetPostAsync(string id)
+        {
+            if (!_userCache.TryGetValue(id, out InstagramPost post))
+            {
+                var client = _httpClientFactory.CreateClient();
+                string requestUrl;
+                requestUrl = _settings.SidecarURL + "/instagram/post/" + id;
+                var request = new HttpRequestMessage(HttpMethod.Get, requestUrl);
+
+                var httpResponse = await client.SendAsync(request);
+
+                if (httpResponse.StatusCode != HttpStatusCode.OK)
+                {
+                    _postCache.Set(id, post, _cacheEntryOptionsError);
+                    return null;
+                }
+            }
+
+            post = new InstagramPost()
+                {
+
+                };
+            
+            return null;
+        }
+        
 }

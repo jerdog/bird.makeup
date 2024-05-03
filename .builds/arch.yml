@@ -4,7 +4,6 @@ packages:
   - dotnet-runtime-6.0
   - docker
   - kubectl
-  - instaloader
 sources:
   - https://git.sr.ht/~cloutier/bird.makeup
 secrets:

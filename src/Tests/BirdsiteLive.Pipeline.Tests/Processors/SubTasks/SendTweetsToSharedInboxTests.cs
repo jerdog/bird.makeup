@@ -30,7 +30,7 @@ namespace BirdsiteLive.Pipeline.Tests.Processors.SubTasks
             {
                 new ExtractedTweet
                 {
-                    Id = tweetId,
+                    Id = tweetId.ToString(),
                 }
             };
 
@@ -97,7 +97,7 @@ namespace BirdsiteLive.Pipeline.Tests.Processors.SubTasks
             statusServiceMock
                 .Setup(x => x.GetActivity(
                 It.Is<string>(y => y == twitterHandle),
-                It.Is<ExtractedTweet>(y => y.Id == tweetId)))
+                It.Is<ExtractedTweet>(y => y.Id == tweetId.ToString())))
                 .Returns(activity);
 
             var followersDalMock = new Mock<IFollowersDal>(MockBehavior.Strict);
@@ -125,7 +125,7 @@ namespace BirdsiteLive.Pipeline.Tests.Processors.SubTasks
             {
                 new ExtractedTweet
                 {
-                    Id = tweetId,
+                    Id = tweetId.ToString(),
                     IsReply = true,
                     IsThread = true
                 }
@@ -194,7 +194,7 @@ namespace BirdsiteLive.Pipeline.Tests.Processors.SubTasks
             statusServiceMock
                 .Setup(x => x.GetActivity(
                 It.Is<string>(y => y == twitterHandle),
-                It.Is<ExtractedTweet>(y => y.Id == tweetId)))
+                It.Is<ExtractedTweet>(y => y.Id == tweetId.ToString())))
                 .Returns(activity);
 
             var followersDalMock = new Mock<IFollowersDal>(MockBehavior.Strict);
@@ -221,7 +221,7 @@ namespace BirdsiteLive.Pipeline.Tests.Processors.SubTasks
             {
                 new ExtractedTweet
                 {
-                    Id = tweetId,
+                    Id = tweetId.ToString(),
                     IsReply = false,
                     IsRetweet = true,
                     OriginalAuthor = new TwitterUser { Acct = "hello" },
@@ -289,7 +289,7 @@ namespace BirdsiteLive.Pipeline.Tests.Processors.SubTasks
             statusServiceMock
                 .Setup(x => x.GetActivity(
                 It.Is<string>(y => y == twitterHandle),
-                It.Is<ExtractedTweet>(y => y.Id == tweetId)))
+                It.Is<ExtractedTweet>(y => y.Id == tweetId.ToString())))
                 .Returns(activity);
 
             var followersDalMock = new Mock<IFollowersDal>(MockBehavior.Strict);
@@ -320,7 +320,7 @@ namespace BirdsiteLive.Pipeline.Tests.Processors.SubTasks
             {
                 tweets.Add(new ExtractedTweet
                 {
-                    Id = tweetId
+                    Id = tweetId.ToString()
                 });
             }
 
@@ -382,7 +382,7 @@ namespace BirdsiteLive.Pipeline.Tests.Processors.SubTasks
                 statusServiceMock
                     .Setup(x => x.GetActivity(
                         It.Is<string>(y => y == twitterHandle),
-                        It.Is<ExtractedTweet>(y => y.Id == tweetId)))
+                        It.Is<ExtractedTweet>(y => y.Id == tweetId.ToString())))
                     .Returns(new ActivityCreateNote { apObject = new Note { id = tweetId.ToString() }});
             }
 
@@ -414,7 +414,7 @@ namespace BirdsiteLive.Pipeline.Tests.Processors.SubTasks
             {
                 tweets.Add(new ExtractedTweet
                 {
-                    Id = tweetId
+                    Id = tweetId.ToString()
                 });
             }
 
@@ -492,7 +492,7 @@ namespace BirdsiteLive.Pipeline.Tests.Processors.SubTasks
                 statusServiceMock
                     .Setup(x => x.GetActivity(
                         It.Is<string>(y => y == twitterHandle),
-                        It.Is<ExtractedTweet>(y => y.Id == tweetId)))
+                        It.Is<ExtractedTweet>(y => y.Id == tweetId.ToString())))
                     .Returns(new ActivityCreateNote { apObject = new Note { id = tweetId.ToString() }});
             }
 
@@ -526,7 +526,7 @@ namespace BirdsiteLive.Pipeline.Tests.Processors.SubTasks
             {
                 new ExtractedTweet
                 {
-                    Id = tweetId,
+                    Id = tweetId.ToString(),
                 }
             };
 
@@ -581,7 +581,7 @@ namespace BirdsiteLive.Pipeline.Tests.Processors.SubTasks
             statusServiceMock
                 .Setup(x => x.GetActivity(
                 It.Is<string>(y => y == twitterHandle),
-                It.Is<ExtractedTweet>(y => y.Id == tweetId)))
+                It.Is<ExtractedTweet>(y => y.Id == tweetId.ToString())))
                 .Throws(new ArgumentException("Invalid pattern blabla at offset 9"));
 
             var followersDalMock = new Mock<IFollowersDal>(MockBehavior.Strict);
@@ -609,7 +609,7 @@ namespace BirdsiteLive.Pipeline.Tests.Processors.SubTasks
             {
                 new ExtractedTweet
                 {
-                    Id = tweetId,
+                    Id = tweetId.ToString(),
                 }
             };
 
@@ -658,7 +658,7 @@ namespace BirdsiteLive.Pipeline.Tests.Processors.SubTasks
             statusServiceMock
                 .Setup(x => x.GetActivity(
                 It.Is<string>(y => y == twitterHandle),
-                It.Is<ExtractedTweet>(y => y.Id == tweetId)))
+                It.Is<ExtractedTweet>(y => y.Id == tweetId.ToString())))
                 .Throws(new ArgumentException());
 
             var followersDalMock = new Mock<IFollowersDal>(MockBehavior.Strict);

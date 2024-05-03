@@ -106,7 +106,7 @@ public class InstagramService : ISocialMediaService
 
         public async Task<SocialMediaPost?> GetPostAsync(string id)
         {
-            if (!_userCache.TryGetValue(id, out InstagramPost post))
+            if (!_postCache.TryGetValue(id, out InstagramPost post))
             {
                 var client = _httpClientFactory.CreateClient();
                 string requestUrl;
@@ -120,14 +120,41 @@ public class InstagramService : ISocialMediaService
                     _postCache.Set(id, post, _cacheEntryOptionsError);
                     return null;
                 }
+                var c = await httpResponse.Content.ReadAsStringAsync();
+                var postDoc = JsonDocument.Parse(c);
+                List<ExtractedMedia> media = new List<ExtractedMedia>();
+                foreach (JsonElement m in postDoc.RootElement.GetProperty("media").EnumerateArray())
+                {
+                    bool isVideo = m.GetProperty("is_video").GetBoolean();
+                    if (!isVideo)
+                    {
+                        media.Add(new ExtractedMedia()
+                        {
+                            Url = m.GetProperty("url").GetString(),
+                            MediaType = "image/jpeg"
+
+                        });
+                        
+                    }
+
+                }
+                post = new InstagramPost()
+                    {
+                        Id = id,
+                        MessageContent = postDoc.RootElement.GetProperty("caption").GetString(),
+                        Author = new InstagramUser()
+                        {
+                            Acct = postDoc.RootElement.GetProperty("user").GetString(),
+                        },
+                        
+                        Media = media.ToArray(),
+                    };
+                _postCache.Set(id, post, _cacheEntryOptions);
+                return post;
             }
 
-            post = new InstagramPost()
-                {
-
-                };
             
-            return null;
+            return post;
         }
         
 }

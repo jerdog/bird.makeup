@@ -5,7 +5,7 @@ namespace BirdsiteLive.Common.Interfaces;
 
 public interface SocialMediaPost
 {
-    public long Id { get; set; }
+    public string Id { get; set; }
     public SocialMediaUser Author { get; set; }
     public SocialMediaUser OriginalAuthor { get; set; }
     public string MessageContent { get; set; }

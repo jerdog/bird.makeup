@@ -37,7 +37,7 @@ namespace BirdsiteLive.Pipeline.Tests.Processors
                 {
                     new ExtractedTweet
                     {
-                        Id = tweetId
+                        Id = tweetId.ToString()
                     }
                 },
                 User = new SyncTwitterUser
@@ -115,7 +115,7 @@ namespace BirdsiteLive.Pipeline.Tests.Processors
                 {
                     new ExtractedTweet
                     {
-                        Id = tweetId
+                        Id = tweetId.ToString()
                     }
                 },
                 User = new SyncTwitterUser
@@ -196,7 +196,7 @@ namespace BirdsiteLive.Pipeline.Tests.Processors
                 {
                     new ExtractedTweet
                     {
-                        Id = tweetId
+                        Id = tweetId.ToString()
                     }
                 },
                 User = new SyncTwitterUser
@@ -286,7 +286,7 @@ namespace BirdsiteLive.Pipeline.Tests.Processors
                 {
                     new ExtractedTweet
                     {
-                        Id = tweetId
+                        Id = tweetId.ToString()
                     }
                 },
                 User = new SyncTwitterUser
@@ -377,7 +377,7 @@ namespace BirdsiteLive.Pipeline.Tests.Processors
                 {
                     new ExtractedTweet
                     {
-                        Id = tweetId
+                        Id = tweetId.ToString()
                     }
                 },
                 User = new SyncTwitterUser
@@ -472,7 +472,7 @@ namespace BirdsiteLive.Pipeline.Tests.Processors
                 {
                     new ExtractedTweet
                     {
-                        Id = tweetId
+                        Id = tweetId.ToString()
                     }
                 },
                 User = new SyncTwitterUser
@@ -552,7 +552,7 @@ namespace BirdsiteLive.Pipeline.Tests.Processors
                 {
                     new ExtractedTweet
                     {
-                        Id = tweetId
+                        Id = tweetId.ToString()
                     }
                 },
                 User = new SyncTwitterUser
@@ -632,7 +632,7 @@ namespace BirdsiteLive.Pipeline.Tests.Processors
                 {
                     new ExtractedTweet
                     {
-                        Id = tweetId
+                        Id = tweetId.ToString()
                     }
                 },
                 User = new SyncTwitterUser
@@ -720,7 +720,7 @@ namespace BirdsiteLive.Pipeline.Tests.Processors
                 {
                     new ExtractedTweet
                     {
-                        Id = tweetId
+                        Id = tweetId.ToString()
                     }
                 },
                 User = new SyncTwitterUser
@@ -809,7 +809,7 @@ namespace BirdsiteLive.Pipeline.Tests.Processors
                 {
                     new ExtractedTweet
                     {
-                        Id = tweetId
+                        Id = tweetId.ToString()
                     }
                 },
                 User = new SyncTwitterUser
@@ -898,7 +898,7 @@ namespace BirdsiteLive.Pipeline.Tests.Processors
                 {
                     new ExtractedTweet
                     {
-                        Id = tweetId
+                        Id = tweetId.ToString()
                     }
                 },
                 User = new SyncTwitterUser
@@ -987,7 +987,7 @@ namespace BirdsiteLive.Pipeline.Tests.Processors
                 {
                     new ExtractedTweet
                     {
-                        Id = tweetId
+                        Id = tweetId.ToString()
                     }
                 },
                 User = new SyncTwitterUser

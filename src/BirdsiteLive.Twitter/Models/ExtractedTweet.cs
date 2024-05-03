@@ -6,7 +6,11 @@ namespace BirdsiteLive.Twitter.Models
 {
     public class ExtractedTweet : SocialMediaPost
     {
-        public long Id { get; set; }
+        public string Id { get; set; }
+        public long IdLong
+        {
+            get => long.Parse(Id);
+        }
         public long? InReplyToStatusId { get; set; }
         public string MessageContent { get; set; }
         public ExtractedMedia[] Media { get; set; }

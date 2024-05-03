@@ -193,7 +193,7 @@ namespace BirdsiteLive.Twitter
 
                 }
             }
-            extractedTweets = extractedTweets.OrderByDescending(x => x.Id).Where(x => x.Id > fromTweetId).ToList();
+            extractedTweets = extractedTweets.OrderByDescending(x => x.Id).Where(x => x.IdLong > fromTweetId).ToList();
 
             int followersThreshold = 9999999;
             int twitterFollowersThreshold = 9999999;
@@ -280,10 +280,10 @@ namespace BirdsiteLive.Twitter
                             tweet.IsRetweet = true;
                             tweet.OriginalAuthor = tweet.Author;
                             tweet.Author = await _twitterUserService.GetUserAsync(user.Acct);
-                            tweet.RetweetId = tweet.Id;
+                            tweet.RetweetId = tweet.IdLong;
                             // Sadly not given by Nitter UI
                             var gen = new TwitterSnowflakeGenerator(1, 1);
-                            tweet.Id = gen.NextId();
+                            tweet.Id = gen.NextId().ToString();
                         }
                         tweets.Add(tweet);
                     }
@@ -374,10 +374,10 @@ namespace BirdsiteLive.Twitter
                         tweet.IsRetweet = true;
                         tweet.OriginalAuthor = tweet.Author;
                         tweet.Author = await _twitterUserService.GetUserAsync(user.Acct);
-                        tweet.RetweetId = tweet.Id;
+                        tweet.RetweetId = tweet.IdLong;
                         // Sadly not given by Nitter UI
                         var gen = new TwitterSnowflakeGenerator(1, 1);
-                        tweet.Id = gen.NextId();
+                        tweet.Id = gen.NextId().ToString();
                     }
                     tweets.Add(tweet);
                 }
@@ -532,7 +532,7 @@ namespace BirdsiteLive.Twitter
             return new ExtractedTweet()
             {
                 MessageContent = messageContent.Trim(),
-                Id = statusId,
+                Id = statusId.ToString(),
                 IsReply = isReply,
                 IsThread = isThread,
                 IsRetweet = false,
@@ -703,7 +703,7 @@ namespace BirdsiteLive.Twitter
             
             var extractedTweet = new ExtractedTweet
             {
-                Id = Int64.Parse(tweetRes.GetProperty("rest_id").GetString()),
+                Id = tweetRes.GetProperty("rest_id").GetString(),
                 InReplyToStatusId = inReplyToPostId,
                 InReplyToAccount = inReplyToUser,
                 MessageContent = MessageContent.Trim(),

@@ -34,7 +34,7 @@ namespace BirdsiteLive.Domain.Tests
             var username = "MyUserName";
             var extractedTweet = new ExtractedTweet
             {
-                Id = 124L,
+                Id = "124",
                 CreatedAt = DateTime.UtcNow,
                 MessageContent = @"Getting ready for the weekend...have a great one everyone!
 ⁠
@@ -66,7 +66,7 @@ Photo by Tim Tronckoe | @timtronckoe
             var username = "MyUserName";
             var extractedTweet = new ExtractedTweet
             {
-                Id = 124,
+                Id = "124",
                 IsRetweet = true,
                 OriginalAuthor = new TwitterUser { Acct = "hello" },
                 CreatedAt = DateTime.UtcNow,

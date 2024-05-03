@@ -4,7 +4,7 @@ namespace BirdsiteLive.Instagram.Models
 {
     public class InstagramPost : SocialMediaPost
     {
-        public long Id { get; set; }
+        public string Id { get; set; }
         public long? InReplyToStatusId { get; set; } = null;
         public string MessageContent { get; set; }
         public ExtractedMedia[] Media { get; set; }

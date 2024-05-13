@@ -15,6 +15,7 @@ public class InstagramService : ISocialMediaService
 {
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly InstanceSettings _settings;
+        private readonly ISettingsDal _settingsDal;
         
         private readonly MemoryCache _userCache;
         private readonly MemoryCache _postCache;
@@ -37,10 +38,11 @@ public class InstagramService : ISocialMediaService
             .SetAbsoluteExpiration(TimeSpan.FromMinutes(30));
 
         #region Ctor
-        public InstagramService(IInstagramUserDal userDal, IHttpClientFactory httpClientFactory, InstanceSettings settings)
+        public InstagramService(IInstagramUserDal userDal, IHttpClientFactory httpClientFactory, InstanceSettings settings, ISettingsDal settingsDal)
         {
             _httpClientFactory = httpClientFactory;
             _settings = settings;
+            _settingsDal = settingsDal;
             UserDal = userDal;
             
             _userCache = new MemoryCache(new MemoryCacheOptions()
@@ -59,8 +61,14 @@ public class InstagramService : ISocialMediaService
         public Regex ValidUsername { get;  } = new Regex(@"^[a-zA-Z0-9_\.]{1,30}$");
         public Regex UserMention { get;  } = new Regex(@"(^|.?[ \n\.]+)@([a-zA-Z0-9_\.]+)(?=\s|$|[\[\]<>,;:'\.’!?/—\|-]|(. ))");
         public SocialMediaUserDal UserDal { get; }
-        public async Task<SocialMediaUser> GetUserAsync(string username)
+        public async Task<SocialMediaUser?> GetUserAsync(string username)
         {
+            var accounts = await _settingsDal.Get("ig_allow_list");
+            if (accounts is null)
+                throw new UserNotFoundException();
+            if (!accounts.Value.EnumerateArray().Any(user => user.GetString() == username))
+                throw new UserNotFoundException();
+            
             if (!_userCache.TryGetValue(username, out InstagramUser user))
             {
                 var client = _httpClientFactory.CreateClient();

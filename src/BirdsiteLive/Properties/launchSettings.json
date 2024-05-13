@@ -6,7 +6,8 @@
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
         "Instance__ParallelTwitterRequests": "0",
-        "Instance__InstaMode": "true"
+        "Instance__InstaMode": "true",
+        "Instance__SidecarURL": "http://ubuntu.tail98293.ts.net:5000"
       },
       "applicationUrl": "http://localhost:5042"
     },

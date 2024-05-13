@@ -15,13 +15,14 @@ public class UserTest
     {
         var userDal = new Mock<IInstagramUserDal>();
         var httpFactory = new Mock<IHttpClientFactory>();
+        var settingsDal = new Mock<ISettingsDal>();
         httpFactory.Setup(_ => _.CreateClient(string.Empty)).Returns(new HttpClient());
         var settings = new InstanceSettings
         {
             Domain = "domain.name"
         };
 
-        _instaService = new InstagramService(userDal.Object, httpFactory.Object, settings);
+        _instaService = new InstagramService(userDal.Object, httpFactory.Object, settings, settingsDal.Object);
     }
     [TestMethod]
     public async Task user_kobe()

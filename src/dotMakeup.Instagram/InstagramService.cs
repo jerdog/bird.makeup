@@ -63,10 +63,8 @@ public class InstagramService : ISocialMediaService
         public SocialMediaUserDal UserDal { get; }
         public async Task<SocialMediaUser?> GetUserAsync(string username)
         {
-            var accounts = await _settingsDal.Get("ig_allow_list");
-            if (accounts is null)
-                throw new UserNotFoundException();
-            if (!accounts.Value.EnumerateArray().Any(user => user.GetString() == username))
+            JsonElement accounts = await _settingsDal.Get("ig_allow_list") ?? JsonDocument.Parse("[\"caseyneistat\"]").RootElement;
+            if (!accounts.EnumerateArray().Any(user => user.GetString() == username))
                 throw new UserNotFoundException();
             
             if (!_userCache.TryGetValue(username, out InstagramUser user))
@@ -142,10 +140,21 @@ public class InstagramService : ISocialMediaService
                             MediaType = "image/jpeg"
 
                         });
+
+                    }
+                    else
+                    {
+                        media.Add(new ExtractedMedia()
+                        {
+                            Url = m.GetProperty("video_url").GetString(),
+                            MediaType = "video/mp4"
+
+                        });
                         
                     }
 
                 }
+                var createdAt = DateTime.Parse(postDoc.RootElement.GetProperty("date").GetString(), null, System.Globalization.DateTimeStyles.RoundtripKind);
                 post = new InstagramPost()
                     {
                         Id = id,
@@ -154,6 +163,7 @@ public class InstagramService : ISocialMediaService
                         {
                             Acct = postDoc.RootElement.GetProperty("user").GetString(),
                         },
+                        CreatedAt = createdAt,
                         
                         Media = media.ToArray(),
                     };

@@ -63,7 +63,7 @@ public class InstagramService : ISocialMediaService
         public SocialMediaUserDal UserDal { get; }
         public async Task<SocialMediaUser?> GetUserAsync(string username)
         {
-            JsonElement accounts = await _settingsDal.Get("ig_allow_list") ?? JsonDocument.Parse("[\"caseyneistat\"]").RootElement;
+            JsonElement accounts = await _settingsDal.Get("ig_allow_list") ?? JsonDocument.Parse("[\"caseyneistat\", \"nasa\"]").RootElement;
             if (!accounts.EnumerateArray().Any(user => user.GetString() == username))
                 throw new UserNotFoundException();
             
@@ -85,6 +85,15 @@ public class InstagramService : ISocialMediaService
                 var c = await httpResponse.Content.ReadAsStringAsync();
                 var userDocument = JsonDocument.Parse(c);
 
+                List<string> pinnedPost = new List<string>();
+                foreach (JsonElement postDoc in userDocument.RootElement.GetProperty("posts").EnumerateArray())
+                {
+                    var post = ParsePost(postDoc);
+                    _postCache.Set(post.Id, post, _cacheEntryOptions);
+                    if (post.IsPinned)
+                        pinnedPost.Add(post.Id);
+                }
+
 
                 try
                 {
@@ -94,7 +103,7 @@ public class InstagramService : ISocialMediaService
                         Acct = username,
                         ProfileImageUrl = userDocument.RootElement.GetProperty("profilePic").GetString(),
                         Name = userDocument.RootElement.GetProperty("name").GetString(),
-                        PinnedPosts = new List<long>(),
+                        PinnedPosts = pinnedPost,
                         ProfileUrl = "www.instagram.com/" + username,
                     };
 
@@ -128,8 +137,18 @@ public class InstagramService : ISocialMediaService
                 }
                 var c = await httpResponse.Content.ReadAsStringAsync();
                 var postDoc = JsonDocument.Parse(c);
+                post = ParsePost(postDoc.RootElement);
+            }
+
+            
+            _postCache.Set(id, post, _cacheEntryOptions);
+            return post;
+        }
+
+        private InstagramPost ParsePost(JsonElement postDoc)
+        {
                 List<ExtractedMedia> media = new List<ExtractedMedia>();
-                foreach (JsonElement m in postDoc.RootElement.GetProperty("media").EnumerateArray())
+                foreach (JsonElement m in postDoc.GetProperty("media").EnumerateArray())
                 {
                     bool isVideo = m.GetProperty("is_video").GetBoolean();
                     if (!isVideo)
@@ -154,25 +173,22 @@ public class InstagramService : ISocialMediaService
                     }
 
                 }
-                var createdAt = DateTime.Parse(postDoc.RootElement.GetProperty("date").GetString(), null, System.Globalization.DateTimeStyles.RoundtripKind);
-                post = new InstagramPost()
+                var createdAt = DateTime.Parse(postDoc.GetProperty("date").GetString(), null, System.Globalization.DateTimeStyles.RoundtripKind);
+                var post = new InstagramPost()
                     {
-                        Id = id,
-                        MessageContent = postDoc.RootElement.GetProperty("caption").GetString(),
+                        Id = postDoc.GetProperty("id").GetString(),
+                        MessageContent = postDoc.GetProperty("caption").GetString(),
                         Author = new InstagramUser()
                         {
-                            Acct = postDoc.RootElement.GetProperty("user").GetString(),
+                            Acct = postDoc.GetProperty("user").GetString(),
                         },
                         CreatedAt = createdAt,
+                        IsPinned = postDoc.GetProperty("pinned").GetBoolean(),
                         
                         Media = media.ToArray(),
                     };
-                _postCache.Set(id, post, _cacheEntryOptions);
                 return post;
-            }
-
             
-            return post;
         }
         
 }

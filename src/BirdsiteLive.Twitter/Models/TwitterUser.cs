@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using BirdsiteLive.Common.Interfaces;
 
 namespace BirdsiteLive.Twitter.Models
@@ -16,7 +17,9 @@ namespace BirdsiteLive.Twitter.Models
         public string Acct { get; set; }
         public string ProfileBannerURL { get; set; }
         public bool Protected { get; set; }
-        public IEnumerable<long> PinnedPosts { get; set; }
+
+        public IEnumerable<string> PinnedPosts { get; set; }
+        
         public int StatusCount { get; set; }
         public int FollowersCount { get; set; }
         public string Location { get; set; }

@@ -11,6 +11,7 @@ namespace BirdsiteLive.Instagram.Models
         public DateTime CreatedAt { get; set; }
         public string InReplyToAccount { get; set; } = null;
         public bool IsRetweet { get; set; } = false;
+        public bool IsPinned { get; set; } = false;
         public long RetweetId { get; set; }
         public SocialMediaUser OriginalAuthor { get; set; } = null;
         public SocialMediaUser Author { get; set; }

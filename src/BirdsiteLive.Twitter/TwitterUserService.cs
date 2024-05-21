@@ -148,13 +148,13 @@ namespace BirdsiteLive.Twitter
                 profileBannerURL = profileBannerURLObject.GetString();
             }
 
-            List<long> pinnedTweets = new();
+            List<string> pinnedTweets = new();
             JsonElement pinnedDoc;
             if (result.GetProperty("legacy").TryGetProperty("pinned_tweet_ids_str", out pinnedDoc))
             {
                 foreach (JsonElement id in pinnedDoc.EnumerateArray())
                 {
-                    pinnedTweets.Add(Int64.Parse(id.GetString()));
+                    pinnedTweets.Add(id.GetString());
                 }
             }
 

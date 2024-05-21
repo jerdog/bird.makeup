@@ -20,7 +20,7 @@ namespace BirdsiteLive.Domain
     {
         Note GetStatus(string username, ExtractedTweet tweet);
         Note GetStatus(string username, SocialMediaPost post);
-        ActivityCreateNote GetActivity(string username, ExtractedTweet tweet);
+        ActivityCreateNote GetActivity(string username, SocialMediaPost tweet);
     }
 
     public class StatusService : IStatusService
@@ -101,7 +101,7 @@ namespace BirdsiteLive.Domain
             return GetStatus(username, (SocialMediaPost)tweet);
         }
 
-        public ActivityCreateNote GetActivity(string username, ExtractedTweet tweet)
+        public ActivityCreateNote GetActivity(string username, SocialMediaPost tweet)
         {
             var note = GetStatus(username, tweet);
             var actor = UrlFactory.GetActorUrl(_instanceSettings.Domain, username);

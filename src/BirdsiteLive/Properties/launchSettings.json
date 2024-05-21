@@ -1,5 +1,16 @@
 {
   "profiles": {
+    "BirdsiteLive (IG + local sidecar)": {
+      "commandName": "Project",
+      "launchBrowser": true,
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "Instance__ParallelTwitterRequests": "0",
+        "Instance__InstaMode": "true",
+        "Instance__SidecarURL": "http://localhost:5000"
+      },
+      "applicationUrl": "http://localhost:5042"
+    },
     "BirdsiteLive (IG)": {
       "commandName": "Project",
       "launchBrowser": true,

@@ -233,9 +233,9 @@ namespace BirdsiteLive.Controllers
             {
                 id = $"https://{_instanceSettings.Domain}/users/{id}/collections/featured"
             };
-            foreach (long statusId in user.PinnedPosts)
+            foreach (string postId in user.PinnedPosts)
             {
-                var tweet = await _twitterTweetService.GetTweetAsync(statusId);
+                var tweet = await _socialMediaService.GetPostAsync(postId);
                 var status = _statusService.GetActivity(id, tweet);
                 status.apObject.context = null;
 

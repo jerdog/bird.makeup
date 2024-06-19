@@ -2,11 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
-using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using BirdsiteLive.DAL.Contracts;
 using BirdsiteLive.DAL.Models;
-using BirdsiteLive.DAL.Postgres.DataAccessLayers.Base;
 using BirdsiteLive.DAL.Postgres.Settings;
 using Dapper;
 using Npgsql;
@@ -176,44 +174,8 @@ namespace BirdsiteLive.DAL.Postgres.DataAccessLayers
                 return result.ToArray();
             }
         }
+        
 
-        public async Task UpdateTwitterUserFediAcctAsync(string twitterUsername, string key)
-        {
-            if(twitterUsername == default) throw new ArgumentException("id");
-
-            var query = $"UPDATE {_settings.TwitterUserTableName} " + "SET extradata['fediaccount'] = $1 WHERE acct = $2";
-            await using var connection = DataSource.CreateConnection();
-            await connection.OpenAsync();
-            await using var command = new NpgsqlCommand(query, connection) {
-                Parameters = 
-                { 
-                    new() { Value = JsonSerializer.Serialize(key), NpgsqlDbType = NpgsqlDbType.Jsonb },
-                    new() { Value = twitterUsername},
-                    
-                }
-            };
-
-            await command.ExecuteNonQueryAsync();
-        }
-        public async Task UpdateUserExtradataAsync(string twitterUsername, string key, object value)
-        {
-            if(twitterUsername == default) throw new ArgumentException("id");
-
-            var query = $"UPDATE {_settings.TwitterUserTableName} SET extradata['wikidata'][$1] = $2 WHERE acct = $3";
-            await using var connection = DataSource.CreateConnection();
-            await connection.OpenAsync();
-            await using var command = new NpgsqlCommand(query, connection) {
-                Parameters = 
-                { 
-                    new() { Value = key},
-                    new() { Value = JsonSerializer.Serialize(value), NpgsqlDbType = NpgsqlDbType.Jsonb },
-                    new() { Value = twitterUsername},
-                    
-                }
-            };
-
-            await command.ExecuteNonQueryAsync();
-        }
         public async Task UpdateTwitterUserIdAsync(string username, long twitterUserId)
         {
             if(username == default) throw new ArgumentException("id");

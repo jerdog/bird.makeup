@@ -14,6 +14,8 @@ public interface SocialMediaUserDal
         Task AddFollower(int follower, int followed);
         Task RemoveFollower(int follower, int followed);
         Task<long> GetFollowersCountAsync(int id);
+        Task UpdateUserExtradataAsync(string username, string key, string subkey, object value);
+        Task UpdateUserExtradataAsync(string username, string key, object value);
 }
 
 public interface SyncUser

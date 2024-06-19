@@ -87,13 +87,13 @@ public class WikidataService
             if (twitterUser.Contains(acct))
             {
                 Console.WriteLine($"{acct} with {qcode}");
-                await _dal.UpdateUserExtradataAsync(acct, "qcode", qcode);
+                await _dal.UpdateUserExtradataAsync(acct, "wikidata", "qcode", qcode);
                 if (fediHandle is not null)
-                    await _dal.UpdateUserExtradataAsync(acct, "fedihandle", fediHandle);
+                    await _dal.UpdateUserExtradataAsync(acct, "wikidata","fedihandle", fediHandle);
                 if (label is not null)
-                    await _dal.UpdateUserExtradataAsync(acct, "label", label);
+                    await _dal.UpdateUserExtradataAsync(acct, "wikidata","label", label);
                 if (description is not null)
-                    await _dal.UpdateUserExtradataAsync(acct, "description", description.Trim());
+                    await _dal.UpdateUserExtradataAsync(acct, "wikidata","description", description.Trim());
             }
         }
     }
@@ -138,7 +138,7 @@ public class WikidataService
         {
             Console.WriteLine(acct + " " + works.Count);
             if (twitterUser.Contains(acct))
-                await _dal.UpdateUserExtradataAsync(acct, "notableWorks", works);
+                await _dal.UpdateUserExtradataAsync(acct, "wikidata", "notableWorks", works);
         }
 
     }

@@ -221,6 +221,7 @@ namespace BirdsiteLive.Twitter
             }
 
             await _twitterUserDal.UpdateTwitterStatusesCountAsync(username, twitterUser.StatusCount);
+            await _twitterUserDal.UpdateUserExtradataAsync(username, "statusesCount", twitterUser.StatusCount);
             _statisticsHandler.GotNewTweets(extractedTweets.Count);
             return extractedTweets.ToArray();
         }

@@ -169,4 +169,43 @@ public abstract class SocialMediaUserPostgresDal : PostgresBase, SocialMediaUser
             
             await command.ExecuteNonQueryAsync();
         }
+        public async Task UpdateUserExtradataAsync(string username, string key, string subkey, object value)
+        {
+            if(username == default) throw new ArgumentException("id");
+
+            var query = $"UPDATE {tableName} SET extradata[$4][$1] = $2 WHERE acct = $3";
+            await using var connection = DataSource.CreateConnection();
+            await connection.OpenAsync();
+            await using var command = new NpgsqlCommand(query, connection) {
+                Parameters = 
+                { 
+                    new() { Value = subkey},
+                    new() { Value = JsonSerializer.Serialize(value), NpgsqlDbType = NpgsqlDbType.Jsonb },
+                    new() { Value = username},
+                    new() { Value = key},
+                    
+                }
+            };
+
+            await command.ExecuteNonQueryAsync();
+        }
+        public async Task UpdateUserExtradataAsync(string username, string key, object value)
+        {
+            if(username == default) throw new ArgumentException("id");
+
+            var query = $"UPDATE {tableName} SET extradata[$1] = $2 WHERE acct = $3";
+            await using var connection = DataSource.CreateConnection();
+            await connection.OpenAsync();
+            await using var command = new NpgsqlCommand(query, connection) {
+                Parameters = 
+                { 
+                    new() { Value = key},
+                    new() { Value = JsonSerializer.Serialize(value), NpgsqlDbType = NpgsqlDbType.Jsonb },
+                    new() { Value = username},
+                    
+                }
+            };
+
+            await command.ExecuteNonQueryAsync();
+        }
 }

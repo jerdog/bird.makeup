@@ -6,6 +6,7 @@ using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Xml;
+using BirdsiteLive.Common.Interfaces;
 using BirdsiteLive.Common.Settings;
 using BirdsiteLive.DAL.Contracts;
 using BirdsiteLive.DAL.Models;
@@ -24,20 +25,24 @@ namespace BirdsiteLive.Pipeline.Processors
     {
         private readonly ISendTweetsToInboxTask _sendTweetsToInboxTask;
         private readonly ISendTweetsToSharedInboxTask _sendTweetsToSharedInbox;
+        private readonly SocialMediaUserDal _userDal;
         private readonly IFollowersDal _followersDal;
+        private readonly ISocialMediaService _socialMediaService;
         private readonly InstanceSettings _instanceSettings;
         private readonly ILogger<SendTweetsToFollowersProcessor> _logger;
         private readonly IRemoveFollowerAction _removeFollowerAction;
         private List<Task> _todo = new List<Task>();
 
         #region Ctor
-        public SendTweetsToFollowersProcessor(ISendTweetsToInboxTask sendTweetsToInboxTask, ISendTweetsToSharedInboxTask sendTweetsToSharedInbox, IFollowersDal followersDal, ILogger<SendTweetsToFollowersProcessor> logger, InstanceSettings instanceSettings, IRemoveFollowerAction removeFollowerAction)
+        public SendTweetsToFollowersProcessor(ISendTweetsToInboxTask sendTweetsToInboxTask, ISendTweetsToSharedInboxTask sendTweetsToSharedInbox, IFollowersDal followersDal, ISocialMediaService socialMediaService, ILogger<SendTweetsToFollowersProcessor> logger, InstanceSettings instanceSettings, IRemoveFollowerAction removeFollowerAction)
         {
             _sendTweetsToInboxTask = sendTweetsToInboxTask;
             _sendTweetsToSharedInbox = sendTweetsToSharedInbox;
             _logger = logger;
             _instanceSettings = instanceSettings;
             _removeFollowerAction = removeFollowerAction;
+            _socialMediaService = socialMediaService;
+            _userDal = socialMediaService.UserDal;
             _followersDal = followersDal;
         }
         #endregion
@@ -102,8 +107,7 @@ namespace BirdsiteLive.Pipeline.Processors
                     {
                         foreach (var f in followersPerInstance)
                         {
-                            f.Followings.Remove(user.Id);
-                            await _followersDal.UpdateFollowerAsync(f);
+                            await _userDal.RemoveFollower(f.Id, user.Id);
                         }
                     }
                 }

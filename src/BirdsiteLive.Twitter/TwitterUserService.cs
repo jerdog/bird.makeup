@@ -116,7 +116,7 @@ namespace BirdsiteLive.Twitter
                 var result = res.RootElement.GetProperty("data").GetProperty("user").GetProperty("result");
                 var user = Extract(result);
                 var userFromDal = await _twitterUserDal.GetUserAsync(username);
-                if (userFromDal.Followers > 20)
+                if (userFromDal is not null && userFromDal.Followers > 20)
                     user = await addDescription(user);
                 return user;
             }

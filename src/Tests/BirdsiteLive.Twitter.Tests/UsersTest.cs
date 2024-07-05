@@ -7,8 +7,10 @@ using BirdsiteLive.Twitter.Tools;
 using BirdsiteLive.Statistics.Domain;
 using Moq;
 using System.Net.Http;
+using System.Text.Json;
 using BirdsiteLive.Common.Settings;
 using BirdsiteLive.DAL.Contracts;
+using BirdsiteLive.DAL.Models;
 
 namespace BirdsiteLive.ActivityPub.Tests
 {
@@ -24,15 +26,22 @@ namespace BirdsiteLive.ActivityPub.Tests
             var logger3 = new Mock<ILogger<TwitterUserService>>();
             var stats = new Mock<ITwitterStatisticsHandler>();
             var httpFactory = new Mock<IHttpClientFactory>();
+            var twitterDal = new Mock<ITwitterUserDal>();
+            twitterDal.Setup(_ => _.GetUserAsync("kobebryant"))
+                .ReturnsAsync(new SyncTwitterUser() { Followers = 1 });
+            twitterDal.Setup(_ => _.GetUserAsync("grantimahara"))
+                .ReturnsAsync(new SyncTwitterUser() { Followers = 9999 });
             var settings = new InstanceSettings
             {
                 Domain = "domain.name"
             };
             var settingsDal = new Mock<ISettingsDal>();
+            settingsDal.Setup(_ => _.Get("twitteraccounts"))
+                .ReturnsAsync(JsonDocument.Parse("""{"accounts": [["xxx", "xxx"]]}""").RootElement);
             httpFactory.Setup(_ => _.CreateClient(string.Empty)).Returns(new HttpClient());
             httpFactory.Setup(_ => _.CreateClient("WithProxy")).Returns(new HttpClient());
             ITwitterAuthenticationInitializer auth = new TwitterAuthenticationInitializer(httpFactory.Object, settings, settingsDal.Object, logger1.Object);
-            _tweetService = new TwitterUserService(auth, stats.Object, logger3.Object);
+            _tweetService = new TwitterUserService(auth, stats.Object, twitterDal.Object, settings, settingsDal.Object, httpFactory.Object, logger2.Object);
         }
 
         [TestMethod]
@@ -53,6 +62,13 @@ namespace BirdsiteLive.ActivityPub.Tests
             Assert.IsTrue(user.FollowersCount > 500_000);
             Assert.AreEqual(user.Acct, "grantimahara");
             Assert.AreEqual(user.Location, "Los Angeles, CA");
+        }
+        [TestMethod]
+        public async Task UserGrantBio()
+        {
+            var user = await _tweetService.GetUserAsync("grantimahara");
+            if (user.Description != "Host of White Rabbit Project on Netflix, former MythBuster and special FX modelmaker.")
+                Assert.Inconclusive();
         }
 
     }

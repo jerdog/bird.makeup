@@ -6,6 +6,8 @@ using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
 using BirdsiteLive.Common.Exceptions;
+using BirdsiteLive.Common.Settings;
+using BirdsiteLive.DAL.Contracts;
 using BirdsiteLive.Statistics.Domain;
 using BirdsiteLive.Twitter.Models;
 using BirdsiteLive.Twitter.Tools;
@@ -25,6 +27,10 @@ namespace BirdsiteLive.Twitter
         private readonly ITwitterAuthenticationInitializer _twitterAuthenticationInitializer;
         private readonly ITwitterStatisticsHandler _statisticsHandler;
         private readonly ILogger<TwitterUserService> _logger;
+        private readonly ITwitterUserDal _twitterUserDal;
+        private readonly InstanceSettings _instanceSettings;
+        private readonly ISettingsDal _settings;
+        private readonly IHttpClientFactory _httpClientFactory;
 
         private readonly string endpoint =
             "https://twitter.com/i/api/graphql/SAMkL5y_N9pmahSw8yy6gw/UserByScreenName?variables=%7B%22screen_name%22%3A%22elonmusk%22%2C%22withSafetyModeUserFields%22%3Atrue%7D&features=%7B%22hidden_profile_likes_enabled%22%3Afalse%2C%22hidden_profile_subscriptions_enabled%22%3Atrue%2C%22responsive_web_graphql_exclude_directive_enabled%22%3Atrue%2C%22verified_phone_label_enabled%22%3Afalse%2C%22subscriptions_verification_info_is_identity_verified_enabled%22%3Afalse%2C%22subscriptions_verification_info_verified_since_enabled%22%3Atrue%2C%22highlights_tweets_tab_ui_enabled%22%3Atrue%2C%22creator_subscriptions_tweet_preview_api_enabled%22%3Atrue%2C%22responsive_web_graphql_skip_user_profile_image_extensions_enabled%22%3Afalse%2C%22responsive_web_graphql_timeline_navigation_enabled%22%3Atrue%7D&fieldToggles=%7B%22withAuxiliaryUserLabels%22%3Afalse%7D";
@@ -75,10 +81,14 @@ namespace BirdsiteLive.Twitter
         """.Replace(" ", "").Replace("\n", "");
 
         #region Ctor
-        public TwitterUserService(ITwitterAuthenticationInitializer twitterAuthenticationInitializer, ITwitterStatisticsHandler statisticsHandler, ILogger<TwitterUserService> logger)
+        public TwitterUserService(ITwitterAuthenticationInitializer twitterAuthenticationInitializer, ITwitterStatisticsHandler statisticsHandler, ITwitterUserDal twitterUserDal, InstanceSettings instanceSettings, ISettingsDal settingsDal, IHttpClientFactory httpClientFactory, ILogger<TwitterUserService> logger)
         {
             _twitterAuthenticationInitializer = twitterAuthenticationInitializer;
             _statisticsHandler = statisticsHandler;
+            _twitterUserDal = twitterUserDal;
+            _instanceSettings = instanceSettings;
+            _settings = settingsDal;
+            _httpClientFactory = httpClientFactory;
             _logger = logger;
         }
         #endregion
@@ -104,7 +114,11 @@ namespace BirdsiteLive.Twitter
                 var c = await httpResponse.Content.ReadAsStringAsync();
                 res = JsonDocument.Parse(c);
                 var result = res.RootElement.GetProperty("data").GetProperty("user").GetProperty("result");
-                return Extract(result);
+                var user = Extract(result);
+                var userFromDal = await _twitterUserDal.GetUserAsync(username);
+                if (userFromDal.Followers > 20)
+                    user = await addDescription(user);
+                return user;
             }
             catch (System.Collections.Generic.KeyNotFoundException)
             {
@@ -185,6 +199,47 @@ namespace BirdsiteLive.Twitter
                 ProfileUrl = "twitter.com/" + result.GetProperty("legacy").GetProperty("screen_name").GetString().ToLower(), 
             };
 
+        }
+
+        async private Task<TwitterUser> addDescription(TwitterUser user)
+        {
+
+            try
+            {
+                var cred = await _settings.Get("twitteraccounts");
+                string username = String.Empty;
+                string password = String.Empty;
+
+                var candidates = cred.Value.GetProperty("accounts").EnumerateArray().ToArray();
+                Random.Shared.Shuffle(candidates);
+                foreach (JsonElement account in candidates)
+                {
+                    username = account.EnumerateArray().First().GetString();
+                    password = account.EnumerateArray().Last().GetString();
+                }
+
+                var client = _httpClientFactory.CreateClient();
+                var request = new HttpRequestMessage(HttpMethod.Get,
+                    $"http://localhost:5000/twitter/bio/{user.Id}");
+
+                request.Headers.TryAddWithoutValidation("dotmakeup-user", username);
+                request.Headers.TryAddWithoutValidation("dotmakeup-password", password);
+
+                _statisticsHandler.CalledApi($"sidecar.Tries.Bio");
+                _statisticsHandler.CalledApi("sidecar.Tries");
+
+                var httpResponse = await client.SendAsync(request);
+
+                if (httpResponse.StatusCode == HttpStatusCode.OK)
+                    user.Description = await httpResponse.Content.ReadAsStringAsync();
+
+            }
+            catch (Exception _)
+            {
+                
+            }
+            
+            return user;
         }
 
         public bool IsUserApiRateLimited()

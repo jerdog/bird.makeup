@@ -35,7 +35,7 @@ namespace BirdsiteLive.DAL.Postgres.DataAccessLayers
         }
         private async Task<SyncTwitterUser> GetUserAsync(string acct, int? id)
         {
-            var query = $"SELECT * FROM {tableName} WHERE acct = $1 OR id = $2";
+            var query = $"SELECT *, ( SELECT COUNT(*) FROM {_settings.FollowersTableName} WHERE followings @> ARRAY[{tableName}.id]) as followersCount FROM {tableName} WHERE acct = $1 OR id = $2";
 
             if (acct is not null)
                 acct = acct.ToLowerInvariant();
@@ -62,6 +62,7 @@ namespace BirdsiteLive.DAL.Postgres.DataAccessLayers
                 LastTweetPostedId = reader["lastTweetPostedId"] as long? ?? default,
                 LastSync = reader["lastSync"] as DateTime? ?? default,
                 FetchingErrorCount = reader["fetchingErrorCount"] as int? ?? default,
+                Followers = reader["followersCount"] as long? ?? default,
                 FediAcct = reader["fediverseaccount"] as string,
                 ExtraData = extradata,
             };

@@ -33,7 +33,7 @@ public abstract class SocialMediaUserPostgresDal : PostgresBase, SocialMediaUser
         }
         private async Task<SyncUser> GetUserAsync(string acct, int? id)
         {
-            var query = $"SELECT * FROM {tableName} WHERE acct = $1 OR id = $2";
+            var query = $"SELECT *, ( SELECT COUNT(*) FROM {_settings.FollowersTableName} WHERE followings @> ARRAY[{tableName}.id]) as followersCount FROM {tableName} WHERE acct = $1 OR id = $2";
 
             if (acct is not null)
                 acct = acct.ToLowerInvariant();
@@ -56,6 +56,7 @@ public abstract class SocialMediaUserPostgresDal : PostgresBase, SocialMediaUser
             {
                 Id = reader["id"] as int? ?? default,
                 Acct = reader["acct"] as string,
+                Followers = reader["followersCount"] as long? ?? default,
                 ExtraData = extradata,
             };
 

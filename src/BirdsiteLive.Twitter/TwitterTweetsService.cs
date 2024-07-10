@@ -558,8 +558,6 @@ namespace BirdsiteLive.Twitter
             long? inReplyToPostId = null;
             long retweetId = default;
 
-            //JsonElement tweetRes__ = tweet.GetProperty("content").GetProperty("itemContent")
-            //    .GetProperty("tweet_results").GetProperty("result");
             JsonElement userDoc = tweetRes.GetProperty("core")
                     .GetProperty("user_results").GetProperty("result");
 
@@ -701,6 +699,44 @@ namespace BirdsiteLive.Twitter
                 //MessageContent = Regex.Replace(MessageContent, Regex.Escape($"https://twitter.com/{quoteTweetAcct}/status/{quoteTweetId}"), "", RegexOptions.IgnoreCase);
                 MessageContent = MessageContent + "\n\n" + quoteTweetLink;
             }
+
+            TwitterPoll poll = null;
+            JsonElement cardDoc;
+            if (tweetRes.TryGetProperty("card", out cardDoc))
+            {
+                DateTime endDate = DateTime.Now;
+                Dictionary<char, string> labels = new Dictionary<char, string>();
+                Dictionary<char, long> counts = new Dictionary<char, long>();
+                foreach (JsonElement val in cardDoc.GetProperty("legacy").GetProperty("binding_values")
+                             .EnumerateArray())
+                {
+                    var key = val.GetProperty("key").GetString();
+                    if (key == "end_datetime_utc")
+                    {
+                        var endDateString = val.GetProperty("value").GetProperty("string_value").GetString();
+                        endDate = DateTime.Parse(endDateString);
+                    }
+                    else if (key.StartsWith("choice") && key.EndsWith("label"))
+                    {
+                        var entryLabel = val.GetProperty("value").GetProperty("string_value").GetString();
+                        char entryNumber = key[6];
+                        labels.Add(entryNumber, entryLabel);
+                    }
+                    else if (key.StartsWith("choice") && key.EndsWith("count"))
+                    {
+                        var entryLabel = val.GetProperty("value").GetProperty("string_value").GetString();
+                        char entryNumber = key[6];
+                        counts.Add(entryNumber, long.Parse(entryLabel));
+                    }
+                }
+
+                var c = counts.OrderBy(x => x.Key).Select(x => x.Value);
+                poll = new TwitterPoll()
+                {
+                    endTime = endDate,
+                    options = labels.OrderBy(x => x.Key).Select(x => x.Value).Zip(c).ToList(),
+                };
+            }
             
             var extractedTweet = new ExtractedTweet
             {
@@ -717,6 +753,7 @@ namespace BirdsiteLive.Twitter
                 RetweetId = retweetId,
                 OriginalAuthor = OriginalAuthor,
                 Author = author,
+                Poll = poll,
             };
        
             return extractedTweet;

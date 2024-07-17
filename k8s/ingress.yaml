@@ -4,7 +4,6 @@ metadata:
   name: dotmakeup-bird
 spec:
   dnsNames:
-    - k.bird.makeup
     - bird.makeup
   issuerRef:
     name: letsencrypt
@@ -17,6 +16,7 @@ metadata:
   name: dotmakeup-bird
   annotations:
     certmanager.k8s.io/cluster-issuer: "letsencrypt"
+    nginx.ingress.kubernetes.io/upstream-hash-by: "$request_uri"
 spec:
   ingressClassName: "nginx"
   tls:

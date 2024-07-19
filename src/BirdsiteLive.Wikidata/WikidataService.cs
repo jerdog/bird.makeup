@@ -87,13 +87,14 @@ public class WikidataService
             if (twitterUser.Contains(acct))
             {
                 Console.WriteLine($"{acct} with {qcode}");
-                await _dal.UpdateUserExtradataAsync(acct, "wikidata", "qcode", qcode);
-                if (fediHandle is not null)
-                    await _dal.UpdateUserExtradataAsync(acct, "wikidata","fedihandle", fediHandle);
-                if (label is not null)
-                    await _dal.UpdateUserExtradataAsync(acct, "wikidata","label", label);
-                if (description is not null)
-                    await _dal.UpdateUserExtradataAsync(acct, "wikidata","description", description.Trim());
+                var entry = new WikidataEntry()
+                {
+                    Description = description,
+                    Label = label,
+                    QCode = qcode,
+                    FediHandle = fediHandle,
+                };
+                await _dal.UpdateUserExtradataAsync(acct, "wikidata", entry);
             }
         }
     }
@@ -141,5 +142,28 @@ public class WikidataService
                 await _dal.UpdateUserExtradataAsync(acct, "wikidata", "notableWorks", works);
         }
 
+    }
+
+    public async Task SyncAttachments()
+    {
+        var twitterUser = new HashSet<string>();
+        var twitterUserQuery = await _dal.GetAllTwitterUsersAsync();
+        Console.WriteLine("Loading twitter users");
+        foreach (SyncTwitterUser user in twitterUserQuery)
+        {
+            twitterUser.Add(user.Acct);
+        }
+        Console.WriteLine($"Done loading {twitterUser.Count} twitter users");
+
+        foreach (string u in twitterUser)
+        {
+            var s = await _dal.GetUserExtradataAsync(u, "wikidata");
+            var w = JsonSerializer.Deserialize<WikidataEntry>(s);
+            if (w.FediHandle is not null)
+            {
+                Console.WriteLine($"{u} - {w.FediHandle}");
+                await _dal.UpdateUserExtradataAsync(u, "hooks", "addAttachments", new Dictionary<string, string>() {{ "fedi", w.FediHandle }});
+            }
+        }
     }
 }

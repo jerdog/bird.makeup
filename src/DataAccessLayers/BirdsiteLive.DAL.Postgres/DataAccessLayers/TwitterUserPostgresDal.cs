@@ -167,7 +167,7 @@ namespace BirdsiteLive.DAL.Postgres.DataAccessLayers
 
         public async Task<SyncTwitterUser[]> GetAllTwitterUsersAsync()
         {
-            var query = $"SELECT * FROM {_settings.TwitterUserTableName}";
+            var query = $"SELECT id, acct, lasttweetpostedid, lastsync, fetchingerrorcount, twitteruserid, statusescount FROM {_settings.TwitterUserTableName}";
 
             using (var dbConnection = Connection)
             {

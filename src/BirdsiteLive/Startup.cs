@@ -61,6 +61,7 @@ namespace BirdsiteLive
                     config.Instrumentations.Remove(Instrumentation.NetRuntime);
                     config.Instrumentations.Remove(Instrumentation.HttpClient);
 //                    config.Instrumentations.Remove(Instrumentation.AspNetCore);
+                    config.ExporterSettings.EnableTraces = false;
                 });
 
             services.AddControllersWithViews();

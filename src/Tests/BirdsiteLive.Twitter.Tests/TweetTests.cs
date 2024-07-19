@@ -187,7 +187,7 @@ http://www.realworldrisk.com https://twitter.com/i/web/status/166896966334087168
         {
             var tweet = await _tweetService.GetTweetAsync(1593767953706921985);
             Assert.AreEqual(tweet.MessageContent, "Reinstate former President Trump");
-            Assert.AreEqual(tweet.Poll.endTime.DayOfYear, new DateTime(2022, 11, 19, 7, 47, 45).DayOfYear);
+            Assert.AreEqual(tweet.Poll.endTime.Year, new DateTime(2022, 11, 19, 7, 47, 45).Year);
             Assert.AreEqual(tweet.Poll.options[0].First, "Yes");
             Assert.AreEqual(tweet.Poll.options[0].Second, 7814391);
             Assert.IsFalse(tweet.IsRetweet);

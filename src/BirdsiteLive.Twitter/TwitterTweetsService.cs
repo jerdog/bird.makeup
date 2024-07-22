@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.Metrics;
 using System.Linq;
 using System.IO;
 using System.Net;
@@ -30,6 +31,10 @@ namespace BirdsiteLive.Twitter
 
     public class TwitterTweetsService : ITwitterTweetsService
     {
+        static Meter _meter = new("DotMakeup", "1.0.0");
+        static Counter<int> _apiCalled = _meter.CreateCounter<int>("dotmakeup_api_called_count");
+        static Counter<int> _newTweets = _meter.CreateCounter<int>("dotmakeup_twitter_new_tweets_count");
+        
         private readonly ITwitterAuthenticationInitializer _twitterAuthenticationInitializer;
         private readonly ITwitterStatisticsHandler _statisticsHandler;
         private readonly ICachedTwitterUserService _twitterUserService;
@@ -91,15 +96,19 @@ namespace BirdsiteLive.Twitter
 
                 var tweetInDoc = tweet.RootElement.GetProperty("data").GetProperty("tweetResult")
                     .GetProperty("result");
-
                 
-                _statisticsHandler.GotNewTweets(1);
-                
-                return await Extract( tweetInDoc );
+                var extract = await Extract( tweetInDoc );
+                _apiCalled.Add(1, new KeyValuePair<string, object>("api", "twitter_tweet"),
+                    new KeyValuePair<string, object>("result", "2xx")
+                );
+                return extract;
             }
             catch (Exception e)
             {
                 _logger.LogError(e, "Error retrieving tweet {TweetId}", statusId);
+                _apiCalled.Add(1, new KeyValuePair<string, object>("api", "twitter_tweet"),
+                    new KeyValuePair<string, object>("result", "5xx")
+                );
                 await _twitterAuthenticationInitializer.RefreshClient(request);
                 return null;
             }
@@ -197,6 +206,7 @@ namespace BirdsiteLive.Twitter
 
             int followersThreshold = 9999999;
             int twitterFollowersThreshold = 9999999;
+            string source = "Vanilla";
             var nitterSettings = await _settings.Get("nitter");
             if (nitterSettings is not null)
             {
@@ -210,19 +220,25 @@ namespace BirdsiteLive.Twitter
             else if (user.StatusesCount != twitterUser.StatusCount && user.Followers > followersThreshold + 10)
             {
                 extractedTweets = await TweetFromSidecar(user, fromTweetId, true);
+                source = "Sidecar (with replies)";
             }
             else if (user.StatusesCount != twitterUser.StatusCount && user.Followers > followersThreshold + 3)
             {
                 extractedTweets = await TweetFromSidecar(user, fromTweetId, false);
+                source = "Sidecar (without replies)";
             }
             else if (user.StatusesCount != twitterUser.StatusCount && user.Followers > followersThreshold && twitterUser.FollowersCount > twitterFollowersThreshold)
             {
                 extractedTweets = await TweetFromNitter(user, fromTweetId, false, false);
+                source = "Nitter";
             }
 
             await _twitterUserDal.UpdateTwitterStatusesCountAsync(username, twitterUser.StatusCount);
             await _twitterUserDal.UpdateUserExtradataAsync(username, "statusesCount", twitterUser.StatusCount);
             _statisticsHandler.GotNewTweets(extractedTweets.Count);
+            _newTweets.Add(extractedTweets.Count,
+                new KeyValuePair<string, object>("source", source)
+            );
             return extractedTweets.ToArray();
         }
 
@@ -260,7 +276,17 @@ namespace BirdsiteLive.Twitter
                 var httpResponse = await client.SendAsync(request);
 
                 if (httpResponse.StatusCode != HttpStatusCode.OK)
+                {
+                    _apiCalled.Add(1, new KeyValuePair<string, object>("api", "twitter_sidecar_timeline"),
+                        new KeyValuePair<string, object>("result", "5xx"),
+                        new KeyValuePair<string, object>("endpoint", endpoint)
+                    );
                     return new List<ExtractedTweet>();
+                }
+                _apiCalled.Add(1, new KeyValuePair<string, object>("api", "twitter_sidecar_timeline"),
+                    new KeyValuePair<string, object>("result", "2xx"),
+                    new KeyValuePair<string, object>("endpoint", endpoint)
+                );
                 
                 var c = await httpResponse.Content.ReadAsStringAsync();
                 var tweetsDocument = JsonDocument.Parse(c);
@@ -305,14 +331,16 @@ namespace BirdsiteLive.Twitter
                 return new List<ExtractedTweet>();
             }
         }
-        private async Task<List<ExtractedTweet>> TweetFromNitter(SyncTwitterUser user, long fromId, bool withReplies, bool lowtrust)
+
+        private async Task<List<ExtractedTweet>> TweetFromNitter(SyncTwitterUser user, long fromId, bool withReplies,
+            bool lowtrust)
         {
             // https://status.d420.de/
             var nitterSettings = await _settings.Get("nitter");
             if (nitterSettings is null)
                 return new List<ExtractedTweet>();
-                
-            
+
+
             var requester = new DefaultHttpRequester();
             string useragent;
             if (lowtrust && nitterSettings.Value.TryGetProperty("useragent", out JsonElement useragentElement))
@@ -320,18 +348,20 @@ namespace BirdsiteLive.Twitter
             else
                 useragent = Useragent;
             requester.Headers["User-Agent"] = useragent;
-            requester.Headers["Accept"] = "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8";
+            requester.Headers["Accept"] =
+                "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8";
             requester.Headers["Accept-Encoding"] = "gzip, deflate";
             requester.Headers["Accept-Language"] = "en-US,en;q=0.5";
             var config = Configuration.Default.With(requester).WithDefaultLoader();
             var context = BrowsingContext.New(config);
-            
-            List<string> domains = new List<string>() { } ;
+
+            List<string> domains = new List<string>() { };
             var prop = (lowtrust) ? "lowtrustendpoints" : "endpoints";
             foreach (var d in nitterSettings.Value.GetProperty(prop).EnumerateArray())
             {
                 domains.Add(d.GetString());
             }
+
             Random rnd = new Random();
             int randIndex = rnd.Next(domains.Count);
             var domain = domains[randIndex];
@@ -342,15 +372,21 @@ namespace BirdsiteLive.Twitter
                 address = $"https://{domain}/{user.Acct}";
             var document = await context.OpenAsync(address);
             _statisticsHandler.CalledApi("Nitter");
-                
+
             var cellSelector = ".tweet-link";
             var cells = document.QuerySelectorAll(cellSelector);
             var titles = cells.Select(m => m.GetAttribute("href"));
-            
+
             if (titles.Any())
                 _statisticsHandler.CalledApi("Nitter.Success-" + domain);
 
-            List<ExtractedTweet> tweets = new List<ExtractedTweet>();
+            _apiCalled.Add(1, new KeyValuePair<string, object>("api", "nitter"),
+                new KeyValuePair<string, object>("success", titles.Any()),
+                new KeyValuePair<string, object>("domain", domain)
+            );
+        
+
+        List<ExtractedTweet> tweets = new List<ExtractedTweet>();
             string pattern = @".*\/([0-9]+)#m";
             Regex rg = new Regex(pattern);
             
@@ -395,8 +431,6 @@ namespace BirdsiteLive.Twitter
         }
         private async Task<ExtractedTweet> TweetFromSyndication(long statusId)
         {
-            string reqURL =
-                $"https://cdn.syndication.twimg.com/tweet-result?id={statusId}&lang=en&token=3ykp5xr72qv";
             JsonDocument tweet;
             var client = _httpClientFactory.CreateClient();
             

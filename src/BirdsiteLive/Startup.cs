@@ -48,19 +48,21 @@ namespace BirdsiteLive
             aiOptions.EnableDependencyTrackingTelemetryModule = false;
             aiOptions.EnableDebugLogger = false;
             aiOptions.EnableRequestTrackingTelemetryModule = false;
-            //aiOptions.EnableAdaptiveSampling = false;
             services.AddApplicationInsightsTelemetry(aiOptions);
 
             services.AddOpenTelemetry()
-                .ConfigureResource(builder => builder.AddService(serviceName: "dotmakeup", serviceInstanceId: Environment.MachineName))
-                .WithMetrics(config => config.AddMeter("DotMakeup.Twitter"))
+                .ConfigureResource(builder => builder.AddService(
+                    serviceName: "dotmakeup", 
+                    autoGenerateServiceInstanceId: false,
+                    serviceInstanceId: Environment.MachineName
+                    ))
+                .WithMetrics(config => config.AddMeter("DotMakeup"))
                 .WithMetrics(config => config.AddMeter("Microsoft.AspNetCore.Hosting"))
                 .UseGrafana(config =>
                 {
                     config.Instrumentations.Remove(Instrumentation.Process);
                     config.Instrumentations.Remove(Instrumentation.NetRuntime);
                     config.Instrumentations.Remove(Instrumentation.HttpClient);
-//                    config.Instrumentations.Remove(Instrumentation.AspNetCore);
                     config.ExporterSettings.EnableTraces = false;
                 });
 

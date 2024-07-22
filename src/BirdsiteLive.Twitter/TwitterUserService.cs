@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.Metrics;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -24,6 +25,9 @@ namespace BirdsiteLive.Twitter
 
     public class TwitterUserService : ITwitterUserService
     {
+        static Meter _meter = new("DotMakeup", "1.0.0");
+        static Counter<int> _apiCalled = _meter.CreateCounter<int>("dotmakeup_api_called_count");
+        
         private readonly ITwitterAuthenticationInitializer _twitterAuthenticationInitializer;
         private readonly ITwitterStatisticsHandler _statisticsHandler;
         private readonly ILogger<TwitterUserService> _logger;
@@ -118,26 +122,20 @@ namespace BirdsiteLive.Twitter
                 var userFromDal = await _twitterUserDal.GetUserAsync(username);
                 if (userFromDal is not null && userFromDal.Followers > 20)
                     user = await addDescription(user);
+                _apiCalled.Add(1, new KeyValuePair<string, object>("api", "twitter_account")
+                , new KeyValuePair<string, object>("result", "2xx") );
                 return user;
             }
             catch (System.Collections.Generic.KeyNotFoundException)
             {
+                _apiCalled.Add(1, new KeyValuePair<string, object>("api", "twitter_account")
+                , new KeyValuePair<string, object>("result", "4xx") );
                 throw new UserNotFoundException();
-                //if (e.TwitterExceptionInfos.Any(x => x.Message.ToLowerInvariant().Contains("User has been suspended".ToLowerInvariant())))
-                //{
-                //    throw new UserHasBeenSuspendedException();
-                //}
-                //else if (e.TwitterExceptionInfos.Any(x => x.Message.ToLowerInvariant().Contains("User not found".ToLowerInvariant())))
-                //{
-                //    throw new UserNotFoundException();
-                //}
-                //else
-                //{
-                //    throw;
-                //}
             }
             catch (Exception e)
             {
+                _apiCalled.Add(1, new KeyValuePair<string, object>("api", "twitter_account")
+                , new KeyValuePair<string, object>("result", "5xx") );
                 _logger.LogError(e, "Error retrieving user {Username}", username);
                 throw;
             }
@@ -226,7 +224,6 @@ namespace BirdsiteLive.Twitter
                 request.Headers.TryAddWithoutValidation("dotmakeup-password", password);
 
                 _statisticsHandler.CalledApi($"sidecar.Tries.Bio");
-                _statisticsHandler.CalledApi("sidecar.Tries");
 
                 var httpResponse = await client.SendAsync(request);
 

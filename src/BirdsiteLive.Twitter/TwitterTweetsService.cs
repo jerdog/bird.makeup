@@ -9,7 +9,6 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using BirdsiteLive.Common.Settings;
 using BirdsiteLive.Common.Interfaces;
-using BirdsiteLive.Statistics.Domain;
 using BirdsiteLive.Twitter.Models;
 using BirdsiteLive.Twitter.Tools;
 using Microsoft.Extensions.Logging;
@@ -36,7 +35,6 @@ namespace BirdsiteLive.Twitter
         static Counter<int> _newTweets = _meter.CreateCounter<int>("dotmakeup_twitter_new_tweets_count");
         
         private readonly ITwitterAuthenticationInitializer _twitterAuthenticationInitializer;
-        private readonly ITwitterStatisticsHandler _statisticsHandler;
         private readonly ICachedTwitterUserService _twitterUserService;
         private readonly ITwitterUserDal _twitterUserDal;
         private readonly ILogger<TwitterTweetsService> _logger;
@@ -47,10 +45,9 @@ namespace BirdsiteLive.Twitter
         private string Useragent = "Bird.makeup ( https://git.sr.ht/~cloutier/bird.makeup ) Bot";
 
         #region Ctor
-        public TwitterTweetsService(ITwitterAuthenticationInitializer twitterAuthenticationInitializer, ITwitterStatisticsHandler statisticsHandler, ICachedTwitterUserService twitterUserService, ITwitterUserDal twitterUserDal, InstanceSettings instanceSettings, IHttpClientFactory httpClientFactory, ISettingsDal settings, ILogger<TwitterTweetsService> logger)
+        public TwitterTweetsService(ITwitterAuthenticationInitializer twitterAuthenticationInitializer, ICachedTwitterUserService twitterUserService, ITwitterUserDal twitterUserDal, InstanceSettings instanceSettings, IHttpClientFactory httpClientFactory, ISettingsDal settings, ILogger<TwitterTweetsService> logger)
         {
             _twitterAuthenticationInitializer = twitterAuthenticationInitializer;
-            _statisticsHandler = statisticsHandler;
             _twitterUserService = twitterUserService;
             _twitterUserDal = twitterUserDal;
             _instanceSettings = instanceSettings;
@@ -222,7 +219,7 @@ namespace BirdsiteLive.Twitter
                 extractedTweets = await TweetFromSidecar(user, fromTweetId, true);
                 source = "Sidecar (with replies)";
             }
-            else if (user.StatusesCount != twitterUser.StatusCount && user.Followers > followersThreshold + 3)
+            else if (user.StatusesCount != twitterUser.StatusCount && user.Followers > followersThreshold + 1)
             {
                 extractedTweets = await TweetFromSidecar(user, fromTweetId, false);
                 source = "Sidecar (without replies)";
@@ -235,7 +232,6 @@ namespace BirdsiteLive.Twitter
 
             await _twitterUserDal.UpdateTwitterStatusesCountAsync(username, twitterUser.StatusCount);
             await _twitterUserDal.UpdateUserExtradataAsync(username, "statusesCount", twitterUser.StatusCount);
-            _statisticsHandler.GotNewTweets(extractedTweets.Count);
             _newTweets.Add(extractedTweets.Count,
                 new KeyValuePair<string, object>("source", source)
             );
@@ -270,9 +266,6 @@ namespace BirdsiteLive.Twitter
                 request.Headers.TryAddWithoutValidation("dotmakeup-user", username);
                 request.Headers.TryAddWithoutValidation("dotmakeup-password", password);
                 
-                _statisticsHandler.CalledApi($"sidecar.Tries.{endpoint}");
-                _statisticsHandler.CalledApi("sidecar.Tries");
-
                 var httpResponse = await client.SendAsync(request);
 
                 if (httpResponse.StatusCode != HttpStatusCode.OK)
@@ -290,8 +283,6 @@ namespace BirdsiteLive.Twitter
                 
                 var c = await httpResponse.Content.ReadAsStringAsync();
                 var tweetsDocument = JsonDocument.Parse(c);
-                
-                _statisticsHandler.CalledApi("sidecar.Success");
                 
                 foreach (JsonElement title in tweetsDocument.RootElement.EnumerateArray())
                 {
@@ -371,14 +362,10 @@ namespace BirdsiteLive.Twitter
             else
                 address = $"https://{domain}/{user.Acct}";
             var document = await context.OpenAsync(address);
-            _statisticsHandler.CalledApi("Nitter");
 
             var cellSelector = ".tweet-link";
             var cells = document.QuerySelectorAll(cellSelector);
             var titles = cells.Select(m => m.GetAttribute("href"));
-
-            if (titles.Any())
-                _statisticsHandler.CalledApi("Nitter.Success-" + domain);
 
             _apiCalled.Add(1, new KeyValuePair<string, object>("api", "nitter"),
                 new KeyValuePair<string, object>("success", titles.Any()),

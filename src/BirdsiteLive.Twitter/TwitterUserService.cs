@@ -9,7 +9,6 @@ using System.Threading.Tasks;
 using BirdsiteLive.Common.Exceptions;
 using BirdsiteLive.Common.Settings;
 using BirdsiteLive.DAL.Contracts;
-using BirdsiteLive.Statistics.Domain;
 using BirdsiteLive.Twitter.Models;
 using BirdsiteLive.Twitter.Tools;
 using Microsoft.Extensions.Logging;
@@ -29,7 +28,6 @@ namespace BirdsiteLive.Twitter
         static Counter<int> _apiCalled = _meter.CreateCounter<int>("dotmakeup_api_called_count");
         
         private readonly ITwitterAuthenticationInitializer _twitterAuthenticationInitializer;
-        private readonly ITwitterStatisticsHandler _statisticsHandler;
         private readonly ILogger<TwitterUserService> _logger;
         private readonly ITwitterUserDal _twitterUserDal;
         private readonly InstanceSettings _instanceSettings;
@@ -85,10 +83,9 @@ namespace BirdsiteLive.Twitter
         """.Replace(" ", "").Replace("\n", "");
 
         #region Ctor
-        public TwitterUserService(ITwitterAuthenticationInitializer twitterAuthenticationInitializer, ITwitterStatisticsHandler statisticsHandler, ITwitterUserDal twitterUserDal, InstanceSettings instanceSettings, ISettingsDal settingsDal, IHttpClientFactory httpClientFactory, ILogger<TwitterUserService> logger)
+        public TwitterUserService(ITwitterAuthenticationInitializer twitterAuthenticationInitializer, ITwitterUserDal twitterUserDal, InstanceSettings instanceSettings, ISettingsDal settingsDal, IHttpClientFactory httpClientFactory, ILogger<TwitterUserService> logger)
         {
             _twitterAuthenticationInitializer = twitterAuthenticationInitializer;
-            _statisticsHandler = statisticsHandler;
             _twitterUserDal = twitterUserDal;
             _instanceSettings = instanceSettings;
             _settings = settingsDal;
@@ -138,10 +135,6 @@ namespace BirdsiteLive.Twitter
                 , new KeyValuePair<string, object>("result", "5xx") );
                 _logger.LogError(e, "Error retrieving user {Username}", username);
                 throw;
-            }
-            finally
-            {
-                _statisticsHandler.CalledApi("Twitter.User");
             }
 
             // Expand URLs
@@ -222,8 +215,6 @@ namespace BirdsiteLive.Twitter
 
                 request.Headers.TryAddWithoutValidation("dotmakeup-user", username);
                 request.Headers.TryAddWithoutValidation("dotmakeup-password", password);
-
-                _statisticsHandler.CalledApi($"sidecar.Tries.Bio");
 
                 var httpResponse = await client.SendAsync(request);
 

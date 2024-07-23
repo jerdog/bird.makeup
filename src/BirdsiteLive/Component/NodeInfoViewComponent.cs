@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using BirdsiteLive.DAL.Contracts;
 using BirdsiteLive.Domain.Repository;
 using BirdsiteLive.Services;
-using BirdsiteLive.Statistics.Domain;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BirdsiteLive.Component

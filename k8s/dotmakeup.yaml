@@ -98,12 +98,6 @@ spec:
                 secretKeyRef:
                   name: dotmakeup-db
                   key: password
-            - name: ApplicationInsights__ConnectionString
-              valueFrom:
-                secretKeyRef:
-                  name: dotmakeup-app-insights
-                  key: ConnectionString
-                  optional: true
           livenessProbe:
             httpGet:
               path: /About

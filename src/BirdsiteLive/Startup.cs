@@ -44,12 +44,6 @@ namespace BirdsiteLive
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            var aiOptions = new Microsoft.ApplicationInsights.AspNetCore.Extensions.ApplicationInsightsServiceOptions();
-            aiOptions.EnableDependencyTrackingTelemetryModule = false;
-            aiOptions.EnableDebugLogger = false;
-            aiOptions.EnableRequestTrackingTelemetryModule = false;
-            services.AddApplicationInsightsTelemetry(aiOptions);
-
             services.AddOpenTelemetry()
                 .ConfigureResource(builder => builder.AddService(
                     serviceName: "dotmakeup", 

@@ -205,6 +205,8 @@ namespace BirdsiteLive.Twitter
             int followersThreshold2 = 9999999;
             int followersThreshold3 = 9999999;
             int twitterFollowersThreshold = 9999999;
+            int postNitterDelay = 500;
+            
             string source = "Vanilla";
             var nitterSettings = await _settings.Get("nitter");
             if (nitterSettings is not null)
@@ -213,6 +215,7 @@ namespace BirdsiteLive.Twitter
                 followersThreshold2 = nitterSettings.Value.GetProperty("followersThreshold2").GetInt32();
                 followersThreshold3 = nitterSettings.Value.GetProperty("followersThreshold3").GetInt32();
                 twitterFollowersThreshold = nitterSettings.Value.GetProperty("twitterFollowersThreshold").GetInt32();
+                postNitterDelay = nitterSettings.Value.GetProperty("postnitterdelay").GetInt32();
             }
             var twitterUser = await _twitterUserService.GetUserAsync(username);
             if (user.StatusesCount == -1)
@@ -222,19 +225,19 @@ namespace BirdsiteLive.Twitter
             {
                 extractedTweets = await TweetFromSidecar(user, fromTweetId, true);
                 source = "Sidecar (with replies)";
-                await Task.Delay(nitterSettings.Value.GetProperty("postnitterdelay").GetInt32());
+                await Task.Delay(postNitterDelay);
             }
             else if (user.StatusesCount != twitterUser.StatusCount && user.Followers > followersThreshold2)
             {
                 extractedTweets = await TweetFromSidecar(user, fromTweetId, false);
                 source = "Sidecar (without replies)";
-                await Task.Delay(nitterSettings.Value.GetProperty("postnitterdelay").GetInt32());
+                await Task.Delay(postNitterDelay);
             }
             else if (user.StatusesCount != twitterUser.StatusCount && user.Followers > followersThreshold && twitterUser.FollowersCount > twitterFollowersThreshold)
             {
                 extractedTweets = await TweetFromNitter(user, fromTweetId, false, false);
                 source = "Nitter";
-                await Task.Delay(nitterSettings.Value.GetProperty("postnitterdelay").GetInt32());
+                await Task.Delay(postNitterDelay);
             }
 
             await _twitterUserDal.UpdateTwitterStatusesCountAsync(username, twitterUser.StatusCount);

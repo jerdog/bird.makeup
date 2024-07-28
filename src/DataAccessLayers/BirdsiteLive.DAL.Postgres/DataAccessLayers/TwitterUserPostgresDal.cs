@@ -35,7 +35,9 @@ namespace BirdsiteLive.DAL.Postgres.DataAccessLayers
         }
         private async Task<SyncTwitterUser> GetUserAsync(string acct, int? id)
         {
-            var query = $"SELECT *, ( SELECT COUNT(*) FROM {_settings.FollowersTableName} WHERE followings @> ARRAY[{tableName}.id]) as followersCount FROM {tableName} WHERE acct = $1 OR id = $2";
+            var query = $@"SELECT id, acct, twitterUserId, lastTweetPostedId, lastSync, fetchingErrorCount, statusescount, extradata,
+                ( SELECT COUNT(*) FROM {_settings.FollowersTableName} WHERE followings @> ARRAY[{tableName}.id]) as followersCount 
+                FROM {tableName} WHERE acct = $1 OR id = $2";
 
             if (acct is not null)
                 acct = acct.ToLowerInvariant();
@@ -62,8 +64,8 @@ namespace BirdsiteLive.DAL.Postgres.DataAccessLayers
                 LastTweetPostedId = reader["lastTweetPostedId"] as long? ?? default,
                 LastSync = reader["lastSync"] as DateTime? ?? default,
                 FetchingErrorCount = reader["fetchingErrorCount"] as int? ?? default,
+                StatusesCount = reader["statusescount"] as int? ?? -1,
                 Followers = reader["followersCount"] as long? ?? default,
-                FediAcct = reader["fediverseaccount"] as string,
                 ExtraData = extradata,
             };
 
@@ -103,23 +105,23 @@ namespace BirdsiteLive.DAL.Postgres.DataAccessLayers
 
         public async Task<SyncTwitterUser[]> GetAllTwitterUsersWithFollowersAsync(int maxNumber, int nStart, int nEnd, int m)
         {
-            const string query = @"
+            string query = @$"
                 WITH following AS (
-                    SELECT unnest(followings) as follow FROM followers
+                    SELECT unnest(followings) as follow FROM {_settings.FollowersTableName}
                 ),
                 following2 AS (
                     SELECT id, lastsync, count(*) as followers FROM following
-                    INNER JOIN twitter_users ON following.follow=twitter_users.id
+                    INNER JOIN {_settings.TwitterUserTableName} ON following.follow={_settings.TwitterUserTableName}.id
                     WHERE mod(id, $2) >= $3 AND mod(id, $2) <= $4
                     GROUP BY id
                     ORDER BY lastSync ASC NULLS FIRST
                     LIMIT $1
                 )
-                UPDATE twitter_users
+                UPDATE {_settings.TwitterUserTableName}
                 SET lastsync = NOW()
                 FROM following2
-                WHERE following2.id = twitter_users.id
-                RETURNING * 
+                WHERE following2.id = {_settings.TwitterUserTableName}.id
+                RETURNING {_settings.TwitterUserTableName}.id, acct, twitterUserId, lastTweetPostedId, {_settings.TwitterUserTableName}.lastSync, fetchingErrorCount, statusescount, followers
                 ";
 
             await using var connection = DataSource.CreateConnection();
@@ -147,6 +149,7 @@ namespace BirdsiteLive.DAL.Postgres.DataAccessLayers
                         FetchingErrorCount = reader["fetchingErrorCount"] as int? ?? default,
                         Followers = reader["followers"] as long? ?? default,
                         StatusesCount = reader["statusescount"] as int? ?? -1,
+                        ExtraData = JsonDocument.Parse("{}").RootElement,
                     }
                 );
 
@@ -180,7 +183,7 @@ namespace BirdsiteLive.DAL.Postgres.DataAccessLayers
         public async Task UpdateTwitterUserIdAsync(string username, long twitterUserId)
         {
             if(username == default) throw new ArgumentException("id");
-            if(twitterUserId == default) throw new ArgumentException("twtterUserId");
+            if(twitterUserId == default) throw new ArgumentException("twitterUserId");
 
             var query = $"UPDATE {_settings.TwitterUserTableName} SET twitterUserId = $1 WHERE acct = $2";
             await using var connection = DataSource.CreateConnection();

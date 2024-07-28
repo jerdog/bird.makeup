@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
@@ -247,34 +248,53 @@ namespace BirdsiteLive.DAL.Postgres.Tests.DataAccessLayers
         }
 
         [TestMethod]
-        public async Task GetAllTwitterUsers_Top_NotInit()
+        public async Task GetAllTwitterUsers_Ranked()
         {
             // Create accounts
             var dal = new TwitterUserPostgresDal(_settings);
-            for (var i = 0; i < 1000; i++)
+            for (var i = 0; i < 100; i++)
             {
                 var acct = $"myid{i}";
-                var lastTweetId = i+10;
 
                 await dal.CreateUserAsync(acct);
+
+                var user = await dal.GetUserAsync(acct);
+                user.LastTweetPostedId = i+10;
+                user.FetchingErrorCount = i+200;
+                if (i == 42)
+                    user.LastSync = DateTime.Now.AddYears(-1);
+                else
+                    user.LastSync = DateTime.Now.AddMonths(-1).AddSeconds(i);
+                await dal.UpdateTwitterUserAsync(user);
+                await dal.UpdateTwitterUserIdAsync(acct, i+1);
+                await dal.UpdateTwitterStatusesCountAsync(acct, i+3000);
             }
+            
+            var facct = "myhandle";
+            var host = "domain.ext";
+            var following = Enumerable.Range(0, 100).ToArray();
+            var inboxRoute = "/myhandle/inbox";
+            var sharedInboxRoute = "/inbox";
+            var actorId = $"https://{host}/{facct}";
 
-            // Update accounts
-            var now = DateTime.UtcNow;
-            var allUsers = await dal.GetAllTwitterUsersAsync();
-            foreach (var acc in allUsers)
-            {
-                var lastSync = now.AddDays(acc.LastTweetPostedId);
-                acc.LastSync = lastSync;
-                await dal.UpdateTwitterUserAsync(acc);
-            }
+            var fdal = new FollowersPostgresDal(_settings);
+            await fdal.CreateFollowerAsync(facct, host, inboxRoute, sharedInboxRoute, actorId, following);
 
-            // Create a not init account
-            await dal.CreateUserAsync("not_init");
+            var result = await dal.GetAllTwitterUsersWithFollowersAsync(1, 0, 10, 10);
 
-            var result = await dal.GetAllTwitterUsersAsync(10);
+            SyncTwitterUser user1 = result.ElementAt(0);
+            Assert.AreEqual(user1.Acct, "myid42");
+            Assert.AreEqual(user1.LastTweetPostedId, 52);
 
-            Assert.IsTrue(result.Any(x => x.Acct == "not_init"));
+            SyncTwitterUser user2 = await dal.GetUserAsync(result.ElementAt(0).Id);
+            Assert.AreEqual(user1.FetchingErrorCount, user2.FetchingErrorCount);
+            Assert.AreEqual(user1.StatusesCount, user2.StatusesCount);
+            Assert.AreEqual(user1.Followers, 1);
+            Assert.AreEqual(user1.Followers, user2.Followers);
+            Assert.AreEqual(user1.LastTweetPostedId, user2.LastTweetPostedId);
+            Assert.AreEqual(user1.FetchingErrorCount, user2.FetchingErrorCount);
+            Assert.AreEqual(user1.TwitterUserId, user2.TwitterUserId);
+
         }
 
         [TestMethod]

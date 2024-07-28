@@ -23,7 +23,7 @@ namespace BirdsiteLive.DAL.Postgres.DataAccessLayers
     public class DbInitializerPostgresDal : PostgresBase, IDbInitializerDal
     {
         private readonly PostgresTools _tools;
-        private readonly Version _currentVersion = new Version(3, 3);
+        private readonly Version _currentVersion = new Version(3, 4);
         private const string DbVersionType = "db-version";
 
         #region Ctor
@@ -138,6 +138,7 @@ namespace BirdsiteLive.DAL.Postgres.DataAccessLayers
                 new Tuple<Version, Version>(new Version(3,0), new Version(3,1)),
                 new Tuple<Version, Version>(new Version(3,1), new Version(3,2)),
                 new Tuple<Version, Version>(new Version(3,2), new Version(3,3)),
+                new Tuple<Version, Version>(new Version(3,3), new Version(3,4)),
             };
         }
 
@@ -246,7 +247,17 @@ namespace BirdsiteLive.DAL.Postgres.DataAccessLayers
             {
                 var alterFollowersAddIg = $@"ALTER TABLE {_settings.FollowersTableName} ADD followings_instagram INTEGER[]";
                 await _tools.ExecuteRequestAsync(alterFollowersAddIg);
-
+            }
+            else if (from == new Version(3, 3) && to == new Version(3, 4))
+            {
+                var alterTwittterAddWikidata = $@"ALTER TABLE {_settings.TwitterUserTableName} ADD wikidata JSONB";
+                var alterTwittterAddCache = $@"ALTER TABLE {_settings.TwitterUserTableName} ADD cache JSONB";
+                var alterIgAddWikidata = $@"ALTER TABLE {_settings.InstagramUserTableName} ADD wikidata JSONB";
+                var alterIgAddCache = $@"ALTER TABLE {_settings.InstagramUserTableName} ADD cache JSONB";
+                await _tools.ExecuteRequestAsync(alterTwittterAddWikidata);
+                await _tools.ExecuteRequestAsync(alterTwittterAddCache);
+                await _tools.ExecuteRequestAsync(alterIgAddWikidata);
+                await _tools.ExecuteRequestAsync(alterIgAddCache);
             }
             else
             {

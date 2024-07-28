@@ -19,7 +19,7 @@ namespace BirdsiteLive.DAL.Models
 
         public int FetchingErrorCount { get; set; } //TODO: update DAL
         public long Followers { get; set; } 
-        public long StatusesCount { get; set; }
+        public int StatusesCount { get; set; }
         public JsonElement ExtraData { get; set; } = new JsonElement();
 
         public string PreDescriptionHook

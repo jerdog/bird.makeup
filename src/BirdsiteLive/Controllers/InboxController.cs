@@ -46,6 +46,8 @@ namespace BirdsiteLive.Controllers
                     _logger.LogTrace("Signature: {Signature}", signature);
                     _logger.LogTrace($"Date: {HeaderHandler.RequestHeaders(r.Headers)["date"]}");
                     _logger.LogTrace($"Digest: {HeaderHandler.RequestHeaders(r.Headers)["digest"]}");
+                    _logger.LogTrace($"Host: {HeaderHandler.RequestHeaders(r.Headers)["host"]}");
+                    _logger.LogTrace($"Host: {HeaderHandler.RequestHeaders(r.Headers)["content-type"]}");
                     
                     switch (activity?.type)
                     {

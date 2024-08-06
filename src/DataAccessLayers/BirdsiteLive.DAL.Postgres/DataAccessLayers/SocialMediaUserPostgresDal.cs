@@ -61,6 +61,41 @@ public abstract class SocialMediaUserPostgresDal : PostgresBase, SocialMediaUser
             };
 
         }
+        public async Task<string> GetUserCacheAsync(string username)
+        {
+            var query = $"SELECT cache FROM {tableName} WHERE acct = $1";
+
+            await using var connection = DataSource.CreateConnection();
+            await connection.OpenAsync();
+            await using var command = new NpgsqlCommand(query, connection) {
+                Parameters =
+                {
+                    new() { Value = username },
+                },
+            };
+            var reader = await command.ExecuteReaderAsync();
+            if (!reader.HasRows)
+                return null;
+            await reader.ReadAsync();
+            
+            var cache = reader["cache"] as string;
+            return cache;
+        }
+        public async Task UpdateUserCacheAsync(SocialMediaUser cache)
+        {
+            var query = $"UPDATE {tableName} SET cache = $1 WHERE acct = $2";
+            await using var connection = DataSource.CreateConnection();
+            await connection.OpenAsync();
+            await using var command = new NpgsqlCommand(query, connection) {
+                Parameters = 
+                { 
+                    new() { Value = JsonSerializer.Serialize(cache), NpgsqlDbType = NpgsqlDbType.Jsonb },
+                    new() { Value = cache.Acct},
+                }
+            };
+
+            await command.ExecuteNonQueryAsync();
+        }
         public async Task<long> GetFollowersCountAsync(int id)
         {
             var query = $"SELECT COUNT({FollowingColumnName}) FROM {_settings.FollowersTableName} WHERE {FollowingColumnName} @> ARRAY[$1]";

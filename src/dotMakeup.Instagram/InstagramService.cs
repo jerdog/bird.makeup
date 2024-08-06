@@ -16,6 +16,7 @@ public class InstagramService : ISocialMediaService
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly InstanceSettings _settings;
         private readonly ISettingsDal _settingsDal;
+        private readonly IInstagramUserDal _instagramUserDal;
         
         private readonly MemoryCache _userCache;
         private readonly MemoryCache _postCache;
@@ -43,6 +44,7 @@ public class InstagramService : ISocialMediaService
             _httpClientFactory = httpClientFactory;
             _settings = settings;
             _settingsDal = settingsDal;
+            _instagramUserDal = userDal;
             UserDal = userDal;
             
             _userCache = new MemoryCache(new MemoryCacheOptions()
@@ -63,57 +65,22 @@ public class InstagramService : ISocialMediaService
         public SocialMediaUserDal UserDal { get; }
         public async Task<SocialMediaUser?> GetUserAsync(string username)
         {
-            JsonElement accounts = await _settingsDal.Get("ig_allow_list") ?? JsonDocument.Parse("[\"caseyneistat\", \"nasa\"]").RootElement;
-            if (!accounts.EnumerateArray().Any(user => user.GetString() == username))
+            JsonElement? accounts = await _settingsDal.Get("ig_allow_list");
+            if (accounts is not null && !accounts.Value.EnumerateArray().Any(user => user.GetString() == username))
                 throw new UserNotFoundException();
             
             if (!_userCache.TryGetValue(username, out InstagramUser user))
             {
-                var client = _httpClientFactory.CreateClient();
-                string requestUrl;
-                requestUrl = _settings.SidecarURL + "/instagram/user/" + username;
-                var request = new HttpRequestMessage(HttpMethod.Get, requestUrl);
-
-                var httpResponse = await client.SendAsync(request);
-
-                if (httpResponse.StatusCode != HttpStatusCode.OK)
+                var userCache = await _instagramUserDal.GetUserCacheAsync(username);
+                if (userCache is not null)
                 {
-                    _userCache.Set(username, user, _cacheEntryOptionsError);
-                    throw new UserNotFoundException();
+                    user = JsonSerializer.Deserialize<InstagramUser>(userCache);
                 }
-
-                var c = await httpResponse.Content.ReadAsStringAsync();
-                var userDocument = JsonDocument.Parse(c);
-
-                List<string> pinnedPost = new List<string>();
-                foreach (JsonElement postDoc in userDocument.RootElement.GetProperty("posts").EnumerateArray())
+                else
                 {
-                    var post = ParsePost(postDoc);
-                    _postCache.Set(post.Id, post, _cacheEntryOptions);
-                    if (post.IsPinned)
-                        pinnedPost.Add(post.Id);
+                    user = await CallSidecar(username);
+                    await _instagramUserDal.UpdateUserCacheAsync(user);
                 }
-
-
-                try
-                {
-                    user = new InstagramUser()
-                    {
-                        Description = userDocument.RootElement.GetProperty("bio").GetString(),
-                        Acct = username,
-                        ProfileImageUrl = userDocument.RootElement.GetProperty("profilePic").GetString(),
-                        Name = userDocument.RootElement.GetProperty("name").GetString(),
-                        PinnedPosts = pinnedPost,
-                        ProfileUrl = "www.instagram.com/" + username,
-                    };
-
-                }
-                catch (KeyNotFoundException _)
-                {
-                    _userCache.Set(username, user, _cacheEntryOptionsError);
-                    throw new UserNotFoundException();
-                }
-                _userCache.Set(username, user, _cacheEntryOptions);
             }
 
             return user;
@@ -143,6 +110,58 @@ public class InstagramService : ISocialMediaService
             
             _postCache.Set(id, post, _cacheEntryOptions);
             return post;
+        }
+
+        private async Task<InstagramUser> CallSidecar(string username)
+        {
+            InstagramUser user = null;
+            var client = _httpClientFactory.CreateClient();
+            string requestUrl;
+            requestUrl = _settings.SidecarURL + "/instagram/user/" + username;
+            var request = new HttpRequestMessage(HttpMethod.Get, requestUrl);
+
+            var httpResponse = await client.SendAsync(request);
+
+            if (httpResponse.StatusCode != HttpStatusCode.OK)
+            {
+                _userCache.Set(username, user, _cacheEntryOptionsError);
+                throw new UserNotFoundException();
+            }
+
+            var c = await httpResponse.Content.ReadAsStringAsync();
+            var userDocument = JsonDocument.Parse(c);
+
+            List<string> pinnedPost = new List<string>();
+            foreach (JsonElement postDoc in userDocument.RootElement.GetProperty("posts").EnumerateArray())
+            {
+                var post = ParsePost(postDoc);
+                _postCache.Set(post.Id, post, _cacheEntryOptions);
+                if (post.IsPinned)
+                    pinnedPost.Add(post.Id);
+            }
+
+
+            try
+            {
+                user = new InstagramUser()
+                {
+                    Description = userDocument.RootElement.GetProperty("bio").GetString(),
+                    Acct = username,
+                    ProfileImageUrl = userDocument.RootElement.GetProperty("profilePic").GetString(),
+                    Name = userDocument.RootElement.GetProperty("name").GetString(),
+                    PinnedPosts = pinnedPost,
+                    ProfileUrl = "www.instagram.com/" + username,
+                };
+
+            }
+            catch (KeyNotFoundException _)
+            {
+                _userCache.Set(username, user, _cacheEntryOptionsError);
+                throw new UserNotFoundException();
+            }
+            _userCache.Set(username, user, _cacheEntryOptions);
+
+            return user;
         }
 
         private InstagramPost ParsePost(JsonElement postDoc)

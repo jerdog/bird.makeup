@@ -124,7 +124,7 @@ namespace BirdsiteLive.Domain
             var date = DateTime.UtcNow.ToUniversalTime();
             var httpDate = date.ToString("r");
 
-            var digest = _cryptoService.ComputeSha256Hash(json);
+            var digest = CryptoService.ComputeSha256Hash(json);
 
             var signature = await _cryptoService.SignAndGetSignatureHeader(date, actorUrl, targetHost, digest, usedInbox);
 

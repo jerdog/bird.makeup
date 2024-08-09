@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -15,13 +16,15 @@ namespace BirdsiteLive.Twitter
     public class TwitterService : ISocialMediaService
     {
         private readonly ITwitterTweetsService _twitterTweetsService;
-        private readonly ITwitterUserService _twitterUserService;
+        private readonly ICachedTwitterUserService _twitterUserService;
+        private readonly ITwitterUserDal _userDal;
 
         #region Ctor
         public TwitterService(ICachedTwitterTweetsService twitterService, ICachedTwitterUserService twitterUserService, ITwitterUserDal userDal, InstanceSettings settings)
         {
             _twitterTweetsService = twitterService;
             _twitterUserService = twitterUserService;
+            _userDal = userDal;
             UserDal = userDal;
         }
         #endregion
@@ -32,6 +35,30 @@ namespace BirdsiteLive.Twitter
                 return null;
             var post = await _twitterTweetsService.GetTweetAsync(parsedStatusId);
             return post;
+        }
+
+        public async Task<SocialMediaPost[]> GetNewPosts(SyncUser user)
+        {
+            var tweets = new ExtractedTweet[0];
+            
+            try
+            {
+                if (user.LastTweetPostedId == -1)
+                    tweets = await _twitterTweetsService.GetTimelineAsync(user);
+                else
+                    tweets = await _twitterTweetsService.GetTimelineAsync(user, user.LastTweetPostedId);
+            }
+            catch (Exception e)
+            {
+                _twitterUserService.PurgeUser(user.Acct);
+            }
+            if (tweets.Length > 0)
+            {
+                var tweetId = tweets.Last().Id;
+                await _userDal.UpdateTwitterUserAsync(user.Id, long.Parse(tweetId), user.FetchingErrorCount, user.LastSync);
+            }
+
+            return tweets;
         }
 
         public string ServiceName { get; } = "Twitter";

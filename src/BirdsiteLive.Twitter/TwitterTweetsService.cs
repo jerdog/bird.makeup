@@ -25,7 +25,7 @@ namespace BirdsiteLive.Twitter
     public interface ITwitterTweetsService
     {
         Task<ExtractedTweet> GetTweetAsync(long statusId);
-        Task<ExtractedTweet[]> GetTimelineAsync(SyncTwitterUser user, long fromTweetId = -1);
+        Task<ExtractedTweet[]> GetTimelineAsync(SyncUser user, long fromTweetId = -1);
     }
 
     public class TwitterTweetsService : ITwitterTweetsService
@@ -111,7 +111,7 @@ namespace BirdsiteLive.Twitter
             }
         }
 
-        public async Task<ExtractedTweet[]> GetTimelineAsync(SyncTwitterUser user, long fromTweetId = -1)
+        public async Task<ExtractedTweet[]> GetTimelineAsync(SyncUser user, long fromTweetId = -1)
         {
 
             var client = await _twitterAuthenticationInitializer.MakeHttpClient();
@@ -248,7 +248,7 @@ namespace BirdsiteLive.Twitter
             return extractedTweets.ToArray();
         }
 
-        private async Task<List<ExtractedTweet>> TweetFromSidecar(SyncTwitterUser user, long fromId, bool withReplies)
+        private async Task<List<ExtractedTweet>> TweetFromSidecar(SyncUser user, long fromId, bool withReplies)
         {
             try
             {
@@ -331,7 +331,7 @@ namespace BirdsiteLive.Twitter
             }
         }
 
-        private async Task<List<ExtractedTweet>> TweetFromNitter(SyncTwitterUser user, long fromId, bool withReplies,
+        private async Task<List<ExtractedTweet>> TweetFromNitter(SyncUser user, long fromId, bool withReplies,
             bool lowtrust)
         {
             // https://status.d420.de/

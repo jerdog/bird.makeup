@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using BirdsiteLive.Common.Interfaces;
 using BirdsiteLive.DAL.Contracts;
 using BirdsiteLive.DAL.Models;
 using BirdsiteLive.Pipeline.Contracts;
@@ -17,18 +18,14 @@ namespace BirdsiteLive.Pipeline.Processors.SubTasks
 {
     public class RetrieveTweetsProcessor : IRetrieveTweetsProcessor
     {
-        private readonly ITwitterTweetsService _twitterTweetsService;
-        private readonly ICachedTwitterUserService _twitterUserService;
-        private readonly ITwitterUserDal _twitterUserDal;
+        private readonly ISocialMediaService _socialMediaService;
         private readonly ILogger<RetrieveTweetsProcessor> _logger;
         private readonly InstanceSettings _settings;
 
         #region Ctor
-        public RetrieveTweetsProcessor(ITwitterTweetsService twitterTweetsService, ITwitterUserDal twitterUserDal, ICachedTwitterUserService twitterUserService, InstanceSettings settings, ILogger<RetrieveTweetsProcessor> logger)
+        public RetrieveTweetsProcessor(ISocialMediaService socialMediaService, InstanceSettings settings, ILogger<RetrieveTweetsProcessor> logger)
         {
-            _twitterTweetsService = twitterTweetsService;
-            _twitterUserDal = twitterUserDal;
-            _twitterUserService = twitterUserService;
+            _socialMediaService = socialMediaService;
             _logger = logger;
             _settings = settings;
         }
@@ -59,21 +56,17 @@ namespace BirdsiteLive.Pipeline.Processors.SubTasks
                     }
                     try 
                     {
-                        var tweets = await RetrieveNewTweets(user);
-                        _logger.LogInformation(index + "/" + syncTwitterUsers.Count() + " Got " + tweets.Length + " tweets from user " + user.Acct + " " );
+                        var tweets = await _socialMediaService.GetNewPosts(user);
+                        _logger.LogInformation(index + "/" + syncTwitterUsers.Count() + " Got " + tweets.Length + " posts from user " + user.Acct + " " );
                         if (tweets.Length > 0)
                         {
-                            userWtData.Tweets = tweets;
+                            userWtData.Tweets = (ExtractedTweet[])tweets;
                             usersWtTweets.Add(userWtData);
-                            var tweetId = tweets.Last().Id;
-                            await _twitterUserDal.UpdateTwitterUserAsync(user.Id, long.Parse(tweetId), user.FetchingErrorCount, user.LastSync);
                         }
-
                     } 
                     catch(Exception e)
                     {
                         _logger.LogError(e.Message);
-                        //await _twitterUserDal.UpdateTwitterUserAsync(user.Id, user.LastTweetPostedId, user.FetchingErrorCount, now);
                     }
                 });
                 todo.Add(t);
@@ -88,26 +81,6 @@ namespace BirdsiteLive.Pipeline.Processors.SubTasks
 
             await Task.WhenAll(todo);
             return usersWtTweets.ToArray();
-        }
-
-        private async Task<ExtractedTweet[]> RetrieveNewTweets(SyncTwitterUser user)
-        {
-            var tweets = new ExtractedTweet[0];
-            
-            try
-            {
-                if (user.LastTweetPostedId == -1)
-                    tweets = await _twitterTweetsService.GetTimelineAsync(user);
-                else
-                    tweets = await _twitterTweetsService.GetTimelineAsync(user, user.LastTweetPostedId);
-            }
-            catch (Exception e)
-            {
-                _logger.LogError(e, "Error retrieving TL of {Username} from {LastTweetPostedId}, purging user from cache", user.Acct, user.LastTweetPostedId);
-                _twitterUserService.PurgeUser(user.Acct);
-            }
-
-            return tweets;
         }
     }
 }

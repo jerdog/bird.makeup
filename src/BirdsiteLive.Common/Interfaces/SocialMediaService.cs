@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
@@ -7,6 +8,7 @@ public interface ISocialMediaService
 {
         Task<SocialMediaUser> GetUserAsync(string username);
         Task<SocialMediaPost?> GetPostAsync(string id);
+        Task<SocialMediaPost[]> GetNewPosts(SyncUser user);
         string ServiceName { get;  }
         SocialMediaUserDal UserDal { get; }
         Regex ValidUsername { get;  }

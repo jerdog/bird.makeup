@@ -22,6 +22,7 @@ tasks:
   - publish-arm: |
       cd bird.makeup/src/BirdsiteLive
       dotnet publish --os linux --arch arm64 /t:PublishContainer -c Release
+      docker tag cloutier/bird.makeup:latest cloutier/bird.makeup:latest-arm
       docker push cloutier/bird.makeup:latest-arm
   - deploy: |
       cd bird.makeup/k8s

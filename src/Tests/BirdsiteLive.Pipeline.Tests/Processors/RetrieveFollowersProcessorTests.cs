@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using BirdsiteLive.Common.Models;
 using BirdsiteLive.DAL.Contracts;
 using BirdsiteLive.DAL.Models;
 using BirdsiteLive.Pipeline.Models;
@@ -55,13 +56,6 @@ namespace BirdsiteLive.Pipeline.Tests.Processors
 
             #region Mocks
             var followersDalMock = new Mock<IFollowersDal>(MockBehavior.Strict);
-            followersDalMock
-                .Setup(x => x.GetFollowersAsync(It.Is<int>(y => y == userId1)))
-                .ReturnsAsync(followersUser1.ToArray());
-
-            followersDalMock
-                .Setup(x => x.GetFollowersAsync(It.Is<int>(y => y == userId2)))
-                .ReturnsAsync(followersUser2.ToArray());
             #endregion
 
             var processor = new RetrieveFollowersProcessor(followersDalMock.Object);

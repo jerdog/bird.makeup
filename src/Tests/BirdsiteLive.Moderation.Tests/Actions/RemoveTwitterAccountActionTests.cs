@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+using BirdsiteLive.Common.Interfaces;
+using BirdsiteLive.Common.Models;
 using BirdsiteLive.DAL.Contracts;
 using BirdsiteLive.DAL.Models;
 using BirdsiteLive.Moderation.Actions;
@@ -32,22 +34,33 @@ namespace BirdsiteLive.Moderation.Tests.Actions
             #endregion
 
             #region Mocks
-            var followersDalMock = new Mock<IFollowersDal>(MockBehavior.Strict);
-            followersDalMock
-                .Setup(x => x.GetFollowersAsync(
-                    It.Is<int>(y => y == 24)))
+            var followersDalMock = new Mock<IFollowersDal>();
+
+            //followersDalMock
+            //    .Setup(x => x.DeleteFollowerAsync(
+            //        It.Is<int>(y => y == 48)))
+            //    .Returns(Task.CompletedTask);
+
+            var socialServiceMock = new Mock<ISocialMediaService>(MockBehavior.Strict);
+            socialServiceMock
+                .Setup(x => x.UserDal.GetFollowersAsync(
+                    It.Is<int>(y => y == twitter.Id)
+                    ))
                 .ReturnsAsync(followers.ToArray());
 
-            followersDalMock
-                .Setup(x => x.DeleteFollowerAsync(
-                    It.Is<int>(y => y == 48)))
+            socialServiceMock
+                .Setup(x => x.UserDal.RemoveFollower(
+                    It.Is<int>(y => y == followers[0].Id),
+                    It.Is<int>(y => y == twitter.Id)
+                    ))
                 .Returns(Task.CompletedTask);
-
-            var twitterUserDalMock = new Mock<ITwitterUserDal>(MockBehavior.Strict);
-            twitterUserDalMock
-                .Setup(x => x.DeleteUserAsync(
-                    It.Is<int>(y => y == 24)))
+            
+            socialServiceMock
+                .Setup(x => x.UserDal.DeleteUserAsync(
+                    It.Is<int>(y => y == twitter.Id)
+                    ))
                 .Returns(Task.CompletedTask);
+            
 
             var rejectFollowingActionMock = new Mock<IRejectFollowingAction>(MockBehavior.Strict);
             rejectFollowingActionMock
@@ -57,12 +70,11 @@ namespace BirdsiteLive.Moderation.Tests.Actions
                 .Returns(Task.CompletedTask);
             #endregion
 
-            var action = new RemoveTwitterAccountAction(followersDalMock.Object, twitterUserDalMock.Object, rejectFollowingActionMock.Object);
+            var action = new RemoveTwitterAccountAction(followersDalMock.Object, socialServiceMock.Object, rejectFollowingActionMock.Object);
             await action.ProcessAsync(twitter);
 
             #region Validations
             followersDalMock.VerifyAll();
-            twitterUserDalMock.VerifyAll();
             rejectFollowingActionMock.VerifyAll();
             #endregion
         }
@@ -88,25 +100,29 @@ namespace BirdsiteLive.Moderation.Tests.Actions
             #endregion
 
             #region Mocks
-            var followersDalMock = new Mock<IFollowersDal>(MockBehavior.Strict);
-            followersDalMock
-                .Setup(x => x.GetFollowersAsync(
-                    It.Is<int>(y => y == 24)))
+            var followersDalMock = new Mock<IFollowersDal>();
+
+            var twitterUserDalMock = new Mock<ISocialMediaService>(MockBehavior.Strict);
+            twitterUserDalMock
+                .Setup(x => x.UserDal.GetFollowersAsync(
+                    It.Is<int>(y => y == twitter.Id)
+                    ))
                 .ReturnsAsync(followers.ToArray());
 
-            followersDalMock
-                .Setup(x => x.UpdateFollowerAsync(
-                    It.Is<Follower>(y => y.Id == 48
-                        && y.Followings.Count == 1
-                    )))
-                .Returns(Task.CompletedTask);
-
-            var twitterUserDalMock = new Mock<ITwitterUserDal>(MockBehavior.Strict);
             twitterUserDalMock
-                .Setup(x => x.DeleteUserAsync(
-                    It.Is<int>(y => y == 24)))
+                .Setup(x => x.UserDal.RemoveFollower(
+                    It.Is<int>(y => y == followers[0].Id),
+                    It.Is<int>(y => y == twitter.Id)
+                    ))
                 .Returns(Task.CompletedTask);
-
+            
+            twitterUserDalMock
+                .Setup(x => x.UserDal.DeleteUserAsync(
+                    It.Is<int>(y => y == twitter.Id)
+                    ))
+                .Returns(Task.CompletedTask);
+            
+            
             var rejectFollowingActionMock = new Mock<IRejectFollowingAction>(MockBehavior.Strict);
             rejectFollowingActionMock
                 .Setup(x => x.ProcessAsync(

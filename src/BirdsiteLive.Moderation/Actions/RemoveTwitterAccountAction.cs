@@ -1,5 +1,6 @@
 ﻿using System.Linq;
 using System.Threading.Tasks;
+using BirdsiteLive.Common.Interfaces;
 using BirdsiteLive.DAL.Contracts;
 using BirdsiteLive.DAL.Models;
 
@@ -13,14 +14,14 @@ namespace BirdsiteLive.Moderation.Actions
     public class RemoveTwitterAccountAction : IRemoveTwitterAccountAction
     {
         private readonly IFollowersDal _followersDal;
-        private readonly ITwitterUserDal _twitterUserDal;
+        private readonly ISocialMediaService _socialMediaService;
         private readonly IRejectFollowingAction _rejectFollowingAction;
 
         #region Ctor
-        public RemoveTwitterAccountAction(IFollowersDal followersDal, ITwitterUserDal twitterUserDal, IRejectFollowingAction rejectFollowingAction)
+        public RemoveTwitterAccountAction(IFollowersDal followersDal, ISocialMediaService socialMediaService, IRejectFollowingAction rejectFollowingAction)
         {
             _followersDal = followersDal;
-            _twitterUserDal = twitterUserDal;
+            _socialMediaService = socialMediaService;
             _rejectFollowingAction = rejectFollowingAction;
         }
         #endregion
@@ -29,7 +30,7 @@ namespace BirdsiteLive.Moderation.Actions
         {
             // Check Followers 
             var twitterUserId = twitterUser.Id;
-            var followers = await _followersDal.GetFollowersAsync(twitterUserId);
+            var followers = await _socialMediaService.UserDal.GetFollowersAsync(twitterUserId);
             
             // Remove all Followers
             foreach (var follower in followers) 
@@ -38,17 +39,14 @@ namespace BirdsiteLive.Moderation.Actions
                 await _rejectFollowingAction.ProcessAsync(follower, twitterUser);
 
                 // Remove following from DB
-                if (follower.Followings.Contains(twitterUserId))
-                    follower.Followings.Remove(twitterUserId);
-
-                if (follower.Followings.Any())
-                    await _followersDal.UpdateFollowerAsync(follower);
-                else
-                    await _followersDal.DeleteFollowerAsync(follower.Id);
+                //if (follower.Followings.Any())
+                await _socialMediaService.UserDal.RemoveFollower(follower.Id, twitterUserId);
+                //else
+                //    await _followersDal.DeleteFollowerAsync(follower.Id);
             }
 
             // Remove twitter user
-            await _twitterUserDal.DeleteUserAsync(twitterUserId);
+            await _socialMediaService.UserDal.DeleteUserAsync(twitterUserId);
         }
     }
 }

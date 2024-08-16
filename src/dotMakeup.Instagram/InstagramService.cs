@@ -59,9 +59,9 @@ public class InstagramService : ISocialMediaService
         #endregion
 
 
-        public Task<SocialMediaPost[]> GetNewPosts(SyncUser user)
+        public async Task<SocialMediaPost[]> GetNewPosts(SyncUser user)
         {
-            throw new NotImplementedException();
+            return new SocialMediaPost[] {};
         }
 
         public string ServiceName { get; } = "Instagram";

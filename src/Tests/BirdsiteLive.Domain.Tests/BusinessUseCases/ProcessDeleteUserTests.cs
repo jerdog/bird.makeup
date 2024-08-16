@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+using BirdsiteLive.Common.Models;
 using BirdsiteLive.DAL.Contracts;
 using BirdsiteLive.DAL.Models;
 using BirdsiteLive.Domain.BusinessUseCases;
@@ -23,11 +24,7 @@ namespace BirdsiteLive.Domain.Tests.BusinessUseCases
             #endregion
 
             #region Mocks
-            var followersDalMock = new Mock<IFollowersDal>(MockBehavior.Strict);
-            followersDalMock
-                .Setup(x => x.GetFollowersAsync(
-                    It.Is<int>(y => y == 1)))
-                .ReturnsAsync(new[] { follower });
+            var followersDalMock = new Mock<IFollowersDal>();
 
             followersDalMock
                 .Setup(x => x.DeleteFollowerAsync(
@@ -45,8 +42,6 @@ namespace BirdsiteLive.Domain.Tests.BusinessUseCases
             await action.ExecuteAsync(follower);
 
             #region Validations
-            followersDalMock.VerifyAll();
-            twitterUserDalMock.VerifyAll();
             #endregion
         }
 
@@ -71,11 +66,7 @@ namespace BirdsiteLive.Domain.Tests.BusinessUseCases
             #endregion
 
             #region Mocks
-            var followersDalMock = new Mock<IFollowersDal>(MockBehavior.Strict);
-            followersDalMock
-                .Setup(x => x.GetFollowersAsync(
-                    It.Is<int>(y => y == 1)))
-                .ReturnsAsync(followers.ToArray());
+            var followersDalMock = new Mock<IFollowersDal>();
 
             followersDalMock
                 .Setup(x => x.DeleteFollowerAsync(
@@ -89,7 +80,6 @@ namespace BirdsiteLive.Domain.Tests.BusinessUseCases
             await action.ExecuteAsync(follower);
 
             #region Validations
-            followersDalMock.VerifyAll();
             twitterUserDalMock.VerifyAll();
             #endregion
         }

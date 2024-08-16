@@ -3,6 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Xml;
 using BirdsiteLive.Common.Interfaces;
+using BirdsiteLive.Common.Models;
 using BirdsiteLive.Common.Settings;
 using BirdsiteLive.DAL.Contracts;
 using BirdsiteLive.DAL.Models;
@@ -43,7 +44,8 @@ namespace BirdsiteLive.Pipeline.Tests.Processors
                 },
                 User = new SyncTwitterUser
                 {
-                    Acct = userAcct
+                    Acct = userAcct,
+                    Id = 10
                 },
                 Followers = new []
                 {
@@ -77,6 +79,11 @@ namespace BirdsiteLive.Pipeline.Tests.Processors
 
             var followersDalMock = new Mock<IFollowersDal>(MockBehavior.Strict);
             var socialServiceMock = new Mock<ISocialMediaService>();
+            socialServiceMock
+                .Setup(x => x.UserDal.GetFollowersAsync(
+                    It.Is<int>(y => y == 10)
+                    ))
+                .ReturnsAsync(userWithTweets.Followers);
             
             var loggerMock = new Mock<ILogger<SendTweetsToFollowersProcessor>>();
 
@@ -122,7 +129,8 @@ namespace BirdsiteLive.Pipeline.Tests.Processors
                 },
                 User = new SyncTwitterUser
                 {
-                    Acct = userAcct
+                    Acct = userAcct,
+                    Id = 10
                 },
                 Followers = new[]
                 {
@@ -159,6 +167,11 @@ namespace BirdsiteLive.Pipeline.Tests.Processors
 
             var followersDalMock = new Mock<IFollowersDal>(MockBehavior.Strict);
             var socialServiceMock = new Mock<ISocialMediaService>();
+            socialServiceMock
+                .Setup(x => x.UserDal.GetFollowersAsync(
+                    It.Is<int>(y => y == 10)
+                    ))
+                .ReturnsAsync(userWithTweets.Followers);
             
             var loggerMock = new Mock<ILogger<SendTweetsToFollowersProcessor>>();
 
@@ -204,7 +217,8 @@ namespace BirdsiteLive.Pipeline.Tests.Processors
                 },
                 User = new SyncTwitterUser
                 {
-                    Acct = userAcct
+                    Acct = userAcct,
+                    Id = 10
                 },
                 Followers = new[]
                 {
@@ -246,9 +260,17 @@ namespace BirdsiteLive.Pipeline.Tests.Processors
 
             var followersDalMock = new Mock<IFollowersDal>(MockBehavior.Strict);
             var socialServiceMock = new Mock<ISocialMediaService>();
+            socialServiceMock
+                .Setup(x => x.UserDal.GetFollowersAsync(
+                    It.Is<int>(y => y == 10)
+                    ))
+                .ReturnsAsync(userWithTweets.Followers);
             
             followersDalMock
-                .Setup(x => x.UpdateFollowerAsync(It.Is<Follower>(y => y.Id == userId2 && y.PostingErrorCount == 1)))
+                .Setup(x => x.UpdateFollowerErrorCountAsync(
+                        It.Is<int>(y => y == userId2),
+                        It.Is<int>(y => y == 1)
+                ))
                 .Returns(Task.CompletedTask);
 
             var loggerMock = new Mock<ILogger<SendTweetsToFollowersProcessor>>();
@@ -295,7 +317,8 @@ namespace BirdsiteLive.Pipeline.Tests.Processors
                 },
                 User = new SyncTwitterUser
                 {
-                    Acct = userAcct
+                    Acct = userAcct,
+                    Id = 10
                 },
                 Followers = new[]
                 {
@@ -338,9 +361,17 @@ namespace BirdsiteLive.Pipeline.Tests.Processors
 
             var followersDalMock = new Mock<IFollowersDal>(MockBehavior.Strict);
             var socialServiceMock = new Mock<ISocialMediaService>();
+            socialServiceMock
+                .Setup(x => x.UserDal.GetFollowersAsync(
+                    It.Is<int>(y => y == 10)
+                    ))
+                .ReturnsAsync(userWithTweets.Followers);
 
             followersDalMock
-                .Setup(x => x.UpdateFollowerAsync(It.Is<Follower>(y => y.Id == userId2 && y.PostingErrorCount == 0)))
+                .Setup(x => x.UpdateFollowerErrorCountAsync(
+                        It.Is<int>(y => y == userId2),
+                        It.Is<int>(y => y == 0)
+                ))
                 .Returns(Task.CompletedTask);
 
             var loggerMock = new Mock<ILogger<SendTweetsToFollowersProcessor>>();
@@ -387,7 +418,8 @@ namespace BirdsiteLive.Pipeline.Tests.Processors
                 },
                 User = new SyncTwitterUser
                 {
-                    Acct = userAcct
+                    Acct = userAcct,
+                    Id = 10
                 },
                 Followers = new[]
                 {
@@ -431,13 +463,24 @@ namespace BirdsiteLive.Pipeline.Tests.Processors
 
             var followersDalMock = new Mock<IFollowersDal>(MockBehavior.Strict);
             var socialServiceMock = new Mock<ISocialMediaService>();
+            socialServiceMock
+                .Setup(x => x.UserDal.GetFollowersAsync(
+                    It.Is<int>(y => y == 10)
+                    ))
+                .ReturnsAsync(userWithTweets.Followers);
 
             followersDalMock
-                .Setup(x => x.UpdateFollowerAsync(It.Is<Follower>(y => y.Id == userId1 && y.PostingErrorCount == 0)))
+                .Setup(x => x.UpdateFollowerErrorCountAsync(
+                        It.Is<int>(y => y == userId1),
+                        It.Is<int>(y => y == 0)
+                ))
                 .Returns(Task.CompletedTask);
 
             followersDalMock
-                .Setup(x => x.UpdateFollowerAsync(It.Is<Follower>(y => y.Id == userId2 && y.PostingErrorCount == 51)))
+                .Setup(x => x.UpdateFollowerErrorCountAsync(
+                        It.Is<int>(y => y == userId2),
+                        It.Is<int>(y => y == 51)
+                ))
                 .Returns(Task.CompletedTask);
 
             var loggerMock = new Mock<ILogger<SendTweetsToFollowersProcessor>>();
@@ -483,7 +526,8 @@ namespace BirdsiteLive.Pipeline.Tests.Processors
                 },
                 User = new SyncTwitterUser
                 {
-                    Acct = userAcct
+                    Acct = userAcct,
+                    Id = 10
                 },
                 Followers = new[]
                 {
@@ -519,6 +563,11 @@ namespace BirdsiteLive.Pipeline.Tests.Processors
 
             var followersDalMock = new Mock<IFollowersDal>(MockBehavior.Strict);
             var socialServiceMock = new Mock<ISocialMediaService>();
+            socialServiceMock
+                .Setup(x => x.UserDal.GetFollowersAsync(
+                    It.Is<int>(y => y == 10)
+                    ))
+                .ReturnsAsync(userWithTweets.Followers);
 
             var loggerMock = new Mock<ILogger<SendTweetsToFollowersProcessor>>();
 
@@ -564,7 +613,8 @@ namespace BirdsiteLive.Pipeline.Tests.Processors
                 },
                 User = new SyncTwitterUser
                 {
-                    Acct = userAcct
+                    Acct = userAcct,
+                    Id = 10
                 },
                 Followers = new[]
                 {
@@ -600,6 +650,11 @@ namespace BirdsiteLive.Pipeline.Tests.Processors
 
             var followersDalMock = new Mock<IFollowersDal>(MockBehavior.Strict);
             var socialServiceMock = new Mock<ISocialMediaService>();
+            socialServiceMock
+                .Setup(x => x.UserDal.GetFollowersAsync(
+                    It.Is<int>(y => y == 10)
+                    ))
+                .ReturnsAsync(userWithTweets.Followers);
 
             var loggerMock = new Mock<ILogger<SendTweetsToFollowersProcessor>>();
 
@@ -645,7 +700,8 @@ namespace BirdsiteLive.Pipeline.Tests.Processors
                 },
                 User = new SyncTwitterUser
                 {
-                    Acct = userAcct
+                    Acct = userAcct,
+                    Id = 10
                 },
                 Followers = new[]
                 {
@@ -685,9 +741,17 @@ namespace BirdsiteLive.Pipeline.Tests.Processors
 
             var followersDalMock = new Mock<IFollowersDal>(MockBehavior.Strict);
             var socialServiceMock = new Mock<ISocialMediaService>();
+            socialServiceMock
+                .Setup(x => x.UserDal.GetFollowersAsync(
+                    It.Is<int>(y => y == 10)
+                    ))
+                .ReturnsAsync(userWithTweets.Followers);
             
             followersDalMock
-                .Setup(x => x.UpdateFollowerAsync(It.Is<Follower>(y => y.Id == userId2 && y.PostingErrorCount == 1)))
+                .Setup(x => x.UpdateFollowerErrorCountAsync(
+                        It.Is<int>(y => y == userId2),
+                        It.Is<int>(y => y == 1)
+                ))
                 .Returns(Task.CompletedTask);
 
             var loggerMock = new Mock<ILogger<SendTweetsToFollowersProcessor>>();
@@ -734,7 +798,8 @@ namespace BirdsiteLive.Pipeline.Tests.Processors
                 },
                 User = new SyncTwitterUser
                 {
-                    Acct = userAcct
+                    Acct = userAcct,
+                    Id = 10
                 },
                 Followers = new[]
                 {
@@ -775,6 +840,11 @@ namespace BirdsiteLive.Pipeline.Tests.Processors
 
             var followersDalMock = new Mock<IFollowersDal>(MockBehavior.Strict);
             var socialServiceMock = new Mock<ISocialMediaService>();
+            socialServiceMock
+                .Setup(x => x.UserDal.GetFollowersAsync(
+                    It.Is<int>(y => y == 10)
+                    ))
+                .ReturnsAsync(userWithTweets.Followers);
 
             var loggerMock = new Mock<ILogger<SendTweetsToFollowersProcessor>>();
 
@@ -824,7 +894,8 @@ namespace BirdsiteLive.Pipeline.Tests.Processors
                 },
                 User = new SyncTwitterUser
                 {
-                    Acct = userAcct
+                    Acct = userAcct,
+                    Id = 10
                 },
                 Followers = new[]
                 {
@@ -865,6 +936,11 @@ namespace BirdsiteLive.Pipeline.Tests.Processors
 
             var followersDalMock = new Mock<IFollowersDal>(MockBehavior.Strict);
             var socialServiceMock = new Mock<ISocialMediaService>();
+            socialServiceMock
+                .Setup(x => x.UserDal.GetFollowersAsync(
+                    It.Is<int>(y => y == 10)
+                    ))
+                .ReturnsAsync(userWithTweets.Followers);
 
             var loggerMock = new Mock<ILogger<SendTweetsToFollowersProcessor>>();
 
@@ -914,7 +990,8 @@ namespace BirdsiteLive.Pipeline.Tests.Processors
                 },
                 User = new SyncTwitterUser
                 {
-                    Acct = userAcct
+                    Acct = userAcct,
+                    Id = 10
                 },
                 Followers = new[]
                 {
@@ -955,9 +1032,17 @@ namespace BirdsiteLive.Pipeline.Tests.Processors
 
             var followersDalMock = new Mock<IFollowersDal>(MockBehavior.Strict);
             var socialServiceMock = new Mock<ISocialMediaService>();
+            socialServiceMock
+                .Setup(x => x.UserDal.GetFollowersAsync(
+                    It.Is<int>(y => y == 10)
+                    ))
+                .ReturnsAsync(userWithTweets.Followers);
 
             followersDalMock
-                .Setup(x => x.UpdateFollowerAsync(It.Is<Follower>(y => y.Id == userId2 && y.PostingErrorCount == 0)))
+                .Setup(x => x.UpdateFollowerErrorCountAsync(
+                        It.Is<int>(y => y == userId2),
+                        It.Is<int>(y => y == 0)
+                ))
                 .Returns(Task.CompletedTask);
 
             var loggerMock = new Mock<ILogger<SendTweetsToFollowersProcessor>>();
@@ -1004,7 +1089,8 @@ namespace BirdsiteLive.Pipeline.Tests.Processors
                 },
                 User = new SyncTwitterUser
                 {
-                    Acct = userAcct
+                    Acct = userAcct,
+                    Id = 10
                 },
                 Followers = new[]
                 {
@@ -1046,13 +1132,24 @@ namespace BirdsiteLive.Pipeline.Tests.Processors
 
             var followersDalMock = new Mock<IFollowersDal>(MockBehavior.Strict);
             var socialServiceMock = new Mock<ISocialMediaService>();
+            socialServiceMock
+                .Setup(x => x.UserDal.GetFollowersAsync(
+                    It.Is<int>(y => y == 10)
+                    ))
+                .ReturnsAsync(userWithTweets.Followers);
 
             followersDalMock
-                .Setup(x => x.UpdateFollowerAsync(It.Is<Follower>(y => y.Id == userId1 && y.PostingErrorCount == 0)))
+                .Setup(x => x.UpdateFollowerErrorCountAsync(
+                        It.Is<int>(y => y == userId1),
+                        It.Is<int>(y => y == 0)
+                ))
                 .Returns(Task.CompletedTask);
 
             followersDalMock
-                .Setup(x => x.UpdateFollowerAsync(It.Is<Follower>(y => y.Id == userId2 && y.PostingErrorCount == 51)))
+                .Setup(x => x.UpdateFollowerErrorCountAsync(
+                        It.Is<int>(y => y == userId2),
+                        It.Is<int>(y => y == 51)
+                ))
                 .Returns(Task.CompletedTask);
 
             var loggerMock = new Mock<ILogger<SendTweetsToFollowersProcessor>>();

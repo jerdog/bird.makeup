@@ -9,6 +9,7 @@ using BirdsiteLive.Common.Interfaces;
 using BirdsiteLive.Common.Regexes;
 using BirdsiteLive.Common.Settings;
 using BirdsiteLive.Common.Exceptions;
+using BirdsiteLive.Common.Models;
 using BirdsiteLive.DAL.Contracts;
 using BirdsiteLive.DAL.Models;
 using BirdsiteLive.Domain;
@@ -124,7 +125,7 @@ namespace BirdsiteLive.Controllers
             var userDal = await _socialMediaService.UserDal.GetUserAsync(user.Acct);
             if (userDal != null)
             {
-                followers = await _followersDal.GetFollowersAsync(userDal.Id);
+                followers = await _socialMediaService.UserDal.GetFollowersAsync(userDal.Id);
                 fediAccount = userDal.FediAcct;
             }
 

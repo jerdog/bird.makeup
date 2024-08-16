@@ -8,6 +8,7 @@ using BirdsiteLive.DAL.Postgres.DataAccessLayers.Base;
 using BirdsiteLive.DAL.Postgres.Settings;
 using Dapper;
 using System.Text.Json;
+using BirdsiteLive.Common.Models;
 using Npgsql;
 
 namespace BirdsiteLive.DAL.Postgres.DataAccessLayers
@@ -93,36 +94,6 @@ namespace BirdsiteLive.DAL.Postgres.DataAccessLayers
             
         }
 
-        public async Task<Follower[]> GetFollowersAsync(int followedUserId)
-        {
-            if (followedUserId == default) throw new ArgumentException("followedUserId");
-
-            var query = $"SELECT * FROM {_settings.FollowersTableName} WHERE followings @> ARRAY[$1]";
-
-            await using var connection = await DataSource.OpenConnectionAsync();
-            await using var command = new NpgsqlCommand(query, connection) {
-                Parameters = { new() { Value = followedUserId}}
-            };
-            var reader = await command.ExecuteReaderAsync();
-
-            var followers = new List<Follower>();
-            while (await reader.ReadAsync())
-            {
-                followers.Add(new Follower
-                {
-                    Id = reader["id"] as int? ?? default,
-                    Followings = (reader["followings"] as int[] ?? new int[0]).ToList(),
-                    ActorId = reader["actorId"] as string,
-                    Acct = reader["acct"] as string,
-                    Host = reader["host"] as string,
-                    InboxRoute = reader["inboxRoute"] as string,
-                    SharedInboxRoute = reader["sharedInboxRoute"] as string,
-                    PostingErrorCount = reader["postingErrorCount"] as int? ?? default,
-                });
-            }
-            
-            return followers.ToArray();
-        }
 
         public async Task<Follower[]> GetAllFollowersAsync()
         {
@@ -135,19 +106,17 @@ namespace BirdsiteLive.DAL.Postgres.DataAccessLayers
             }
         }
 
-        public async Task UpdateFollowerAsync(Follower follower)
+        public async Task UpdateFollowerErrorCountAsync(int followerid, int count)
         {
-            if (follower == default) throw new ArgumentException("follower");
-            if (follower.Id == default) throw new ArgumentException("id");
+            if (followerid == default) throw new ArgumentException("id");
 
-            var query = $"UPDATE {_settings.FollowersTableName} SET followings = $1, postingErrorCount = $2 WHERE id = $3";
+            var query = $"UPDATE {_settings.FollowersTableName} SET postingErrorCount = $1 WHERE id = $2";
             await using var connection = DataSource.CreateConnection();
             await connection.OpenAsync();
             await using var command = new NpgsqlCommand(query, connection) {
                 Parameters = { 
-                    new() { Value = follower.Followings}, 
-                    new() { Value = follower.PostingErrorCount}, 
-                    new() { Value = follower.Id}
+                    new() { Value = count}, 
+                    new() { Value = followerid}
                 }
             };
 

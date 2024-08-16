@@ -71,11 +71,9 @@ namespace BirdsiteLive.Pipeline.Processors
                     List<UserWithDataToSync> toSync = new List<UserWithDataToSync>();
                     foreach (var u in users)
                     {
-                        var followers = await _followersDal.GetFollowersAsync(u.Id);
                         toSync.Add( new UserWithDataToSync()
                         {
                             User = u,
-                            Followers = followers
                         });
                         
                     }

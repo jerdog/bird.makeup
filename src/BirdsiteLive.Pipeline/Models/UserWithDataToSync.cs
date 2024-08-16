@@ -1,4 +1,5 @@
-﻿using BirdsiteLive.DAL.Models;
+﻿using BirdsiteLive.Common.Models;
+using BirdsiteLive.DAL.Models;
 using BirdsiteLive.Twitter.Models;
 
 namespace BirdsiteLive.Pipeline.Models

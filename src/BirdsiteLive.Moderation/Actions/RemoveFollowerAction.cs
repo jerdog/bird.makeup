@@ -1,4 +1,5 @@
 ﻿using System.Threading.Tasks;
+using BirdsiteLive.Common.Models;
 using BirdsiteLive.DAL.Models;
 using BirdsiteLive.Domain.BusinessUseCases;
 

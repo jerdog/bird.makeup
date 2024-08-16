@@ -1,6 +1,7 @@
 using System;
 using System.Text.Json;
 using System.Threading.Tasks;
+using BirdsiteLive.Common.Models;
 
 namespace BirdsiteLive.Common.Interfaces;
 
@@ -16,6 +17,7 @@ public interface SocialMediaUserDal
         Task AddFollower(int follower, int followed);
         Task RemoveFollower(int follower, int followed);
         Task<long> GetFollowersCountAsync(int id);
+        Task<Follower[]> GetFollowersAsync(int id);
         Task UpdateUserExtradataAsync(string username, string key, string subkey, object value);
         Task UpdateUserExtradataAsync(string username, string key, object value);
         Task<string> GetUserExtradataAsync(string username, string key);

@@ -19,6 +19,10 @@ tasks:
       cd bird.makeup/src/BirdsiteLive
       dotnet publish --os linux --arch x64 /t:PublishContainer -c Release
       docker push cloutier/bird.makeup:latest
+  - publish-arm: |
+      cd bird.makeup/src/BirdsiteLive
+      dotnet publish --os linux --arch arm64 /t:PublishContainer -c Release
+      docker push cloutier/bird.makeup:latest-arm
   - deploy: |
       cd bird.makeup/k8s
       kubectl apply -f dotmakeup.yaml

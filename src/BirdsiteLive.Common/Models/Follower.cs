@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace BirdsiteLive.DAL.Models
+namespace BirdsiteLive.Common.Models
 {
     public class Follower
     {

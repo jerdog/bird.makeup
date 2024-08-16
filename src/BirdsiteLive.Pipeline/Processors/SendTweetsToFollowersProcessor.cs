@@ -7,6 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Xml;
 using BirdsiteLive.Common.Interfaces;
+using BirdsiteLive.Common.Models;
 using BirdsiteLive.Common.Settings;
 using BirdsiteLive.DAL.Contracts;
 using BirdsiteLive.DAL.Models;
@@ -15,7 +16,6 @@ using BirdsiteLive.Moderation.Actions;
 using BirdsiteLive.Pipeline.Contracts;
 using BirdsiteLive.Pipeline.Models;
 using BirdsiteLive.Pipeline.Processors.SubTasks;
-using BirdsiteLive.Twitter;
 using BirdsiteLive.Twitter.Models;
 using Microsoft.Extensions.Logging;
 
@@ -52,6 +52,7 @@ namespace BirdsiteLive.Pipeline.Processors
             foreach (var userWithTweetsToSync in usersWithTweetsToSync)
             {
                 var user = userWithTweetsToSync.User;
+                userWithTweetsToSync.Followers = await _socialMediaService.UserDal.GetFollowersAsync(user.Id);
 
                 _todo = _todo.Where(x => !x.IsCompleted).ToList();
                 
@@ -107,7 +108,7 @@ namespace BirdsiteLive.Pipeline.Processors
                     {
                         foreach (var f in followersPerInstance)
                         {
-                            await _userDal.RemoveFollower(f.Id, user.Id);
+                            await _socialMediaService.UserDal.RemoveFollower(f.Id, user.Id);
                         }
                     }
                 }
@@ -143,8 +144,7 @@ namespace BirdsiteLive.Pipeline.Processors
         {
             if (follower.PostingErrorCount > 0)
             {
-                follower.PostingErrorCount = 0;
-                await _followersDal.UpdateFollowerAsync(follower);
+                await _followersDal.UpdateFollowerErrorCountAsync(follower.Id, 0);
             }
         }
 
@@ -160,7 +160,7 @@ namespace BirdsiteLive.Pipeline.Processors
             }
             else
             {
-                await _followersDal.UpdateFollowerAsync(follower);
+                await _followersDal.UpdateFollowerErrorCountAsync(follower.Id, follower.PostingErrorCount++);
             }
         }
     }

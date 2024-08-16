@@ -1,5 +1,6 @@
 ﻿using System.Linq;
 using System.Threading.Tasks;
+using BirdsiteLive.Common.Models;
 using BirdsiteLive.DAL.Contracts;
 using BirdsiteLive.DAL.Models;
 
@@ -35,17 +36,17 @@ namespace BirdsiteLive.Domain.BusinessUseCases
 
         public async Task ExecuteAsync(Follower follower)
         {
-            // Remove twitter users if no more followers
-            var followings = follower.Followings;
-            foreach (var following in followings)
-            {
-                var followers = await _followersDal.GetFollowersAsync(following);
-                if (followers.Length == 1 && followers.First().Id == follower.Id)
-                    await _twitterUserDal.DeleteUserAsync(following);
-            }
+           // // Remove twitter users if no more followers
+           // var followings = follower.Followings;
+           // foreach (var following in followings)
+           // {
+           //     var followers = await _followersDal.GetFollowersAsync(following);
+           //     if (followers.Length == 1 && followers.First().Id == follower.Id)
+           //         await _twitterUserDal.DeleteUserAsync(following);
+           // }
 
-            // Remove follower from DB
-            await _followersDal.DeleteFollowerAsync(follower.Id);
+           // // Remove follower from DB
+           // await _followersDal.DeleteFollowerAsync(follower.Id);
         }
     }
 }

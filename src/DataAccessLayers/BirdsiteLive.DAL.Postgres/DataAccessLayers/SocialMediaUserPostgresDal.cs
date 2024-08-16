@@ -1,7 +1,10 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
 using BirdsiteLive.Common.Interfaces;
+using BirdsiteLive.Common.Models;
 using BirdsiteLive.DAL.Models;
 using BirdsiteLive.DAL.Postgres.DataAccessLayers.Base;
 using BirdsiteLive.DAL.Postgres.Settings;
@@ -114,6 +117,38 @@ public abstract class SocialMediaUserPostgresDal : PostgresBase, SocialMediaUser
             var count = reader["count"] as long ? ?? default ;
             return count;
         }
+
+        public async Task<Follower[]> GetFollowersAsync(int id)
+        {
+            if (id == default) throw new ArgumentException("followedUserId");
+
+            var query = $"SELECT * FROM {_settings.FollowersTableName} WHERE {FollowingColumnName} @> ARRAY[$1]";
+
+            await using var connection = await DataSource.OpenConnectionAsync();
+            await using var command = new NpgsqlCommand(query, connection) {
+                Parameters = { new() { Value = id}}
+            };
+            var reader = await command.ExecuteReaderAsync();
+
+            var followers = new List<Follower>();
+            while (await reader.ReadAsync())
+            {
+                followers.Add(new Follower
+                {
+                    Id = reader["id"] as int? ?? default,
+                    Followings = (reader["followings"] as int[] ?? new int[0]).ToList(),
+                    ActorId = reader["actorId"] as string,
+                    Acct = reader["acct"] as string,
+                    Host = reader["host"] as string,
+                    InboxRoute = reader["inboxRoute"] as string,
+                    SharedInboxRoute = reader["sharedInboxRoute"] as string,
+                    PostingErrorCount = reader["postingErrorCount"] as int? ?? default,
+                });
+            }
+            
+            return followers.ToArray();
+        }
+
         public async Task DeleteUserAsync(string acct)
         {
             if (string.IsNullOrWhiteSpace(acct)) throw new ArgumentException("acct");

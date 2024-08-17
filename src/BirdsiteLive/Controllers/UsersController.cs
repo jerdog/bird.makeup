@@ -106,7 +106,7 @@ namespace BirdsiteLive.Controllers
             if (acceptHeaders.Any())
             {
                 var r = acceptHeaders.First();
-                if (r.Contains("application/activity+json"))
+                if (r.Contains("application/activity+json") || r.Contains("application/ld+json"))
                 {
                     if (isSaturated) return new ObjectResult("Too Many Requests") { StatusCode = 429 };
                     if (notFound) return NotFound();
@@ -166,7 +166,7 @@ namespace BirdsiteLive.Controllers
             {
                 var r = acceptHeaders.First();
 
-                if (r.Contains("application/activity+json"))
+                if (r.Contains("application/activity+json") || r.Contains("application/ld+json"))
                 {
                     var jsonApUser = JsonSerializer.Serialize(status);
                     return Content(jsonApUser, "application/activity+json; charset=utf-8");
@@ -336,7 +336,7 @@ namespace BirdsiteLive.Controllers
         public IActionResult Followers(string id)
         {
             var r = Request.Headers["Accept"].First();
-            if (!r.Contains("application/activity+json")) return NotFound();
+            if (!r.Contains("json")) return NotFound();
 
             var followers = new Followers
             {

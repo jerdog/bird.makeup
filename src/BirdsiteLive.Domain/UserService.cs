@@ -279,25 +279,7 @@ namespace BirdsiteLive.Domain
             //var followerInbox = sigValidation.User.inbox;
             var twitterUser = activity.apObject.apObject.Split('/').Last().Replace("@", string.Empty);
             await _processUndoFollowUser.ExecuteAsync(followerUserName, followerHost, twitterUser);
-
-            // Send Accept Activity
-            var acceptFollow = new ActivityAcceptUndoFollow()
-            {
-                context = "https://www.w3.org/ns/activitystreams",
-                id = $"{activity.apObject.apObject}#accepts/undofollows/{Guid.NewGuid()}",
-                type = "Accept",
-                actor = activity.apObject.apObject,
-                apObject = new ActivityUndoFollow()
-                {
-                    id = (activity.apObject as dynamic).id?.ToString(),
-                    type = (activity.apObject as dynamic).type?.ToString(),
-                    actor = (activity.apObject as dynamic).actor?.ToString(),
-                    context = (activity.apObject as dynamic).context?.ToString(),
-                    apObject = (activity.apObject as dynamic).@object?.ToString()
-                }
-            };
-            var result = await _activityPubService.PostDataAsync(acceptFollow, followerHost, activity.apObject.apObject);
-            return result == HttpStatusCode.Accepted || result == HttpStatusCode.OK; //TODO: revamp this for better error handling
+            return true;
         }
 
         public async Task<bool> DeleteRequestedAsync(string signature, string method, string path, string queryString, Dictionary<string, string> requestHeaders,

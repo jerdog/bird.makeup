@@ -546,6 +546,7 @@ namespace BirdsiteLive.Twitter
                 string quoteTweetLink = $"https://{_instanceSettings.Domain}/@{quoteTweetAcct}/{quoteTweetId}";
 
                 messageContent = Regex.Replace(messageContent, Regex.Escape($"https://twitter.com/{quoteTweetAcct}/status/{quoteTweetId}"), "", RegexOptions.IgnoreCase);
+                messageContent = Regex.Replace(messageContent, Regex.Escape($"https://x.com/{quoteTweetAcct}/status/{quoteTweetId}"), "", RegexOptions.IgnoreCase);
                 messageContent = messageContent + "\n\n" + quoteTweetLink;
                 
             }
@@ -722,6 +723,7 @@ namespace BirdsiteLive.Twitter
                 //MessageContent.Replace($"https://twitter.com/i/web/status/{}", "");
                // MessageContent = MessageContent.Replace($"https://twitter.com/{quoteTweetAcct}/status/{quoteTweetId}", "");
                 MessageContent = MessageContent.Replace($"https://twitter.com/{quoteTweetAcct}/status/{quoteTweetId}", "", StringComparison.OrdinalIgnoreCase);
+                MessageContent = MessageContent.Replace($"https://x.com/{quoteTweetAcct}/status/{quoteTweetId}", "", StringComparison.OrdinalIgnoreCase);
                 
                 //MessageContent = Regex.Replace(MessageContent, Regex.Escape($"https://twitter.com/{quoteTweetAcct}/status/{quoteTweetId}"), "", RegexOptions.IgnoreCase);
                 MessageContent = MessageContent + "\n\n" + quoteTweetLink;

@@ -133,17 +133,19 @@ namespace BirdsiteLive.ActivityPub.Tests
             Assert.IsNull(tweet.Poll);
         }
         
-        [Ignore]
         [TestMethod]
-        public async Task QTandTextContainsWebLink()
+        public async Task QTandTextContainsXWebLink()
         {
-            var tweet = await _tweetService.GetTweetAsync(1668969663340871682);
+            var tweet = await _tweetService.GetTweetAsync(1822637945943187475);
+            if (tweet is null)
+                Assert.Inconclusive();
 
-            Assert.AreEqual(tweet.MessageContent, @"Friends, our Real World Risk Workshop (now transformed into summer school) #RWRI (18th ed.) takes place July 10-21 (remote).
-We have a few scholarships left but more importantly we are looking for a guest speaker on AI-LLM-Robotics for a 45 Q&amp;A with us.
+            Assert.AreEqual(tweet.MessageContent, @"Ironically the real video shows like 10x more people than the AI conspirooooors were conspiring about 
 
-http://www.realworldrisk.com https://twitter.com/i/web/status/1668969663340871682");
-            Assert.AreEqual(tweet.Author.Acct, "nntaleb");
+
+
+https://domain.name/@stillgray/1822453985204187319");
+            Assert.AreEqual(tweet.Author.Acct, "trustlessstate");
         }
 
         [TestMethod]

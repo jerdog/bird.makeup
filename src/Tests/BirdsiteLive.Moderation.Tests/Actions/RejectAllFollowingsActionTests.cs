@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using BirdsiteLive.ActivityPub;
+using BirdsiteLive.Common.Interfaces;
 using BirdsiteLive.Common.Models;
 using BirdsiteLive.Common.Settings;
 using BirdsiteLive.DAL.Contracts;
@@ -40,7 +41,7 @@ namespace BirdsiteLive.Moderation.Tests.Actions
             twitterUserDalMock
                 .Setup(x => x.GetUserAsync(
                     It.Is<int>(y => y == 24)))
-                .ReturnsAsync(new SyncTwitterUser
+                .ReturnsAsync(new SyncUser
                 {
                     Id = 24,
                     Acct = "acct"
@@ -88,7 +89,7 @@ namespace BirdsiteLive.Moderation.Tests.Actions
             twitterUserDalMock
                 .Setup(x => x.GetUserAsync(
                     It.Is<int>(y => y == 24)))
-                .ReturnsAsync(new SyncTwitterUser
+                .ReturnsAsync(new SyncUser
                 {
                     Id = 24,
                     Acct = "acct"

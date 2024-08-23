@@ -16,9 +16,11 @@
       "launchBrowser": true,
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
-        "Instance__ParallelTwitterRequests": "0",
+        "Instance__ParallelTwitterRequests": "1",
+        "Instance__TwitterRequestDelay": "1000",
+        "Instance__PipelineStartupDelay": "1",
         "Instance__InstaMode": "true",
-        "Instance__SidecarURL": "http://ubuntu.tail98293.ts.net:5000"
+        "Instance__SidecarURL": "http://alibaba.tail98293.ts.net:5000"
       },
       "applicationUrl": "http://localhost:5042"
     },

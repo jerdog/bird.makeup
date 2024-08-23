@@ -85,7 +85,7 @@ namespace BirdsiteLive.Pipeline.Processors
 
         }
 
-        private async Task ProcessFollowersWithSharedInboxAsync(ExtractedTweet[] tweets, List<Follower> followers, SyncTwitterUser user)
+        private async Task ProcessFollowersWithSharedInboxAsync(ExtractedTweet[] tweets, List<Follower> followers, SyncUser user)
         {
             var followersPerInstances = followers.GroupBy(x => x.Host);
 
@@ -123,7 +123,7 @@ namespace BirdsiteLive.Pipeline.Processors
             }
         }
         
-        private async Task ProcessFollowersWithInboxAsync(ExtractedTweet[] tweets, List<Follower> followerWtInbox, SyncTwitterUser user)
+        private async Task ProcessFollowersWithInboxAsync(ExtractedTweet[] tweets, List<Follower> followerWtInbox, SyncUser user)
         {
             foreach (var follower in followerWtInbox)
             {
@@ -148,7 +148,7 @@ namespace BirdsiteLive.Pipeline.Processors
             }
         }
 
-        private async Task ProcessFailingUserAsync(Follower follower, SyncTwitterUser user)
+        private async Task ProcessFailingUserAsync(Follower follower, SyncUser user)
         {
             follower.PostingErrorCount++;
 

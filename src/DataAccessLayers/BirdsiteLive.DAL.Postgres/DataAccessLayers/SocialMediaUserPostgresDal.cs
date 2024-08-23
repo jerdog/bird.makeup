@@ -25,6 +25,8 @@ public abstract class SocialMediaUserPostgresDal : PostgresBase, SocialMediaUser
 
         public abstract string tableName { get; set; }
         public abstract string FollowingColumnName { get; set; }
+        
+        public abstract Task<SyncUser[]> GetNextUsersToCrawlAsync(int nStart, int nEnd, int m);
 
         public async Task<SyncUser> GetUserAsync(int id)
         {
@@ -36,7 +38,7 @@ public abstract class SocialMediaUserPostgresDal : PostgresBase, SocialMediaUser
         }
         private async Task<SyncUser> GetUserAsync(string acct, int? id)
         {
-            var query = $"SELECT *, ( SELECT COUNT(*) FROM {_settings.FollowersTableName} WHERE followings @> ARRAY[{tableName}.id]) as followersCount FROM {tableName} WHERE acct = $1 OR id = $2";
+            var query = $"SELECT *, ( SELECT COUNT(*) FROM {_settings.FollowersTableName} WHERE {FollowingColumnName} @> ARRAY[{tableName}.id]) as followersCount FROM {tableName} WHERE acct = $1 OR id = $2";
 
             if (acct is not null)
                 acct = acct.ToLowerInvariant();
@@ -55,7 +57,7 @@ public abstract class SocialMediaUserPostgresDal : PostgresBase, SocialMediaUser
                 return null;
             
             var extradata = JsonDocument.Parse(reader["extradata"] as string ?? "{}").RootElement;
-            return new SyncTwitterUser
+            return new SyncUser
             {
                 Id = reader["id"] as int? ?? default,
                 Acct = reader["acct"] as string,

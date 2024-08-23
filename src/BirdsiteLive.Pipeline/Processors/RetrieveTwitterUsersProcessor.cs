@@ -5,8 +5,10 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
+using BirdsiteLive.Common.Interfaces;
 using BirdsiteLive.Common.Settings;
 using BirdsiteLive.DAL.Contracts;
+using BirdsiteLive.DAL.Models;
 using BirdsiteLive.Pipeline.Models;
 using BirdsiteLive.Pipeline.Contracts;
 using Microsoft.Extensions.Logging;
@@ -15,8 +17,7 @@ namespace BirdsiteLive.Pipeline.Processors
 {
     public class RetrieveTwitterUsersProcessor : IRetrieveTwitterUsersProcessor
     {
-        private readonly ITwitterUserDal _twitterUserDal;
-        private readonly IFollowersDal _followersDal;
+        private readonly ISocialMediaService _socialMediaService;
         private readonly InstanceSettings _instanceSettings;
         private readonly ILogger<RetrieveTwitterUsersProcessor> _logger;
         private static Random rng = new Random();
@@ -26,10 +27,9 @@ namespace BirdsiteLive.Pipeline.Processors
         private readonly int _n_end;
 
         #region Ctor
-        public RetrieveTwitterUsersProcessor(ITwitterUserDal twitterUserDal, IFollowersDal followersDal, InstanceSettings instanceSettings, ILogger<RetrieveTwitterUsersProcessor> logger)
+        public RetrieveTwitterUsersProcessor(ISocialMediaService socialMediaService, InstanceSettings instanceSettings, ILogger<RetrieveTwitterUsersProcessor> logger)
         {
-            _twitterUserDal = twitterUserDal;
-            _followersDal = followersDal;
+            _socialMediaService = socialMediaService;
             _instanceSettings = instanceSettings;
             _logger = logger;
 
@@ -60,7 +60,7 @@ namespace BirdsiteLive.Pipeline.Processors
                         await Task.Delay(10000);
                 }
                 
-                var usersDal = await _twitterUserDal.GetAllTwitterUsersWithFollowersAsync(2000, _n_start, _n_end, _instanceSettings.m);
+                SyncUser[] usersDal = await _socialMediaService.UserDal.GetNextUsersToCrawlAsync(_n_start, _n_end, _instanceSettings.m);
 
                 var userCount = usersDal.Any() ? Math.Min(usersDal.Length, 200) : 1;
                 var splitUsers = usersDal.OrderBy(a => rng.Next()).ToArray().Chunk(userCount).ToList();

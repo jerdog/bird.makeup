@@ -95,7 +95,7 @@ namespace BirdsiteLive.Domain.Tests.BusinessUseCases
                 TotalFollowings = 2,
             };
 
-            var twitterUser = new SyncTwitterUser
+            var twitterUser = new SyncUser
             {
                 Id = 2,
                 Acct = twitterName,
@@ -159,7 +159,7 @@ namespace BirdsiteLive.Domain.Tests.BusinessUseCases
                 Followings = new List<int> { 2 },
             };
 
-            SyncUser twitterUser = new SyncTwitterUser
+            SyncUser twitterUser = new SyncUser
             {
                 Id = 2,
                 Acct = twitterName,

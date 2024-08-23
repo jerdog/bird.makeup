@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
+using BirdsiteLive.Common.Interfaces;
 using BirdsiteLive.DAL.Contracts;
 using BirdsiteLive.DAL.Models;
 using BirdsiteLive.DAL.Postgres.Settings;
@@ -24,6 +25,12 @@ namespace BirdsiteLive.DAL.Postgres.DataAccessLayers
 
         public override string tableName { get; set; } 
         public override string FollowingColumnName { get; set; } = "followings";
+
+        public async override Task<SyncUser[]> GetNextUsersToCrawlAsync(int nStart, int nEnd, int m)
+        {
+            SyncUser[] users = await GetAllTwitterUsersWithFollowersAsync(2000, nStart, nEnd, m);
+            return users;
+        }
 
         public async Task<SyncTwitterUser> GetUserAsync(int id)
         {

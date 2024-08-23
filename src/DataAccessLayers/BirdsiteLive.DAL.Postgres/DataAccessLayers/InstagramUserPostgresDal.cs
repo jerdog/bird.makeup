@@ -1,5 +1,12 @@
+using System;
+using System.Collections.Generic;
+using System.Text.Json;
+using System.Threading.Tasks;
+using BirdsiteLive.Common.Interfaces;
 using BirdsiteLive.DAL.Contracts;
+using BirdsiteLive.DAL.Models;
 using BirdsiteLive.DAL.Postgres.Settings;
+using Npgsql;
 
 namespace BirdsiteLive.DAL.Postgres.DataAccessLayers;
 
@@ -13,6 +20,36 @@ public class InstagramUserPostgresDal : SocialMediaUserPostgresDal, IInstagramUs
         }
         #endregion
 
-        public override string tableName { get; set; }
+        public sealed override string tableName { get; set; }
         public override string FollowingColumnName { get; set; } = "followings_instagram";
+        public override async Task<SyncUser[]> GetNextUsersToCrawlAsync(int nStart, int nEnd, int m)
+        {
+            string query = @$"
+                SELECT id, acct FROM {tableName} LIMIT 1000;
+                ";
+
+            await using var connection = DataSource.CreateConnection();
+            await connection.OpenAsync();
+            await using var command = new NpgsqlCommand(query, connection) {
+                Parameters =
+                {
+                    new() { Value = m},
+                    new() { Value = nStart},
+                    new() { Value = nEnd}
+                }
+            };
+            var reader = await command.ExecuteReaderAsync();
+            var results = new List<SyncUser>();
+            while (await reader.ReadAsync())
+            {
+                results.Add(new SyncUser
+                    {
+                        Id = reader["id"] as int? ?? default,
+                        Acct = reader["acct"] as string,
+                    }
+                );
+
+            }
+            return results.ToArray();
+        }
 }

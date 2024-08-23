@@ -11,6 +11,7 @@ public interface SocialMediaUserDal
         Task<string?> GetUserCacheAsync(string acct);
         Task UpdateUserCacheAsync(SocialMediaUser user);
         Task<SyncUser> GetUserAsync(int acct);
+        Task<SyncUser[]> GetNextUsersToCrawlAsync(int nStart, int nEnd, int m);
         Task DeleteUserAsync(int id);
         Task DeleteUserAsync(string acct);
         Task CreateUserAsync(string acct);
@@ -23,7 +24,7 @@ public interface SocialMediaUserDal
         Task<string> GetUserExtradataAsync(string username, string key);
 }
 
-public interface SyncUser
+public class SyncUser
 {
         public int Id { get; set; }
         public long TwitterUserId { get; set; }

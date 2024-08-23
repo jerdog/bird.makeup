@@ -42,7 +42,7 @@ namespace BirdsiteLive.Pipeline.Tests.Processors
                         Id = tweetId.ToString()
                     }
                 },
-                User = new SyncTwitterUser
+                User = new SyncUser
                 {
                     Acct = userAcct,
                     Id = 10
@@ -72,7 +72,7 @@ namespace BirdsiteLive.Pipeline.Tests.Processors
             sendTweetsToSharedInboxTaskMock
                 .Setup(x => x.ExecuteAsync(
                     It.Is<ExtractedTweet[]>(y => y.Length == 1),
-                    It.Is<SyncTwitterUser>(y => y.Acct == userAcct),
+                    It.Is<SyncUser>(y => y.Acct == userAcct),
                     It.Is<string>(y => y == host),
                     It.Is<Follower[]>(y => y.Length == 2)))
                 .Returns(Task.CompletedTask);
@@ -127,7 +127,7 @@ namespace BirdsiteLive.Pipeline.Tests.Processors
                         Id = tweetId.ToString()
                     }
                 },
-                User = new SyncTwitterUser
+                User = new SyncUser
                 {
                     Acct = userAcct,
                     Id = 10
@@ -159,7 +159,7 @@ namespace BirdsiteLive.Pipeline.Tests.Processors
                 sendTweetsToSharedInboxTaskMock
                     .Setup(x => x.ExecuteAsync(
                         It.Is<ExtractedTweet[]>(y => y.Length == 1),
-                        It.Is<SyncTwitterUser>(y => y.Acct == userAcct),
+                        It.Is<SyncUser>(y => y.Acct == userAcct),
                         It.Is<string>(y => y == host),
                         It.Is<Follower[]>(y => y.Length == 1)))
                     .Returns(Task.CompletedTask);
@@ -215,7 +215,7 @@ namespace BirdsiteLive.Pipeline.Tests.Processors
                         Id = tweetId.ToString()
                     }
                 },
-                User = new SyncTwitterUser
+                User = new SyncUser
                 {
                     Acct = userAcct,
                     Id = 10
@@ -245,7 +245,7 @@ namespace BirdsiteLive.Pipeline.Tests.Processors
             sendTweetsToSharedInboxTaskMock
                 .Setup(x => x.ExecuteAsync(
                     It.Is<ExtractedTweet[]>(y => y.Length == 1),
-                    It.Is<SyncTwitterUser>(y => y.Acct == userAcct),
+                    It.Is<SyncUser>(y => y.Acct == userAcct),
                     It.Is<string>(y => y == host1),
                     It.Is<Follower[]>(y => y.Length == 1)))
                 .Returns(Task.CompletedTask);
@@ -253,7 +253,7 @@ namespace BirdsiteLive.Pipeline.Tests.Processors
             sendTweetsToSharedInboxTaskMock
                 .Setup(x => x.ExecuteAsync(
                     It.Is<ExtractedTweet[]>(y => y.Length == 1),
-                    It.Is<SyncTwitterUser>(y => y.Acct == userAcct),
+                    It.Is<SyncUser>(y => y.Acct == userAcct),
                     It.Is<string>(y => y == host2),
                     It.Is<Follower[]>(y => y.Length == 1)))
                 .Throws(new Exception());
@@ -315,7 +315,7 @@ namespace BirdsiteLive.Pipeline.Tests.Processors
                         Id = tweetId.ToString()
                     }
                 },
-                User = new SyncTwitterUser
+                User = new SyncUser
                 {
                     Acct = userAcct,
                     Id = 10
@@ -346,7 +346,7 @@ namespace BirdsiteLive.Pipeline.Tests.Processors
             sendTweetsToSharedInboxTaskMock
                 .Setup(x => x.ExecuteAsync(
                     It.Is<ExtractedTweet[]>(y => y.Length == 1),
-                    It.Is<SyncTwitterUser>(y => y.Acct == userAcct),
+                    It.Is<SyncUser>(y => y.Acct == userAcct),
                     It.Is<string>(y => y == host1),
                     It.Is<Follower[]>(y => y.Length == 1)))
                 .Returns(Task.CompletedTask);
@@ -354,7 +354,7 @@ namespace BirdsiteLive.Pipeline.Tests.Processors
             sendTweetsToSharedInboxTaskMock
                 .Setup(x => x.ExecuteAsync(
                     It.Is<ExtractedTweet[]>(y => y.Length == 1),
-                    It.Is<SyncTwitterUser>(y => y.Acct == userAcct),
+                    It.Is<SyncUser>(y => y.Acct == userAcct),
                     It.Is<string>(y => y == host2),
                     It.Is<Follower[]>(y => y.Length == 1)))
                 .Returns(Task.CompletedTask);
@@ -416,7 +416,7 @@ namespace BirdsiteLive.Pipeline.Tests.Processors
                         Id = tweetId.ToString()
                     }
                 },
-                User = new SyncTwitterUser
+                User = new SyncUser
                 {
                     Acct = userAcct,
                     Id = 10
@@ -448,7 +448,7 @@ namespace BirdsiteLive.Pipeline.Tests.Processors
             sendTweetsToSharedInboxTaskMock
                 .Setup(x => x.ExecuteAsync(
                     It.Is<ExtractedTweet[]>(y => y.Length == 1),
-                    It.Is<SyncTwitterUser>(y => y.Acct == userAcct),
+                    It.Is<SyncUser>(y => y.Acct == userAcct),
                     It.Is<string>(y => y == host1),
                     It.Is<Follower[]>(y => y.Length == 1)))
                 .Returns(Task.CompletedTask);
@@ -456,7 +456,7 @@ namespace BirdsiteLive.Pipeline.Tests.Processors
             sendTweetsToSharedInboxTaskMock
                 .Setup(x => x.ExecuteAsync(
                     It.Is<ExtractedTweet[]>(y => y.Length == 1),
-                    It.Is<SyncTwitterUser>(y => y.Acct == userAcct),
+                    It.Is<SyncUser>(y => y.Acct == userAcct),
                     It.Is<string>(y => y == host2),
                     It.Is<Follower[]>(y => y.Length == 1)))
                 .Throws(new Exception());
@@ -524,7 +524,7 @@ namespace BirdsiteLive.Pipeline.Tests.Processors
                         Id = tweetId.ToString()
                     }
                 },
-                User = new SyncTwitterUser
+                User = new SyncUser
                 {
                     Acct = userAcct,
                     Id = 10
@@ -555,7 +555,7 @@ namespace BirdsiteLive.Pipeline.Tests.Processors
                     .Setup(x => x.ExecuteAsync(
                         It.Is<ExtractedTweet[]>(y => y.Length == 1),
                         It.Is<Follower>(y => y.Id == userId),
-                        It.Is<SyncTwitterUser>(y => y.Acct == userAcct)))
+                        It.Is<SyncUser>(y => y.Acct == userAcct)))
                     .Returns(Task.CompletedTask);
             }
 
@@ -611,7 +611,7 @@ namespace BirdsiteLive.Pipeline.Tests.Processors
                         Id = tweetId.ToString()
                     }
                 },
-                User = new SyncTwitterUser
+                User = new SyncUser
                 {
                     Acct = userAcct,
                     Id = 10
@@ -642,7 +642,7 @@ namespace BirdsiteLive.Pipeline.Tests.Processors
                     .Setup(x => x.ExecuteAsync(
                         It.Is<ExtractedTweet[]>(y => y.Length == 1),
                         It.Is<Follower>(y => y.Id == userId),
-                        It.Is<SyncTwitterUser>(y => y.Acct == userAcct)))
+                        It.Is<SyncUser>(y => y.Acct == userAcct)))
                     .Returns(Task.CompletedTask);
             }
 
@@ -698,7 +698,7 @@ namespace BirdsiteLive.Pipeline.Tests.Processors
                         Id = tweetId.ToString()
                     }
                 },
-                User = new SyncTwitterUser
+                User = new SyncUser
                 {
                     Acct = userAcct,
                     Id = 10
@@ -727,14 +727,14 @@ namespace BirdsiteLive.Pipeline.Tests.Processors
                 .Setup(x => x.ExecuteAsync(
                     It.Is<ExtractedTweet[]>(y => y.Length == 1),
                     It.Is<Follower>(y => y.Id == userId1),
-                    It.Is<SyncTwitterUser>(y => y.Acct == userAcct)))
+                    It.Is<SyncUser>(y => y.Acct == userAcct)))
                 .Returns(Task.CompletedTask);
 
             sendTweetsToInboxTaskMock
                 .Setup(x => x.ExecuteAsync(
                     It.Is<ExtractedTweet[]>(y => y.Length == 1),
                     It.Is<Follower>(y => y.Id == userId2),
-                    It.Is<SyncTwitterUser>(y => y.Acct == userAcct)))
+                    It.Is<SyncUser>(y => y.Acct == userAcct)))
                 .Throws(new Exception());
 
             var sendTweetsToSharedInboxTaskMock = new Mock<ISendTweetsToSharedInboxTask>(MockBehavior.Strict);
@@ -796,7 +796,7 @@ namespace BirdsiteLive.Pipeline.Tests.Processors
                         Id = tweetId.ToString()
                     }
                 },
-                User = new SyncTwitterUser
+                User = new SyncUser
                 {
                     Acct = userAcct,
                     Id = 10
@@ -826,14 +826,14 @@ namespace BirdsiteLive.Pipeline.Tests.Processors
                 .Setup(x => x.ExecuteAsync(
                     It.Is<ExtractedTweet[]>(y => y.Length == 1),
                     It.Is<Follower>(y => y.Id == userId1),
-                    It.Is<SyncTwitterUser>(y => y.Acct == userAcct)))
+                    It.Is<SyncUser>(y => y.Acct == userAcct)))
                 .Returns(Task.CompletedTask);
 
             sendTweetsToInboxTaskMock
                 .Setup(x => x.ExecuteAsync(
                     It.Is<ExtractedTweet[]>(y => y.Length == 1),
                     It.Is<Follower>(y => y.Id == userId2),
-                    It.Is<SyncTwitterUser>(y => y.Acct == userAcct)))
+                    It.Is<SyncUser>(y => y.Acct == userAcct)))
                 .Throws(new Exception());
 
             var sendTweetsToSharedInboxTaskMock = new Mock<ISendTweetsToSharedInboxTask>(MockBehavior.Strict);
@@ -892,7 +892,7 @@ namespace BirdsiteLive.Pipeline.Tests.Processors
                         Id = tweetId.ToString()
                     }
                 },
-                User = new SyncTwitterUser
+                User = new SyncUser
                 {
                     Acct = userAcct,
                     Id = 10
@@ -922,14 +922,14 @@ namespace BirdsiteLive.Pipeline.Tests.Processors
                 .Setup(x => x.ExecuteAsync(
                     It.Is<ExtractedTweet[]>(y => y.Length == 1),
                     It.Is<Follower>(y => y.Id == userId1),
-                    It.Is<SyncTwitterUser>(y => y.Acct == userAcct)))
+                    It.Is<SyncUser>(y => y.Acct == userAcct)))
                 .Returns(Task.CompletedTask);
 
             sendTweetsToInboxTaskMock
                 .Setup(x => x.ExecuteAsync(
                     It.Is<ExtractedTweet[]>(y => y.Length == 1),
                     It.Is<Follower>(y => y.Id == userId2),
-                    It.Is<SyncTwitterUser>(y => y.Acct == userAcct)))
+                    It.Is<SyncUser>(y => y.Acct == userAcct)))
                 .Throws(new Exception());
 
             var sendTweetsToSharedInboxTaskMock = new Mock<ISendTweetsToSharedInboxTask>(MockBehavior.Strict);
@@ -988,7 +988,7 @@ namespace BirdsiteLive.Pipeline.Tests.Processors
                         Id = tweetId.ToString()
                     }
                 },
-                User = new SyncTwitterUser
+                User = new SyncUser
                 {
                     Acct = userAcct,
                     Id = 10
@@ -1018,14 +1018,14 @@ namespace BirdsiteLive.Pipeline.Tests.Processors
                 .Setup(x => x.ExecuteAsync(
                     It.Is<ExtractedTweet[]>(y => y.Length == 1),
                     It.Is<Follower>(y => y.Id == userId1),
-                    It.Is<SyncTwitterUser>(y => y.Acct == userAcct)))
+                    It.Is<SyncUser>(y => y.Acct == userAcct)))
                 .Returns(Task.CompletedTask);
 
             sendTweetsToInboxTaskMock
                 .Setup(x => x.ExecuteAsync(
                     It.Is<ExtractedTweet[]>(y => y.Length == 1),
                     It.Is<Follower>(y => y.Id == userId2),
-                    It.Is<SyncTwitterUser>(y => y.Acct == userAcct)))
+                    It.Is<SyncUser>(y => y.Acct == userAcct)))
                 .Returns(Task.CompletedTask);
 
             var sendTweetsToSharedInboxTaskMock = new Mock<ISendTweetsToSharedInboxTask>(MockBehavior.Strict);
@@ -1087,7 +1087,7 @@ namespace BirdsiteLive.Pipeline.Tests.Processors
                         Id = tweetId.ToString()
                     }
                 },
-                User = new SyncTwitterUser
+                User = new SyncUser
                 {
                     Acct = userAcct,
                     Id = 10
@@ -1118,14 +1118,14 @@ namespace BirdsiteLive.Pipeline.Tests.Processors
                 .Setup(x => x.ExecuteAsync(
                     It.Is<ExtractedTweet[]>(y => y.Length == 1),
                     It.Is<Follower>(y => y.Id == userId1),
-                    It.Is<SyncTwitterUser>(y => y.Acct == userAcct)))
+                    It.Is<SyncUser>(y => y.Acct == userAcct)))
                 .Returns(Task.CompletedTask);
 
             sendTweetsToInboxTaskMock
                 .Setup(x => x.ExecuteAsync(
                     It.Is<ExtractedTweet[]>(y => y.Length == 1),
                     It.Is<Follower>(y => y.Id == userId2),
-                    It.Is<SyncTwitterUser>(y => y.Acct == userAcct)))
+                    It.Is<SyncUser>(y => y.Acct == userAcct)))
                 .Throws(new Exception());
 
             var sendTweetsToSharedInboxTaskMock = new Mock<ISendTweetsToSharedInboxTask>(MockBehavior.Strict);

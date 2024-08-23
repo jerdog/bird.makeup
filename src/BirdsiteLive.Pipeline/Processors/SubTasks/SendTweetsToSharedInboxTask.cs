@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
+using BirdsiteLive.Common.Interfaces;
 using BirdsiteLive.Common.Models;
 using BirdsiteLive.Common.Settings;
 using BirdsiteLive.DAL.Contracts;
@@ -14,7 +15,7 @@ namespace BirdsiteLive.Pipeline.Processors.SubTasks
 {
     public interface ISendTweetsToSharedInboxTask
     {
-        Task ExecuteAsync(ExtractedTweet[] tweets, SyncTwitterUser user, string host, Follower[] followersPerInstance);
+        Task ExecuteAsync(ExtractedTweet[] tweets, SyncUser user, string host, Follower[] followersPerInstance);
     }
 
     public class SendTweetsToSharedInboxTask : ISendTweetsToSharedInboxTask
@@ -36,7 +37,7 @@ namespace BirdsiteLive.Pipeline.Processors.SubTasks
         }
         #endregion
 
-        public async Task ExecuteAsync(ExtractedTweet[] tweets, SyncTwitterUser user, string host, Follower[] followersPerInstance)
+        public async Task ExecuteAsync(ExtractedTweet[] tweets, SyncUser user, string host, Follower[] followersPerInstance)
         {
             var userId = user.Id;
             var inbox = followersPerInstance.First().SharedInboxRoute;

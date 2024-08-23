@@ -10,8 +10,6 @@ namespace BirdsiteLive.DAL.Models
     {
         public int Id { get; set; }
         public long TwitterUserId { get; set; }
-        public string Acct { get; set; }
-        public string FediAcct { get; set; }
 
         public long LastTweetPostedId { get; set; }
 

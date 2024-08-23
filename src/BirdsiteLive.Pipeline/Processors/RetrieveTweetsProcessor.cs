@@ -49,7 +49,6 @@ namespace BirdsiteLive.Pipeline.Processors.SubTasks
 
                 var t = Task.Run(async () => {
                     var user = userWtData.User;
-                    userWtData.Followers = await _socialMediaService.UserDal.GetFollowersAsync(user.Id);
                     var isVip = userWtData.Followers.ToList().Exists(x => x.Host == "r.town");
                     if (isVip)
                     {

@@ -71,9 +71,11 @@ namespace BirdsiteLive.Pipeline.Processors
                     List<UserWithDataToSync> toSync = new List<UserWithDataToSync>();
                     foreach (var u in users)
                     {
+                        var followers = await _socialMediaService.UserDal.GetFollowersAsync(u.Id);
                         toSync.Add( new UserWithDataToSync()
                         {
                             User = u,
+                            Followers = followers
                         });
                         
                     }

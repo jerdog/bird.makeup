@@ -94,6 +94,11 @@ namespace BirdsiteLive.Pipeline.Tests.Processors
                 .ReturnsAsync(new SyncTwitterUser[0])
                 .ReturnsAsync(new SyncTwitterUser[0])
                 .ReturnsAsync(new SyncTwitterUser[0]);
+            twitterUserDalMock
+                .Setup(x => x.UserDal.GetFollowersAsync(
+                    It.Is<int>(y => true)
+                    ))
+                .ReturnsAsync(new Follower[0]);
 
             var loggerMock = new Mock<ILogger<RetrieveTwitterUsersProcessor>>();
             #endregion
@@ -144,6 +149,11 @@ namespace BirdsiteLive.Pipeline.Tests.Processors
                 .ReturnsAsync(new SyncTwitterUser[0])
                 .ReturnsAsync(new SyncTwitterUser[0])
                 .ReturnsAsync(new SyncTwitterUser[0]);
+            twitterUserDalMock
+                .Setup(x => x.UserDal.GetFollowersAsync(
+                    It.Is<int>(y => true)
+                    ))
+                .ReturnsAsync(new Follower[0]);
             
             
             var loggerMock = new Mock<ILogger<RetrieveTwitterUsersProcessor>>();
@@ -194,6 +204,11 @@ namespace BirdsiteLive.Pipeline.Tests.Processors
                 .ReturnsAsync(new SyncTwitterUser[0])
                 .ReturnsAsync(new SyncTwitterUser[0])
                 .ReturnsAsync(new SyncTwitterUser[0]);
+            twitterUserDalMock
+                .Setup(x => x.UserDal.GetFollowersAsync(
+                    It.Is<int>(y => true)
+                    ))
+                .ReturnsAsync(new Follower[0]);
             
             var loggerMock = new Mock<ILogger<RetrieveTwitterUsersProcessor>>();
             #endregion
@@ -215,10 +230,10 @@ namespace BirdsiteLive.Pipeline.Tests.Processors
         {
             #region Stubs
             var buffer = new BufferBlock<UserWithDataToSync[]>();
-            var users = new List<SyncTwitterUser>();
+            var users = new List<SyncUser>();
 
             for (var i = 0; i < 31; i++)
-                users.Add(new SyncTwitterUser());
+                users.Add(new SyncUser());
 
             var maxUsers = 1000;
             var instanceSettings = new InstanceSettings()
@@ -235,12 +250,17 @@ namespace BirdsiteLive.Pipeline.Tests.Processors
                     It.Is<int>(y => true),
                     It.Is<int>(y => true)))
                 .ReturnsAsync(users.ToArray())
-                .ReturnsAsync(new SyncTwitterUser[0])
-                .ReturnsAsync(new SyncTwitterUser[0])
-                .ReturnsAsync(new SyncTwitterUser[0])
-                .ReturnsAsync(new SyncTwitterUser[0]);
+                .ReturnsAsync(new SyncUser[0])
+                .ReturnsAsync(new SyncUser[0])
+                .ReturnsAsync(new SyncUser[0])
+                .ReturnsAsync(new SyncUser[0]);
             
             var loggerMock = new Mock<ILogger<RetrieveTwitterUsersProcessor>>();
+            twitterUserDalMock
+                .Setup(x => x.UserDal.GetFollowersAsync(
+                    It.Is<int>(y => true)
+                    ))
+                .ReturnsAsync(new Follower[0]);
             #endregion
 
             var processor = new RetrieveTwitterUsersProcessor(twitterUserDalMock.Object, instanceSettings, loggerMock.Object);

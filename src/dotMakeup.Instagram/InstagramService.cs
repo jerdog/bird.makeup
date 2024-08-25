@@ -61,7 +61,8 @@ public class InstagramService : ISocialMediaService
 
         public async Task<SocialMediaPost[]> GetNewPosts(SyncUser user)
         {
-            await GetUserAsync(user.Acct, true);
+            //var v1 = await GetUserAsync(user.Acct, false);
+            var v2 = await GetUserAsync(user.Acct, true);
             return new SocialMediaPost[] {};
         }
 
@@ -144,19 +145,22 @@ public class InstagramService : ISocialMediaService
             if (httpResponse.StatusCode != HttpStatusCode.OK)
             {
                 _userCache.Set(username, user, _cacheEntryOptionsError);
-                throw new UserNotFoundException();
+                throw new RateLimitExceededException();
             }
 
             var c = await httpResponse.Content.ReadAsStringAsync();
             var userDocument = JsonDocument.Parse(c);
 
             List<string> pinnedPost = new List<string>();
+            List<InstagramPost> recentPost = new List<InstagramPost>();
             foreach (JsonElement postDoc in userDocument.RootElement.GetProperty("posts").EnumerateArray())
             {
                 var post = ParsePost(postDoc);
                 _postCache.Set(post.Id, post, _cacheEntryOptions);
                 if (post.IsPinned)
                     pinnedPost.Add(post.Id);
+                else
+                    recentPost.Add(post);
             }
 
 
@@ -169,6 +173,7 @@ public class InstagramService : ISocialMediaService
                     ProfileImageUrl = userDocument.RootElement.GetProperty("profilePic").GetString(),
                     Name = userDocument.RootElement.GetProperty("name").GetString(),
                     PinnedPosts = pinnedPost,
+                    RecentPosts = recentPost,
                     ProfileUrl = "www.instagram.com/" + username,
                 };
 

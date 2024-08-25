@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using BirdsiteLive.Common.Exceptions;
 using BirdsiteLive.Common.Interfaces;
 using BirdsiteLive.DAL.Contracts;
 using BirdsiteLive.DAL.Models;
@@ -64,18 +65,24 @@ namespace BirdsiteLive.Pipeline.Processors.SubTasks
                             usersWtTweets.Add(userWtData);
                         }
                     } 
+                    catch(RateLimitExceededException e)
+                    {
+                        await Task.Delay(_settings.SocialNetworkRequestJitter);
+                        _logger.LogError(e.Message);
+                    }
                     catch(Exception e)
                     {
                         _logger.LogError(e.Message);
                     }
                 });
                 todo.Add(t);
-                if (todo.Count > _settings.ParallelTwitterRequests)
+                if (todo.Count >= _settings.ParallelTwitterRequests)
                 {
                     await Task.WhenAll(todo);
                     await Task.Delay(_settings.TwitterRequestDelay);
                     todo.Clear();
                 }
+                await Task.Delay(Random.Shared.Next() * _settings.SocialNetworkRequestJitter);
                 
             }
 

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using BirdsiteLive.Common.Interfaces;
 using BirdsiteLive.Common.Models;
@@ -15,6 +16,11 @@ namespace BirdsiteLive.DAL.Postgres.DataAccessLayers;
 
 public abstract class SocialMediaUserPostgresDal : PostgresBase, SocialMediaUserDal
 {
+        private readonly JsonSerializerOptions _jsonOptions = new JsonSerializerOptions
+        {
+            IgnoreReadOnlyProperties = true,
+            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+        };
     
         #region Ctor
         public SocialMediaUserPostgresDal(PostgresSettings settings) : base(settings)
@@ -94,7 +100,7 @@ public abstract class SocialMediaUserPostgresDal : PostgresBase, SocialMediaUser
             await using var command = new NpgsqlCommand(query, connection) {
                 Parameters = 
                 { 
-                    new() { Value = JsonSerializer.Serialize(cache), NpgsqlDbType = NpgsqlDbType.Jsonb },
+                    new() { Value = JsonSerializer.Serialize(cache, _jsonOptions), NpgsqlDbType = NpgsqlDbType.Jsonb },
                     new() { Value = cache.Acct},
                 }
             };

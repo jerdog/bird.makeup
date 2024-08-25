@@ -61,6 +61,7 @@ public class InstagramService : ISocialMediaService
 
         public async Task<SocialMediaPost[]> GetNewPosts(SyncUser user)
         {
+            await GetUserAsync(user.Acct, true);
             return new SocialMediaPost[] {};
         }
 
@@ -68,13 +69,26 @@ public class InstagramService : ISocialMediaService
         public Regex ValidUsername { get;  } = new Regex(@"^[a-zA-Z0-9_\.]{1,30}$");
         public Regex UserMention { get;  } = new Regex(@"(^|.?[ \n\.]+)@([a-zA-Z0-9_\.]+)(?=\s|$|[\[\]<>,;:'\.’!?/—\|-]|(. ))");
         public SocialMediaUserDal UserDal { get; }
+
         public async Task<SocialMediaUser?> GetUserAsync(string username)
+        {
+            return await GetUserAsync(username, false);
+        }
+
+        private async Task<SocialMediaUser?> GetUserAsync(string username, bool forceRefresh)
         {
             JsonElement? accounts = await _settingsDal.Get("ig_allow_list");
             if (accounts is not null && !accounts.Value.EnumerateArray().Any(user => user.GetString() == username))
                 throw new UserNotFoundException();
+
+            InstagramUser user;
             
-            if (!_userCache.TryGetValue(username, out InstagramUser user))
+            if (forceRefresh)
+            {
+                user = await CallSidecar(username);
+                await _instagramUserDal.UpdateUserCacheAsync(user);
+            }
+            else if (!_userCache.TryGetValue(username, out user))
             {
                 var userCache = await _instagramUserDal.GetUserCacheAsync(username);
                 if (userCache is not null)

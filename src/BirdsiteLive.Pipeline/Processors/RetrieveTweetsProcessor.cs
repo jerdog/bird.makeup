@@ -79,10 +79,10 @@ namespace BirdsiteLive.Pipeline.Processors.SubTasks
                 if (todo.Count >= _settings.ParallelTwitterRequests)
                 {
                     await Task.WhenAll(todo);
-                    await Task.Delay(_settings.TwitterRequestDelay);
+                    await Task.Delay(_settings.TwitterRequestDelay, ct);
                     todo.Clear();
                 }
-                await Task.Delay(Random.Shared.Next() * _settings.SocialNetworkRequestJitter);
+                await Task.Delay((int)Math.Round(Random.Shared.NextSingle() * _settings.SocialNetworkRequestJitter), ct);
                 
             }
 

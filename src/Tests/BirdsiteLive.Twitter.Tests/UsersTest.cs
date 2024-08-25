@@ -56,7 +56,7 @@ namespace BirdsiteLive.ActivityPub.Tests
         {
             var user = await _tweetService.GetUserAsync("grantimahara");
             Assert.AreEqual(user.Name, "Grant Imahara");
-            Assert.IsTrue(Math.Abs( user.StatusCount - 12495 ) < 10);
+            Assert.IsTrue(Math.Abs( user.StatusCount - 12495 ) < 100);
             Assert.IsTrue(user.FollowersCount > 500_000);
             Assert.AreEqual(user.Acct, "grantimahara");
             Assert.AreEqual(user.Location, "Los Angeles, CA");

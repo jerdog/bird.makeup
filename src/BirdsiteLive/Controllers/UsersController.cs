@@ -338,9 +338,23 @@ namespace BirdsiteLive.Controllers
             var r = Request.Headers["Accept"].First();
             if (!r.Contains("json")) return NotFound();
 
-            var followers = new Followers
+            var followers = new EmptyCollection
             {
                 id = $"https://{_instanceSettings.Domain}/users/{id}/followers"
+            };
+            var jsonApUser = JsonSerializer.Serialize(followers);
+            return Content(jsonApUser, "application/activity+json; charset=utf-8");
+        }
+        [Route("/users/{id}/outbox")]
+        [HttpGet]
+        public IActionResult Outbox(string id)
+        {
+            var r = Request.Headers["Accept"].First();
+            if (!r.Contains("json")) return NotFound();
+
+            var followers = new EmptyCollection
+            {
+                id = $"https://{_instanceSettings.Domain}/users/{id}/outbox"
             };
             var jsonApUser = JsonSerializer.Serialize(followers);
             return Content(jsonApUser, "application/activity+json; charset=utf-8");

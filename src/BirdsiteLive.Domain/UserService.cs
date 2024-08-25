@@ -136,6 +136,7 @@ namespace BirdsiteLive.Domain
                 id = actorUrl,
                 type = "Service", 
                 followers = $"{actorUrl}/followers",
+                outbox = $"{actorUrl}/outbox",
                 preferredUsername = acct,
                 name = twitterUser.Name,
                 inbox = $"{actorUrl}/inbox",

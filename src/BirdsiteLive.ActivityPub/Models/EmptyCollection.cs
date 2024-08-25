@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 
 namespace BirdsiteLive.ActivityPub.Models
 {
-    public class Followers
+    public class EmptyCollection
     {
         [JsonPropertyName("@context")]
         public string context { get; set; } = "https://www.w3.org/ns/activitystreams";

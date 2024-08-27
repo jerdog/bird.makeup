@@ -28,6 +28,7 @@ namespace BirdsiteLive.ActivityPub
 
         private static Dictionary<string, object> featuredContext = new Dictionary<string, object>()
         {
+            ["toot"] = "http://joinmastodon.org/ns#",
             ["featured"] = new Dictionary<string, object>()
                 { ["@id"] = "toot:featured", ["@type"] = "@id" }
         };

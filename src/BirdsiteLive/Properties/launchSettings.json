@@ -16,7 +16,7 @@
       "launchBrowser": true,
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
-        "Instance__ParallelTwitterRequests": "1",
+        "Instance__ParallelTwitterRequests": "0",
         "Instance__TwitterRequestDelay": "1000",
         "Instance__PipelineStartupDelay": "1",
         "Instance__InstaMode": "true",

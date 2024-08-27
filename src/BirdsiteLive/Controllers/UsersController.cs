@@ -2,6 +2,7 @@
 using System.IO;
 using System.Linq;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using BirdsiteLive.ActivityPub;
 using BirdsiteLive.ActivityPub.Models;
@@ -18,6 +19,7 @@ using BirdsiteLive.Tools;
 using BirdsiteLive.Twitter;
 using BirdsiteLive.Twitter.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 
 namespace BirdsiteLive.Controllers
@@ -32,6 +34,7 @@ namespace BirdsiteLive.Controllers
         private readonly ITwitterUserDal _twitterUserDal;
         private readonly ISocialMediaService _socialMediaService;
         private readonly ILogger<UsersController> _logger;
+        private readonly JsonSerializerOptions _jsonOptions;
 
         #region Ctor
         public UsersController(IUserService userService, IStatusService statusService, InstanceSettings instanceSettings, ICachedTwitterTweetsService twitterTweetService, IFollowersDal followersDal, ITwitterUserDal twitterUserDal, ISocialMediaService socialMediaService, ILogger<UsersController> logger)
@@ -44,6 +47,10 @@ namespace BirdsiteLive.Controllers
             _twitterUserDal = twitterUserDal;
             _socialMediaService = socialMediaService;
             _logger = logger;
+            _jsonOptions = new JsonSerializerOptions
+            {
+                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+            };
         }
         #endregion
 
@@ -111,7 +118,7 @@ namespace BirdsiteLive.Controllers
                     if (isSaturated) return new ObjectResult("Too Many Requests") { StatusCode = 429 };
                     if (notFound) return NotFound();
                     var apUser = await _userService.GetUser(user);
-                    var jsonApUser = System.Text.Json.JsonSerializer.Serialize(apUser);
+                    var jsonApUser = System.Text.Json.JsonSerializer.Serialize(apUser, _jsonOptions);
                     return Content(jsonApUser, "application/activity+json; charset=utf-8");
                 }
             }

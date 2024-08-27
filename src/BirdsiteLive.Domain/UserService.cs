@@ -150,22 +150,28 @@ namespace BirdsiteLive.Domain
                     owner = actorUrl,
                     publicKeyPem =  await _cryptoService.GetUserPem(acct)
                 },
-                icon = new Image
-                {
-                    mediaType = "image/jpeg",
-                    url = twitterUser.ProfileImageUrl
-                },
-                image = new Image
-                {
-                    mediaType = "image/jpeg",
-                    url = twitterUser.ProfileBannerURL
-                },
                 attachment = attachment.ToArray(),
                 endpoints = new EndPoints
                 {
                     sharedInbox = $"https://{_instanceSettings.Domain}/inbox"
                 }
             };
+            if (twitterUser.ProfileBannerURL != null)
+            {
+                user.image = new Image
+                {
+                    mediaType = "image/jpeg",
+                    url = twitterUser.ProfileBannerURL
+                };
+            }
+            if (twitterUser.ProfileImageUrl != null)
+            {
+                user.icon = new Image
+                {
+                    mediaType = "image/jpeg",
+                    url = twitterUser.ProfileImageUrl
+                };
+            }
             return user;
         }
 

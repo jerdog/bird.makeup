@@ -30,7 +30,8 @@ namespace BirdsiteLive.ActivityPub
         {
             ["toot"] = "http://joinmastodon.org/ns#",
             ["featured"] = new Dictionary<string, object>()
-                { ["@id"] = "toot:featured", ["@type"] = "@id" }
+                { ["@id"] = "toot:featured", ["@type"] = "@id" },
+            ["discoverable"] = "toot:discoverable",
         };
     }
 }

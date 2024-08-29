@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Text.Json;
 using System.Threading.Tasks;
+using BirdsiteLive.Common.Interfaces;
 using BirdsiteLive.Common.Settings;
 using BirdsiteLive.Twitter.Models;
 using Microsoft.Extensions.Caching.Memory;
@@ -69,6 +70,11 @@ namespace BirdsiteLive.Twitter
         public bool IsUserApiRateLimited()
         {
             return _twitterService.IsUserApiRateLimited();
+        }
+
+        public Task UpdateUserCache(SyncUser user)
+        {
+            return _twitterService.UpdateUserCache(user);
         }
 
         public TwitterUser Extract(JsonElement result)

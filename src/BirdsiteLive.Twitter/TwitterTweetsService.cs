@@ -201,6 +201,7 @@ namespace BirdsiteLive.Twitter
             }
             extractedTweets = extractedTweets.OrderByDescending(x => x.Id).Where(x => x.IdLong > fromTweetId).ToList();
 
+            int followersThreshold0 = 9999999;
             int followersThreshold = 9999999;
             int followersThreshold2 = 9999999;
             int followersThreshold3 = 9999999;
@@ -211,6 +212,7 @@ namespace BirdsiteLive.Twitter
             var nitterSettings = await _settings.Get("nitter");
             if (nitterSettings is not null)
             {
+                followersThreshold0 = nitterSettings.Value.GetProperty("followersThreshold0").GetInt32();
                 followersThreshold = nitterSettings.Value.GetProperty("followersThreshold").GetInt32();
                 followersThreshold2 = nitterSettings.Value.GetProperty("followersThreshold2").GetInt32();
                 followersThreshold3 = nitterSettings.Value.GetProperty("followersThreshold3").GetInt32();
@@ -220,6 +222,12 @@ namespace BirdsiteLive.Twitter
             var twitterUser = await _twitterUserService.GetUserAsync(username);
             if (user.StatusesCount == -1)
             {
+            }
+            else if (user.Followers > followersThreshold0)
+            {
+                extractedTweets = await TweetFromSidecar(user, fromTweetId, true);
+                source = "Sidecar (with replies)";
+                await Task.Delay(postNitterDelay);
             }
             else if (user.StatusesCount != twitterUser.StatusCount && user.Followers > followersThreshold3)
             {

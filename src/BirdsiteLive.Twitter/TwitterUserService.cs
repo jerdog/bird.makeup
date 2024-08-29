@@ -7,6 +7,7 @@ using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
 using BirdsiteLive.Common.Exceptions;
+using BirdsiteLive.Common.Interfaces;
 using BirdsiteLive.Common.Settings;
 using BirdsiteLive.DAL.Contracts;
 using BirdsiteLive.Twitter.Models;
@@ -20,6 +21,7 @@ namespace BirdsiteLive.Twitter
         Task<TwitterUser> GetUserAsync(string username);
         TwitterUser Extract (JsonElement result);
         bool IsUserApiRateLimited();
+        Task UpdateUserCache(SyncUser user);
     }
 
     public class TwitterUserService : ITwitterUserService
@@ -116,11 +118,11 @@ namespace BirdsiteLive.Twitter
                 res = JsonDocument.Parse(c);
                 var result = res.RootElement.GetProperty("data").GetProperty("user").GetProperty("result");
                 var user = Extract(result);
-                var userFromDal = await _twitterUserDal.GetUserAsync(username);
-                if (userFromDal is not null && userFromDal.Followers > 20)
-                    user = await addDescription(user);
-                _apiCalled.Add(1, new KeyValuePair<string, object>("api", "twitter_account")
-                , new KeyValuePair<string, object>("result", "2xx") );
+                //var userFromDal = await _twitterUserDal.GetUserAsync(username);
+                //if (userFromDal is not null && userFromDal.Followers > 20)
+                //    user = await addDescription(user);
+                //_apiCalled.Add(1, new KeyValuePair<string, object>("api", "twitter_account")
+                //, new KeyValuePair<string, object>("result", "2xx") );
                 return user;
             }
             catch (System.Collections.Generic.KeyNotFoundException)
@@ -136,11 +138,6 @@ namespace BirdsiteLive.Twitter
                 _logger.LogError(e, "Error retrieving user {Username}", username);
                 throw;
             }
-
-            // Expand URLs
-            //var description = user.Description;
-            //foreach (var descriptionUrl in user.Entities?.Description?.Urls?.OrderByDescending(x => x.URL.Length))
-            //    description = description.Replace(descriptionUrl.URL, descriptionUrl.ExpandedURL);
 
         }
 
@@ -228,6 +225,53 @@ namespace BirdsiteLive.Twitter
             }
             
             return user;
+        }
+        async public Task UpdateUserCache(SyncUser user)
+        {
+            if (user.TwitterUserId == default)
+                return;
+
+            try
+            {
+                var cred = await _settings.Get("twitteraccounts");
+                string username = String.Empty;
+                string password = String.Empty;
+
+                var candidates = cred.Value.GetProperty("accounts").EnumerateArray().ToArray();
+                Random.Shared.Shuffle(candidates);
+                foreach (JsonElement account in candidates)
+                {
+                    username = account.EnumerateArray().First().GetString();
+                    password = account.EnumerateArray().Last().GetString();
+                }
+
+                var client = _httpClientFactory.CreateClient();
+                var request = new HttpRequestMessage(HttpMethod.Get,
+                    $"http://localhost:5000/twitter/profile/{user.TwitterUserId}");
+
+                request.Headers.TryAddWithoutValidation("dotmakeup-user", username);
+                request.Headers.TryAddWithoutValidation("dotmakeup-password", password);
+
+                var httpResponse = await client.SendAsync(request);
+
+                _apiCalled.Add(1, new KeyValuePair<string, object>("api", "twitter_account"),
+                    new KeyValuePair<string, object>("result", httpResponse.StatusCode == HttpStatusCode.OK ? "2xx": "5xx"),
+                    new KeyValuePair<string, object>("endpoint", "profile") 
+                );
+
+                if (httpResponse.StatusCode != HttpStatusCode.OK)
+                    return;
+                        
+                var profileJson = await httpResponse.Content.ReadAsStringAsync();
+                var profile = JsonSerializer.Deserialize<TwitterUser>(profileJson);
+
+                await _twitterUserDal.UpdateUserCacheAsync(profile);
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "Error updating user cache for {Username}", user.Acct);
+            }
+            
         }
 
         public bool IsUserApiRateLimited()

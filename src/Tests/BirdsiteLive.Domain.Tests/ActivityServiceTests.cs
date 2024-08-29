@@ -59,7 +59,7 @@ namespace BirdsiteLive.Domain.Tests
                 """{"object":{"object":"https://mastodon.technology/users/testtest3","@context":"https://www.w3.org/ns/activitystreams","id":"abc","type":"Follow","actor":"https://mastodon.technology/users/testtest2"},"@context":"https://www.w3.org/ns/activitystreams","id":"awef","type":"Accept","actor":"https://mastodon.technology/users/testtest"}""";
             #region Validations
 
-            var req = await service.BuildRequest(activity, "google.com", "tata", "awef");
+            var req = await service.BuildRequest(activity, "google.com", "tata", HttpMethod.Post, "awef");
             
             Assert.AreEqual(await req.Content.ReadAsStringAsync(), json);
 

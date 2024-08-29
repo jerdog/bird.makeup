@@ -1,14 +1,15 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Net.Http;
 using System.Text.Json;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using BirdsiteLive.ActivityPub;
 using BirdsiteLive.Common.Interfaces;
 using BirdsiteLive.Common.Settings;
 using BirdsiteLive.Cryptography;
 using BirdsiteLive.Domain.Factories;
-using BirdsiteLive.Domain.Statistics;
-using BirdsiteLive.Domain.Tools;
 using Microsoft.Extensions.Logging;
 using Microsoft.VisualBasic;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -21,6 +22,8 @@ public class CryptoServiceTest
 {
     private readonly InstanceSettings _settings;
     private readonly CryptoService _cryptoService;
+    private readonly ActivityPubService _activityPubService;
+    private readonly MagicKey _key;
     
     public CryptoServiceTest()
     {
@@ -28,12 +31,50 @@ public class CryptoServiceTest
         {
             Domain = "domain.name"
         };
+        var httpFactory = new Mock<IHttpClientFactory>();
+        var log = new Mock<ILogger<ActivityPubService>>();
         var keyFactory = new Mock<IMagicKeyFactory>();
-        keyFactory.Setup(_ => _.GetMagicKey()).ReturnsAsync(new MagicKey(
-            """{"D":"Oar5IoCLbM2K82c2M3ljJJUAf7KFr6beFtlhFOj+4q1WnIReXylvoe3XBkotQ13jb1RQ5dNKQhI3oMUpHbLbG8mScHv48QtT6OR1HaDVDYwEdiSGN0JsmtBRigbMJyn2AX0OlwkxJe3xi6oo3eCV5CSjU/hiW9JXA9dKD3NP1VgLIGHRNgNcIxkOfVWDN01ECYu4t2OXnZCuyqunZ0lharUJ6e8lralqkZFoP6bMevsrTc3+hYXcjfYZkevet1yUxJqNfw7RWPKNbabheTtsAuS0jhXig8XoJKY8AIffVjchGgIUI4vq4nJMN2rUxz68CF/nFOuD8feER1byABSN4Q==", "P": "7pf+7JzVFRHCSFsaXsm+CnBR/pfwTv8GVp9kpmL7Baru9h7MHnxYJ0N/RTMpMyZvDVx0Sjobp+gLrKLiYD22QfxFAlTVjoDohKUsQugydA0wrDNJ5BBmWWxkapTInGutZYwWTkefWRC/hjyZlAvUhgW9ctSas8+/LEeuyA6ql6M=","Q":"2IaktklUUgI3gbk+7jXNOClm6rc6cjoetk4sS85EjoUJZs59uOAdpfmm0uIqNP0gKy4opxnsQFxybaEHwzuYWH+ZySNS9uRRjYKfDAU6OYCYEOFKlh6jjHUCdcd8VDFNSvA0MT5DZ8tpX2MjjahuGdlfXQZm1UKYB+h1g25caSc=","DP":"JEg83eJjjNasgrBH7E4ldhTqgxq70md5oUaP2bWHkq8Rs5+vTpt+FEpxWiaTh1G65X8/t+HqPrhMvi3u2s/HnXUtUVNxPkBgG3u6pVoGAhvXYPhTrjjIN6UCCCsj7pV5Qs3wvmqp0rN3TIR+nkLGSLMqwgGOnPVkjuk/rPB+BJ0=", "DQ": "wH2CdKNgGL/rxKGAtpiR5nm4CrX1eZL9tqhsbL/k5qaSoxizX+Wttd3pVtTFHPJi5MBWV6eOBfGpsJhVpFSYrSRS/SMwIFj9v0X+Stti1bfieC8w9aArWTS0iSxc9SQXSKWeYKCvn9iPxsMF2mt/5e7+/l4wkSpwqacYwU0dTkU=", "Modulus": "yc28Klfkn//jJKnZpzK4yDsfAv5u6mjzLJwMcW30IWk3k+N/cmH3MDDlC7en04kdYOKWLHSS0+G7XaxehZOj55GG+N7GjEBeUlls1jLHAP+zCyrtPh9UDmSOhYbrTdXAExHTcGn3rVCyYURopzk+gZ7GtNCEYIPrvpUhqgLVXE0FPTeBiyGq92VOmIEdDqQ9HdHgDnzd49oXsMxaqqSh6aJBIv8JgvDUR0OJD7xVrqd5ZvsoDcaKmkNfYL/TsFuQVH5DWC0emTlIgfYp246mUDoh1Z/3vvSglZjATXMx+zjnLbVQB8zcZSSdJSOLlpBPs8CeRjWZqMBFH1hdvML01Q==", "Exponent": "AQAB", "InverseQ": "G/edCYzS5R54fU2GDys37nkoq2rlHUG+uas3fJMKRr+2OMU6sBy26p76enXWEP2gtlqmugFvm4QeKYBUgxwNCPdfof+vNb1yh8wLiqWyG636+MYJK9NkUkAIpUjyVvI4rFWQX4+1cu7pqEqetfP0LafS+4Z+FPhBJK6Iz3YvJng="}"""));
+        _key = new MagicKey(
+            """{"D":"Oar5IoCLbM2K82c2M3ljJJUAf7KFr6beFtlhFOj+4q1WnIReXylvoe3XBkotQ13jb1RQ5dNKQhI3oMUpHbLbG8mScHv48QtT6OR1HaDVDYwEdiSGN0JsmtBRigbMJyn2AX0OlwkxJe3xi6oo3eCV5CSjU/hiW9JXA9dKD3NP1VgLIGHRNgNcIxkOfVWDN01ECYu4t2OXnZCuyqunZ0lharUJ6e8lralqkZFoP6bMevsrTc3+hYXcjfYZkevet1yUxJqNfw7RWPKNbabheTtsAuS0jhXig8XoJKY8AIffVjchGgIUI4vq4nJMN2rUxz68CF/nFOuD8feER1byABSN4Q==", "P": "7pf+7JzVFRHCSFsaXsm+CnBR/pfwTv8GVp9kpmL7Baru9h7MHnxYJ0N/RTMpMyZvDVx0Sjobp+gLrKLiYD22QfxFAlTVjoDohKUsQugydA0wrDNJ5BBmWWxkapTInGutZYwWTkefWRC/hjyZlAvUhgW9ctSas8+/LEeuyA6ql6M=","Q":"2IaktklUUgI3gbk+7jXNOClm6rc6cjoetk4sS85EjoUJZs59uOAdpfmm0uIqNP0gKy4opxnsQFxybaEHwzuYWH+ZySNS9uRRjYKfDAU6OYCYEOFKlh6jjHUCdcd8VDFNSvA0MT5DZ8tpX2MjjahuGdlfXQZm1UKYB+h1g25caSc=","DP":"JEg83eJjjNasgrBH7E4ldhTqgxq70md5oUaP2bWHkq8Rs5+vTpt+FEpxWiaTh1G65X8/t+HqPrhMvi3u2s/HnXUtUVNxPkBgG3u6pVoGAhvXYPhTrjjIN6UCCCsj7pV5Qs3wvmqp0rN3TIR+nkLGSLMqwgGOnPVkjuk/rPB+BJ0=", "DQ": "wH2CdKNgGL/rxKGAtpiR5nm4CrX1eZL9tqhsbL/k5qaSoxizX+Wttd3pVtTFHPJi5MBWV6eOBfGpsJhVpFSYrSRS/SMwIFj9v0X+Stti1bfieC8w9aArWTS0iSxc9SQXSKWeYKCvn9iPxsMF2mt/5e7+/l4wkSpwqacYwU0dTkU=", "Modulus": "yc28Klfkn//jJKnZpzK4yDsfAv5u6mjzLJwMcW30IWk3k+N/cmH3MDDlC7en04kdYOKWLHSS0+G7XaxehZOj55GG+N7GjEBeUlls1jLHAP+zCyrtPh9UDmSOhYbrTdXAExHTcGn3rVCyYURopzk+gZ7GtNCEYIPrvpUhqgLVXE0FPTeBiyGq92VOmIEdDqQ9HdHgDnzd49oXsMxaqqSh6aJBIv8JgvDUR0OJD7xVrqd5ZvsoDcaKmkNfYL/TsFuQVH5DWC0emTlIgfYp246mUDoh1Z/3vvSglZjATXMx+zjnLbVQB8zcZSSdJSOLlpBPs8CeRjWZqMBFH1hdvML01Q==", "Exponent": "AQAB", "InverseQ": "G/edCYzS5R54fU2GDys37nkoq2rlHUG+uas3fJMKRr+2OMU6sBy26p76enXWEP2gtlqmugFvm4QeKYBUgxwNCPdfof+vNb1yh8wLiqWyG636+MYJK9NkUkAIpUjyVvI4rFWQX4+1cu7pqEqetfP0LafS+4Z+FPhBJK6Iz3YvJng="}""");
+        keyFactory.Setup(_ => _.GetMagicKey()).ReturnsAsync(_key);
         _cryptoService = new CryptoService(keyFactory.Object);
+        _activityPubService = new ActivityPubService(_cryptoService, _settings, httpFactory.Object, log.Object);
     }
-    
+
+    [TestMethod]
+    public async Task SignGetUserAndValidate()
+    {
+        var actor = new Actor()
+        {
+            id = "https://domain.name/users/chuck",
+            publicKey = new PublicKey()
+            {
+                publicKeyPem = _key.AsPEM,
+            }
+        };
+        var req = await _activityPubService.BuildRequest((string)null, "domain.name", actor.id, HttpMethod.Get, "/users/bozo");
+    }
+    [TestMethod]
+    public async Task SignMessageToInboxAndValidate()
+    {
+        var activity = new ActivityCreate()
+        {
+
+        };
+        var actor = new Actor()
+        {
+            id = "https://domain.name/users/chuck",
+            publicKey = new PublicKey()
+            {
+                publicKeyPem = _key.AsPEM,
+            }
+        };
+        var req = await _activityPubService.BuildRequest(activity, "domain.name", actor.id, HttpMethod.Post, "/inbox");
+        
+        var res = CryptoService.ValidateSignature(actor, req.Headers.GetValues("Signature").First(), "post", "/inbox", "",req.Headers.ToDictionary(a => a.Key.ToLower(), a => a.Value.First()), await req.Content.ReadAsStringAsync());
+        Assert.IsTrue(res.SignatureIsValidated);
+    }
+
     [TestMethod]
     public void ValidDelete()
     {

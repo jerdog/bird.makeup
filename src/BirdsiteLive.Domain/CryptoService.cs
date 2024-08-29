@@ -53,7 +53,7 @@ namespace BirdsiteLive.Domain
             var httpDate = date.ToString("r");
             var sig64 = await SignString($"(request-target): post {usedInbox}\nhost: {targethost}\ndate: {httpDate}\ndigest: SHA-256={digest}");
 
-            var header = "keyId=\"" + actor + "\",algorithm=\"rsa-sha256\",headers=\"(request-target) host date digest\",signature=\"" + sig64 + "\"";
+            var header = "keyId=\"" + actor + "#main-key\",algorithm=\"rsa-sha256\",headers=\"(request-target) host date digest\",signature=\"" + sig64 + "\"";
             return header;
         }
 

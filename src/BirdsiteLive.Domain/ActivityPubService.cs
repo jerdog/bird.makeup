@@ -48,7 +48,7 @@ namespace BirdsiteLive.Domain
             var userUri = new System.Uri(objectId);
             var httpDate = DateTime.Now.ToString("r");
             var sig64 = await _cryptoService.SignString($"(request-target): get {userUri.AbsolutePath}\nhost: {userUri.Host}\ndate: {httpDate}");
-            var sigHeader = "keyId=\"" + actor + "\",algorithm=\"rsa-sha256\",headers=\"(request-target) host date\",signature=\"" + sig64 + "\"";
+            var sigHeader = "keyId=\"" + actor + "#main-key\",algorithm=\"rsa-sha256\",headers=\"(request-target) host date\",signature=\"" + sig64 + "\"";
 
             var httpClient = _httpClientFactory.CreateClient();
             var httpRequestMessage = new HttpRequestMessage
@@ -112,7 +112,7 @@ namespace BirdsiteLive.Domain
             };
             return acceptFollow;
         }
-        public async Task<HttpRequestMessage> BuildRequest<T>(T data, string targetHost, string actorUrl,
+        public async Task<HttpRequestMessage> BuildRequest<T>(T data, string targetHost, string actorUrl, HttpMethod method,
             string inbox = null)
         {
             var usedInbox = $"/inbox";
@@ -130,7 +130,7 @@ namespace BirdsiteLive.Domain
 
             var httpRequestMessage = new HttpRequestMessage
             {
-                Method = HttpMethod.Post,
+                Method = method,
                 RequestUri = new Uri($"https://{targetHost}{usedInbox}"),
                 Headers =
                 {
@@ -140,17 +140,19 @@ namespace BirdsiteLive.Domain
                     { "Digest", $"SHA-256={digest}" },
                     { "User-Agent", "System.Net (Bird.MakeUp; +" + _instanceSettings.Domain + ")"}
                 },
-                Content = new StringContent(json, Encoding.UTF8, "application/ld+json")
             };
-
-            httpRequestMessage.Content.Headers.ContentType = new MediaTypeHeaderValue("application/activity+json");
+            if (data is not null)
+            {
+                httpRequestMessage.Content = new StringContent(json, Encoding.UTF8, "application/ld+json");
+                httpRequestMessage.Content.Headers.ContentType = new MediaTypeHeaderValue("application/activity+json");
+            }
 
             return httpRequestMessage;
         }
 
         public async Task<HttpStatusCode> PostDataAsync<T>(T data, string targetHost, string actorUrl, string inbox = null)
         {
-            var httpRequestMessage = await BuildRequest(data, targetHost, actorUrl, inbox);
+            var httpRequestMessage = await BuildRequest(data, targetHost, actorUrl, HttpMethod.Post, inbox);
 
             var client = _httpClientFactory.CreateClient();
             client.Timeout = TimeSpan.FromSeconds(2);

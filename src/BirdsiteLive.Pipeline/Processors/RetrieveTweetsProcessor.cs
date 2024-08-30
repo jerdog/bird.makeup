@@ -61,7 +61,7 @@ namespace BirdsiteLive.Pipeline.Processors.SubTasks
                         _logger.LogInformation(index + "/" + syncTwitterUsers.Count() + " Got " + tweets.Length + " posts from user " + user.Acct + " " );
                         if (tweets.Length > 0)
                         {
-                            userWtData.Tweets = (ExtractedTweet[])tweets;
+                            userWtData.Tweets = tweets;
                             usersWtTweets.Add(userWtData);
                         }
                     } 

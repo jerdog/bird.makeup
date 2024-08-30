@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Data;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
-using System.Xml;
 using BirdsiteLive.DAL.Contracts;
 using BirdsiteLive.DAL.Postgres.DataAccessLayers.Base;
 using BirdsiteLive.DAL.Postgres.Settings;
@@ -23,7 +20,7 @@ namespace BirdsiteLive.DAL.Postgres.DataAccessLayers
     public class DbInitializerPostgresDal : PostgresBase, IDbInitializerDal
     {
         private readonly PostgresTools _tools;
-        private readonly Version _currentVersion = new Version(3, 4);
+        private readonly Version _currentVersion = new Version(3, 5);
         private const string DbVersionType = "db-version";
 
         #region Ctor
@@ -139,6 +136,7 @@ namespace BirdsiteLive.DAL.Postgres.DataAccessLayers
                 new Tuple<Version, Version>(new Version(3,1), new Version(3,2)),
                 new Tuple<Version, Version>(new Version(3,2), new Version(3,3)),
                 new Tuple<Version, Version>(new Version(3,3), new Version(3,4)),
+                new Tuple<Version, Version>(new Version(3,4), new Version(3,5)),
             };
         }
 
@@ -259,6 +257,18 @@ namespace BirdsiteLive.DAL.Postgres.DataAccessLayers
                 await _tools.ExecuteRequestAsync(alterIgAddWikidata);
                 await _tools.ExecuteRequestAsync(alterIgAddCache);
             }
+            else if (from == new Version(3, 4) && to == new Version(3, 5))
+            {
+                var alterFollowerExtradata = $@"ALTER TABLE {_settings.FollowersTableName} ADD extradata JSONB";
+                var addLastSync1 = $@"ALTER TABLE {_settings.InstagramUserTableName} ADD lastSync TIMESTAMP (2) WITHOUT TIME ZONE DEFAULT NOW()";
+                var addLastSync2 = $@"ALTER TABLE {_settings.CachedInstaPostsTableName} ADD lastSync TIMESTAMP (2) WITHOUT TIME ZONE DEFAULT NOW()";
+                var defaultTweetId = $@"ALTER TABLE {_settings.TwitterUserTableName} ALTER COLUMN lasttweetpostedid SET DEFAULT -1";
+                await _tools.ExecuteRequestAsync(alterFollowerExtradata);
+                await _tools.ExecuteRequestAsync(addLastSync1);
+                await _tools.ExecuteRequestAsync(addLastSync2);
+                await _tools.ExecuteRequestAsync(defaultTweetId);
+            }
+            
             else
             {
                 throw new NotImplementedException();

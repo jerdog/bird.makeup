@@ -118,11 +118,8 @@ namespace BirdsiteLive.Twitter
                 res = JsonDocument.Parse(c);
                 var result = res.RootElement.GetProperty("data").GetProperty("user").GetProperty("result");
                 var user = Extract(result);
-                //var userFromDal = await _twitterUserDal.GetUserAsync(username);
-                //if (userFromDal is not null && userFromDal.Followers > 20)
-                //    user = await addDescription(user);
-                //_apiCalled.Add(1, new KeyValuePair<string, object>("api", "twitter_account")
-                //, new KeyValuePair<string, object>("result", "2xx") );
+                _apiCalled.Add(1, new KeyValuePair<string, object>("api", "twitter_account")
+                , new KeyValuePair<string, object>("result", "2xx") );
                 return user;
             }
             catch (System.Collections.Generic.KeyNotFoundException)
@@ -189,43 +186,6 @@ namespace BirdsiteLive.Twitter
 
         }
 
-        async private Task<TwitterUser> addDescription(TwitterUser user)
-        {
-
-            try
-            {
-                var cred = await _settings.Get("twitteraccounts");
-                string username = String.Empty;
-                string password = String.Empty;
-
-                var candidates = cred.Value.GetProperty("accounts").EnumerateArray().ToArray();
-                Random.Shared.Shuffle(candidates);
-                foreach (JsonElement account in candidates)
-                {
-                    username = account.EnumerateArray().First().GetString();
-                    password = account.EnumerateArray().Last().GetString();
-                }
-
-                var client = _httpClientFactory.CreateClient();
-                var request = new HttpRequestMessage(HttpMethod.Get,
-                    $"http://localhost:5000/twitter/bio/{user.Id}");
-
-                request.Headers.TryAddWithoutValidation("dotmakeup-user", username);
-                request.Headers.TryAddWithoutValidation("dotmakeup-password", password);
-
-                var httpResponse = await client.SendAsync(request);
-
-                if (httpResponse.StatusCode == HttpStatusCode.OK)
-                    user.Description = await httpResponse.Content.ReadAsStringAsync();
-
-            }
-            catch (Exception _)
-            {
-                
-            }
-            
-            return user;
-        }
         async public Task UpdateUserCache(SyncUser user)
         {
             if (user.TwitterUserId == default)

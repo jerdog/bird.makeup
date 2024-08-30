@@ -62,7 +62,7 @@ namespace BirdsiteLive.Pipeline.Processors
                 
                 SyncUser[] usersDal = await _socialMediaService.UserDal.GetNextUsersToCrawlAsync(_n_start, _n_end, _instanceSettings.m);
 
-                var userCount = usersDal.Any() ? Math.Min(usersDal.Length, 200) : 1;
+                var userCount = usersDal.Any() ? Math.Min(usersDal.Length, 5) : 1;
                 var splitUsers = usersDal.OrderBy(a => rng.Next()).ToArray().Chunk(userCount).ToList();
 
                 foreach (var users in splitUsers)

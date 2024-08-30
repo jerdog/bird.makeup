@@ -61,9 +61,20 @@ public class InstagramService : ISocialMediaService
 
         public async Task<SocialMediaPost[]> GetNewPosts(SyncUser user)
         {
-            //var v1 = await GetUserAsync(user.Acct, false);
+            var newPosts = new List<SocialMediaPost>();
             var v2 = await GetUserAsync(user.Acct, true);
-            return new SocialMediaPost[] {};
+            if (v2 == null)
+                return Array.Empty<SocialMediaPost>();
+            
+            foreach (var p in v2.RecentPosts)
+            {
+                if (p.CreatedAt > user.LastSync)
+                    newPosts.Add(p);
+            }
+
+            await UserDal.UpdateUserLastSyncAsync(user);
+            
+            return newPosts.ToArray();
         }
 
         public string ServiceName { get; } = "Instagram";
@@ -76,7 +87,7 @@ public class InstagramService : ISocialMediaService
             return await GetUserAsync(username, false);
         }
 
-        private async Task<SocialMediaUser?> GetUserAsync(string username, bool forceRefresh)
+        private async Task<InstagramUser?> GetUserAsync(string username, bool forceRefresh)
         {
             JsonElement? accounts = await _settingsDal.Get("ig_allow_list");
             if (accounts is not null && !accounts.Value.EnumerateArray().Any(user => user.GetString() == username))

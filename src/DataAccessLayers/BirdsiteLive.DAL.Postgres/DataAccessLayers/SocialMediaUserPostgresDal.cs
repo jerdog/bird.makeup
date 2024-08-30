@@ -92,6 +92,20 @@ public abstract class SocialMediaUserPostgresDal : PostgresBase, SocialMediaUser
             var cache = reader["cache"] as string;
             return cache;
         }
+        public async Task UpdateUserLastSyncAsync(SyncUser user)
+        {
+            var query = $"UPDATE {tableName} SET lastsync = NOW() WHERE acct = $1";
+            await using var connection = DataSource.CreateConnection();
+            await connection.OpenAsync();
+            await using var command = new NpgsqlCommand(query, connection) {
+                Parameters = 
+                { 
+                    new() { Value = user.Acct},
+                }
+            };
+
+            await command.ExecuteNonQueryAsync();
+        }
         public async Task UpdateUserCacheAsync(SocialMediaUser cache)
         {
             var query = $"UPDATE {tableName} SET cache = $1 WHERE acct = $2";

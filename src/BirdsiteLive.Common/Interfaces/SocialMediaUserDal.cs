@@ -12,6 +12,7 @@ public interface SocialMediaUserDal
         Task<SyncUser> GetUserAsync(string acct);
         Task<string?> GetUserCacheAsync(string acct);
         Task UpdateUserCacheAsync(SocialMediaUser user);
+        Task UpdateUserLastSyncAsync(SyncUser user);
         Task<SyncUser> GetUserAsync(int acct);
         Task<SyncUser[]> GetNextUsersToCrawlAsync(int nStart, int nEnd, int m);
         Task DeleteUserAsync(int id);

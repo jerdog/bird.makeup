@@ -16,7 +16,7 @@ namespace BirdsiteLive.Pipeline.Processors.SubTasks
 {
     public interface ISendTweetsToInboxTask
     {
-        Task ExecuteAsync(IEnumerable<ExtractedTweet> tweets, Follower follower, SyncUser user);
+        Task ExecuteAsync(IEnumerable<SocialMediaPost> tweets, Follower follower, SyncUser user);
     }
 
     public class SendTweetsToInboxTask : ISendTweetsToInboxTask
@@ -38,7 +38,7 @@ namespace BirdsiteLive.Pipeline.Processors.SubTasks
         }
         #endregion
 
-        public async Task ExecuteAsync(IEnumerable<ExtractedTweet> tweets, Follower follower, SyncUser user)
+        public async Task ExecuteAsync(IEnumerable<SocialMediaPost> tweets, Follower follower, SyncUser user)
         {
             var userId = user.Id;
             //var fromStatusId = follower.FollowingsSyncStatus[userId];

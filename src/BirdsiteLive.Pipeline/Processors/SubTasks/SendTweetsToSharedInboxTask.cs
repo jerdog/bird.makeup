@@ -15,7 +15,7 @@ namespace BirdsiteLive.Pipeline.Processors.SubTasks
 {
     public interface ISendTweetsToSharedInboxTask
     {
-        Task ExecuteAsync(ExtractedTweet[] tweets, SyncUser user, string host, Follower[] followersPerInstance);
+        Task ExecuteAsync(SocialMediaPost[] tweets, SyncUser user, string host, Follower[] followersPerInstance);
     }
 
     public class SendTweetsToSharedInboxTask : ISendTweetsToSharedInboxTask
@@ -37,7 +37,7 @@ namespace BirdsiteLive.Pipeline.Processors.SubTasks
         }
         #endregion
 
-        public async Task ExecuteAsync(ExtractedTweet[] tweets, SyncUser user, string host, Follower[] followersPerInstance)
+        public async Task ExecuteAsync(SocialMediaPost[] tweets, SyncUser user, string host, Follower[] followersPerInstance)
         {
             var userId = user.Id;
             var inbox = followersPerInstance.First().SharedInboxRoute;

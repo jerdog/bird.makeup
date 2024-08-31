@@ -244,6 +244,8 @@ namespace BirdsiteLive.Controllers
             foreach (string postId in user.PinnedPosts)
             {
                 var tweet = await _socialMediaService.GetPostAsync(postId);
+                if (tweet is null)
+                    continue;
                 var status = _statusService.GetActivity(id, tweet);
                 status.apObject.context = null;
 

@@ -8,7 +8,7 @@ spec:
       app: dotmakeup
       network: twitter
   serviceName: "dotmakeup"
-  replicas: 3 
+  replicas: 4 
   minReadySeconds: 10 
   template:
     metadata:
@@ -68,9 +68,9 @@ spec:
             - name: Instance__ParallelFediversePosts
               value: "10"
             - name: Instance__UserCacheCapacity
-              value: "50000"
+              value: "40000"
             - name: Instance__TweetCacheCapacity
-              value: "50000"
+              value: "40000"
             - name: Instance__MultiplyNByOrdinal
               value: "true"
             - name: Instance__n_start
@@ -78,7 +78,7 @@ spec:
             - name: Instance__n_end
               value: "20"
             - name: Instance__m
-              value: "59"
+              value: "79"
             - name: db__type
               value: "postgres"
             - name: db__host

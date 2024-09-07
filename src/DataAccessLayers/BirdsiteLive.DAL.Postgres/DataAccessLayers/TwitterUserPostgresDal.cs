@@ -18,12 +18,13 @@ namespace BirdsiteLive.DAL.Postgres.DataAccessLayers
         #region Ctor
         public TwitterUserPostgresDal(PostgresSettings settings) : base(settings)
         {
-
+            PostCacheTableName = _settings.CachedTweetsTableName;
             tableName = _settings.TwitterUserTableName;
         }
         #endregion
 
-        public override string tableName { get; set; } 
+        public sealed override string tableName { get; set; }
+        public sealed override string PostCacheTableName { get; set; }
         public override string FollowingColumnName { get; set; } = "followings";
 
         public async override Task<SyncUser[]> GetNextUsersToCrawlAsync(int nStart, int nEnd, int m)

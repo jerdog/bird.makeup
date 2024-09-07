@@ -6,6 +6,7 @@ using BirdsiteLive.Common.Settings;
 using BirdsiteLive.DAL.Contracts;
 using BirdsiteLive.Common.Exceptions;
 using BirdsiteLive.Instagram.Models;
+using dotMakeup.ipfs;
 using dotMakeup.Instagram.Models;
 using Microsoft.Extensions.Caching.Memory;
 
@@ -17,6 +18,7 @@ public class InstagramService : ISocialMediaService
         private readonly InstanceSettings _settings;
         private readonly ISettingsDal _settingsDal;
         private readonly IInstagramUserDal _instagramUserDal;
+        private readonly IIpfsService _ipfs;
         
         private readonly MemoryCache _userCache;
         private readonly MemoryCache _postCache;
@@ -39,12 +41,13 @@ public class InstagramService : ISocialMediaService
             .SetAbsoluteExpiration(TimeSpan.FromMinutes(30));
 
         #region Ctor
-        public InstagramService(IInstagramUserDal userDal, IHttpClientFactory httpClientFactory, InstanceSettings settings, ISettingsDal settingsDal)
+        public InstagramService(IIpfsService ipfs, IInstagramUserDal userDal, IHttpClientFactory httpClientFactory, InstanceSettings settings, ISettingsDal settingsDal)
         {
             _httpClientFactory = httpClientFactory;
             _settings = settings;
             _settingsDal = settingsDal;
             _instagramUserDal = userDal;
+            _ipfs = ipfs;
             UserDal = userDal;
             
             _userCache = new MemoryCache(new MemoryCacheOptions()
@@ -69,7 +72,20 @@ public class InstagramService : ISocialMediaService
             foreach (var p in v2.RecentPosts)
             {
                 if (p.CreatedAt > user.LastSync)
+                {
+                    if (_settings.IpfsApi is not null)
+                    {
+                        foreach (ExtractedMedia m in p.Media)
+                        {
+                            var hash = await _ipfs.Mirror(m.Url);
+                            m.Url = _ipfs.GetIpfsPublicLink(hash);
+                        }
+
+                        await _instagramUserDal.UpdatePostCacheAsync(p);
+                    }
+                    
                     newPosts.Add(p);
+                }
             }
 
             await UserDal.UpdateUserLastSyncAsync(user);
@@ -121,6 +137,14 @@ public class InstagramService : ISocialMediaService
         {
             if (!_postCache.TryGetValue(id, out InstagramPost post))
             {
+                var dbCache = await _instagramUserDal.GetPostCacheAsync(id);
+                if (dbCache is not null)
+                {
+                    _postCache.Set(id, dbCache, _cacheEntryOptions);
+                    return dbCache;
+                }
+                
+                
                 var client = _httpClientFactory.CreateClient();
                 string requestUrl;
                 requestUrl = _settings.SidecarURL + "/instagram/post/" + id;

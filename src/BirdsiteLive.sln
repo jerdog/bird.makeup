@@ -61,6 +61,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "dotMakeup.Instagram", "dotM
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "dotMakeup.Instagram.Tests", "Tests\dotMakeup.Instagram.Tests\dotMakeup.Instagram.Tests.csproj", "{4DC8E02D-7CA8-436C-8732-C8B23EE89A00}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "dotMakeup.ipfs", "dotMakeup.ipfs\dotMakeup.ipfs.csproj", "{1C68F38E-4F05-4B5E-B427-1AE4B5DA8E2E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -163,6 +165,10 @@ Global
 		{4DC8E02D-7CA8-436C-8732-C8B23EE89A00}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4DC8E02D-7CA8-436C-8732-C8B23EE89A00}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4DC8E02D-7CA8-436C-8732-C8B23EE89A00}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1C68F38E-4F05-4B5E-B427-1AE4B5DA8E2E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1C68F38E-4F05-4B5E-B427-1AE4B5DA8E2E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1C68F38E-4F05-4B5E-B427-1AE4B5DA8E2E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1C68F38E-4F05-4B5E-B427-1AE4B5DA8E2E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -191,6 +197,7 @@ Global
 		{6D650384-7BDD-4628-A46C-2FE4A688DBA4} = {A32D3458-09D0-4E0A-BA4B-8C411B816B94}
 		{0966D6C5-52E7-480A-AF31-FC484D10770F} = {7ACCADEA-4B64-4ACB-A21D-0627674BBA9D}
 		{4DC8E02D-7CA8-436C-8732-C8B23EE89A00} = {A32D3458-09D0-4E0A-BA4B-8C411B816B94}
+		{1C68F38E-4F05-4B5E-B427-1AE4B5DA8E2E} = {4FEAD6BC-3C8E-451A-8CA1-FF1AF47D26CC}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {69E8DCAD-4C37-4010-858F-5F94E6FBABCE}

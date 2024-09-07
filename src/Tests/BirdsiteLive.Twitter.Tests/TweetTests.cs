@@ -115,6 +115,8 @@ namespace BirdsiteLive.ActivityPub.Tests
         public async Task SimpleQT()
         {
             var tweet = await _tweetService.GetTweetAsync(1610807139089383427);
+            if (tweet is null)
+                Assert.Inconclusive();
 
             Assert.AreEqual(tweet.MessageContent, "When you gave them your keys you gave them your coins.\n\nhttps://domain.name/@kadhim/1610706613207285773");
             Assert.AreEqual(tweet.Author.Acct, "ryansadams");

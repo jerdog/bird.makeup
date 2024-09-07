@@ -16,11 +16,13 @@ public class InstagramUserPostgresDal : SocialMediaUserPostgresDal, IInstagramUs
         #region Ctor
         public InstagramUserPostgresDal(PostgresSettings settings) : base(settings)
         {
+            PostCacheTableName = _settings.CachedInstaPostsTableName;
             tableName = _settings.InstagramUserTableName;
         }
         #endregion
 
         public sealed override string tableName { get; set; }
+        public sealed override string PostCacheTableName { get; set; }
         public override string FollowingColumnName { get; set; } = "followings_instagram";
         public override async Task<SyncUser[]> GetNextUsersToCrawlAsync(int nStart, int nEnd, int m)
         {

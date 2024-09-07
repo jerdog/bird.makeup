@@ -10,6 +10,7 @@ using BirdsiteLive.Services;
 using BirdsiteLive.Twitter;
 using BirdsiteLive.Twitter.Tools;
 using dotMakeup.Instagram;
+using dotMakeup.ipfs;
 using Lamar;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -93,6 +94,7 @@ namespace BirdsiteLive
                 services.For<IFollowersDal>().Use<FollowersPostgresDal>().Singleton();
                 services.For<IDbInitializerDal>().Use<DbInitializerPostgresDal>().Singleton();
                 services.For<ISettingsDal>().Use<SettingsPostgresDal>().Singleton();
+                services.For<IIpfsService>().Use<DotmakeupIpfs>().Singleton();
             }
             else
             {

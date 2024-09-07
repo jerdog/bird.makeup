@@ -30,6 +30,7 @@ public abstract class SocialMediaUserPostgresDal : PostgresBase, SocialMediaUser
         #endregion
 
         public abstract string tableName { get; set; }
+        public abstract string PostCacheTableName { get; set; }
         public abstract string FollowingColumnName { get; set; }
         
         public abstract Task<SyncUser[]> GetNextUsersToCrawlAsync(int nStart, int nEnd, int m);
@@ -92,6 +93,49 @@ public abstract class SocialMediaUserPostgresDal : PostgresBase, SocialMediaUser
             var cache = reader["cache"] as string;
             return cache;
         }
+
+        public async Task<SocialMediaPost> GetPostCacheAsync(string post)
+        {
+            var query = $"SELECT data FROM {PostCacheTableName} WHERE id = $1";
+
+            await using var connection = DataSource.CreateConnection();
+            await connection.OpenAsync();
+            await using var command = new NpgsqlCommand(query, connection) {
+                Parameters =
+                {
+                    new() { Value = post },
+                },
+            };
+            var reader = await command.ExecuteReaderAsync();
+            if (!reader.HasRows)
+                return null;
+            await reader.ReadAsync();
+            
+            var cache = reader["cache"] as string;
+            return JsonSerializer.Deserialize<SocialMediaPost>(cache, _jsonOptions);
+        }
+        public async Task UpdatePostCacheAsync(SocialMediaPost post)
+        {
+            var query = $"""
+                INSERT INTO {PostCacheTableName} (id, acct, data, lastsync)
+                VALUES ($1, $2, $3, NOW())
+                ON CONFLICT (id)
+                DO NOTHING 
+""";
+            await using var connection = DataSource.CreateConnection();
+            await connection.OpenAsync();
+            await using var command = new NpgsqlCommand(query, connection) {
+                Parameters = 
+                { 
+                    new() { Value = post.Id},
+                    new() { Value = post.Author.Acct},
+                    new() { Value = JsonSerializer.Serialize(post, _jsonOptions), NpgsqlDbType = NpgsqlDbType.Jsonb },
+                }
+            };
+
+            await command.ExecuteNonQueryAsync();
+        }
+
         public async Task UpdateUserLastSyncAsync(SyncUser user)
         {
             var query = $"UPDATE {tableName} SET lastsync = NOW() WHERE acct = $1";

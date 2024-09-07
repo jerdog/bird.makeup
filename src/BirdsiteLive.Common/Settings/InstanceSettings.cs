@@ -33,6 +33,7 @@ namespace BirdsiteLive.Common.Settings
         public string SidecarURL { get; set; } = "http://localhost:5000";
         public string ProxyURL { get; set; }
         public string IpfsApi { get; set; }
+        public string IpfsGateway { get; set; } = "ipfs.io";
         public string ProxyUser { get; set; }
         public string ProxyPassword { get; set; }
     }

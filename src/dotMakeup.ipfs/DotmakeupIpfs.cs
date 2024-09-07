@@ -28,7 +28,7 @@ public class DotmakeupIpfs : IIpfsService
 
     public string GetIpfsPublicLink(string hash)
     {
-        return "https://ipfs.io/ipfs/" + hash;
+        return $"https://{_instanceSettings.IpfsGateway}/ipfs/{hash}";
     }
 
     public async Task<string> Mirror(string upstream)
@@ -42,6 +42,17 @@ public class DotmakeupIpfs : IIpfsService
         
         var i = await _ipfs.FileSystem.AddAsync(memoryStream);
         await _ipfs.Pin.AddAsync(i.Id);
+        
+        var gatewayClient = _httpClientFactory.CreateClient();
+        gatewayClient.Timeout = TimeSpan.FromMinutes(3);
+        try
+        {
+            await gatewayClient.GetAsync(GetIpfsPublicLink(i.Id));
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine("Timeout during warmup of {0}", i.Id);
+        }
         
         return i.Id;
     }

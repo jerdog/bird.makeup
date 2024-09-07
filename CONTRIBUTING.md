@@ -1,22 +1,11 @@
+# Integrating a new upstream social network
 # Installation
+
+## How the official instances are set up
 
 ## Server prerequisites
 
 Your instance will need [docker](https://docs.docker.com/engine/install/) and [docker-compose](https://docs.docker.com/compose/install/) installed and working. 
-
-## Setup
-
-Download the [docker-compose file](https://github.com/NicolasConstant/BirdsiteLive/blob/master/docker-compose.yml): 
-
-```
-sudo curl -L https://raw.githubusercontent.com/NicolasConstant/BirdsiteLive/master/docker-compose.yml -o docker-compose.yml
-```
-
-Then edit file: 
-
-```
-sudo nano docker-compose.yml
-```
 
 ### Attributes to change in the docker-compose file
 
@@ -132,51 +121,3 @@ sudo ufw status
 
 You should now have an up and running BirdsiteLIVE instance!
 
-## Updating 
-
-Make sure your data belong outside the containers before migrating (set by default). 
-
-To update your installation to the latest release:
-
-```
-# Edit `docker-compose.yml` to update the version, if you have one specified
-# Pull new images
-docker-compose pull
-# Start a new container, automatically removes old one
-docker-compose up -d
-```
-
-## Auto-Updating
-
-To set auto-updates on your deployment, add to the `docker-compose.yml` file this section:
-
-```diff
-version: "3"
-
-networks:
-    birdsitelivenetwork:
-        external: false
-
-services:
-    server:
-        image: nicolasconstant/birdsitelive:latest
-        [...]
-
-    db:
-        image: postgres:9.6
-        [...]
-        
-+   watchtower:
-+       image: containrrr/watchtower
-+       restart: always
-+       container_name: watchtower
-+       environment:
-+           - WATCHTOWER_CLEANUP=true
-+       volumes:
-+           - /var/run/docker.sock:/var/run/docker.sock
-+       command: --interval 300
-```
-
-## More options 
-
-You can find more options available [here](https://github.com/NicolasConstant/BirdsiteLive/blob/master/VARIABLES.md)

@@ -53,6 +53,8 @@ spec:
             requests:
               memory: "900Mi"
               cpu: "500m"
+            limits:
+              memory: "1Gi"
           envFrom:
             - secretRef:
                 name: grafana
@@ -68,9 +70,9 @@ spec:
             - name: Instance__ParallelFediversePosts
               value: "10"
             - name: Instance__UserCacheCapacity
-              value: "40000"
+              value: "5000"
             - name: Instance__TweetCacheCapacity
-              value: "40000"
+              value: "5000"
             - name: Instance__MultiplyNByOrdinal
               value: "true"
             - name: Instance__n_start

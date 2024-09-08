@@ -10,6 +10,18 @@ spec:
     kind: ClusterIssuer
   secretName: ssl-cert-bird-dotmakeup
 ---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: dotmakeup-kilogram
+spec:
+  dnsNames:
+    - kilogram.makeup
+  issuerRef:
+    name: letsencrypt
+    kind: ClusterIssuer
+  secretName: ssl-cert-kilogram-dotmakeup
+---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -23,6 +35,9 @@ spec:
     - hosts:
         - bird.makeup
       secretName: ssl-cert-bird-dotmakeup
+    - hosts:
+        - kilogram.makeup
+      secretName: ssl-cert-kilogram-dotmakeup
   rules:
     - host: bird.makeup
       http:
@@ -32,5 +47,15 @@ spec:
             backend:
               service:
                 name: dotmakeup
+                port:
+                  number: 80
+    - host: kilogram.makeup
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: dotmakeup-kilo
                 port:
                   number: 80

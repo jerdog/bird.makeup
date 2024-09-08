@@ -139,7 +139,7 @@ kind: Service
 metadata:
   name: dotmakeup-kilo
 spec:
-  type: NodePort
+  type: ClusterIP
   selector:
     app: dotmakeup
     network: instagram

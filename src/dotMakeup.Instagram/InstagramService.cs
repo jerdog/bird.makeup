@@ -40,6 +40,11 @@ public class InstagramService : ISocialMediaService
             // Remove from cache after this time, regardless of sliding expiration
             .SetAbsoluteExpiration(TimeSpan.FromMinutes(30));
 
+        private readonly JsonSerializerOptions _serializerOptions = new JsonSerializerOptions()
+        {
+            Converters = { new InstagramSocialMediaUserConverter() }
+        };
+
         #region Ctor
         public InstagramService(IIpfsService ipfs, IInstagramUserDal userDal, IHttpClientFactory httpClientFactory, InstanceSettings settings, ISettingsDal settingsDal)
         {
@@ -121,7 +126,7 @@ public class InstagramService : ISocialMediaService
                 var userCache = await _instagramUserDal.GetUserCacheAsync(username);
                 if (userCache is not null)
                 {
-                    user = JsonSerializer.Deserialize<InstagramUser>(userCache);
+                    user = JsonSerializer.Deserialize<InstagramUser>(userCache, _serializerOptions);
                 }
                 else
                 {

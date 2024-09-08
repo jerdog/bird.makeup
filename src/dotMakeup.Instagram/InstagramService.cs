@@ -126,7 +126,7 @@ public class InstagramService : ISocialMediaService
                 var userCache = await _instagramUserDal.GetUserCacheAsync(username);
                 if (userCache is not null)
                 {
-                    user = JsonSerializer.Deserialize<InstagramUser>(userCache, _serializerOptions);
+                    user = JsonSerializer.Deserialize<InstagramUser>(userCache);
                 }
                 else
                 {
@@ -145,7 +145,7 @@ public class InstagramService : ISocialMediaService
                 var dbCache = await _instagramUserDal.GetPostCacheAsync(id);
                 if (dbCache is not null)
                 {
-                    var x = JsonSerializer.Deserialize<InstagramPost>(dbCache);
+                    var x = JsonSerializer.Deserialize<InstagramPost>(dbCache, _serializerOptions);
                     _postCache.Set(id, x, _cacheEntryOptions);
                     return x;
                 }

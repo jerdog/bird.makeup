@@ -111,7 +111,7 @@ public abstract class SocialMediaUserPostgresDal : PostgresBase, SocialMediaUser
                 return null;
             await reader.ReadAsync();
             
-            var cache = reader["cache"] as string;
+            var cache = reader["data"] as string;
             return JsonSerializer.Deserialize<SocialMediaPost>(cache, _jsonOptions);
         }
         public async Task UpdatePostCacheAsync(SocialMediaPost post)

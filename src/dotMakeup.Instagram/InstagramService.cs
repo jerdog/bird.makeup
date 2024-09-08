@@ -140,8 +140,9 @@ public class InstagramService : ISocialMediaService
                 var dbCache = await _instagramUserDal.GetPostCacheAsync(id);
                 if (dbCache is not null)
                 {
-                    _postCache.Set(id, dbCache, _cacheEntryOptions);
-                    return dbCache;
+                    var x = JsonSerializer.Deserialize<InstagramPost>(dbCache);
+                    _postCache.Set(id, x, _cacheEntryOptions);
+                    return x;
                 }
                 
                 

@@ -94,7 +94,7 @@ public abstract class SocialMediaUserPostgresDal : PostgresBase, SocialMediaUser
             return cache;
         }
 
-        public async Task<SocialMediaPost> GetPostCacheAsync(string post)
+        public async Task<string> GetPostCacheAsync(string post)
         {
             var query = $"SELECT data FROM {PostCacheTableName} WHERE id = $1";
 
@@ -112,7 +112,7 @@ public abstract class SocialMediaUserPostgresDal : PostgresBase, SocialMediaUser
             await reader.ReadAsync();
             
             var cache = reader["data"] as string;
-            return JsonSerializer.Deserialize<SocialMediaPost>(cache, _jsonOptions);
+            return cache;
         }
         public async Task UpdatePostCacheAsync(SocialMediaPost post)
         {

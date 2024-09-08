@@ -27,3 +27,4 @@ tasks:
   - deploy: |
       cd bird.makeup/k8s
       kubectl apply -f dotmakeup.yaml
+      kubectl apply -f kilogram.yaml

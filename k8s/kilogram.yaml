@@ -1,20 +1,20 @@
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: dotmakeup-bird
+  name: dotmakeup-kilo
 spec:
   selector:
     matchLabels:
       app: dotmakeup
-      network: twitter
+      network: instagram
   serviceName: "dotmakeup"
-  replicas: 4 
+  replicas: 1 
   minReadySeconds: 10 
   template:
     metadata:
       labels:
         app: dotmakeup 
-        network: twitter
+        network: instagram
     spec:
       affinity:
         podAntiAffinity:
@@ -24,25 +24,10 @@ spec:
                   - key: network
                     operator: In
                     values:
-                      - twitter
+                      - instagram
               topologyKey: "kubernetes.io/hostname"
       terminationGracePeriodSeconds: 30
       containers:
-        - name: dotmakeup-social-sidecar
-          image: cloutier/dotmakeup-social-sidecar:latest
-          imagePullPolicy: Always
-          ports:
-            - containerPort: 5000
-              name: sidecar
-          livenessProbe:
-            httpGet:
-              path: /twitter/_meta
-              port: 5000
-            initialDelaySeconds: 10 
-            periodSeconds: 3
-          volumeMounts:
-            - name: accounts
-              mountPath: /opt/sidecar/db
         - name: dotmakeup
           image: cloutier/bird.makeup:latest
           imagePullPolicy: Always
@@ -60,13 +45,21 @@ spec:
                 name: grafana
           env:
             - name: Instance__domain
-              value: "bird.makeup"
+              value: "kilogram.makeup"
             - name: Instance__Name
-              value: "bird.makeup"
+              value: "kilogram.makeup"
             - name: Instance__TwitterRequestDelay
               value: "300"
             - name: Instance__ParallelTwitterRequests
-              value: "1"
+              value: "0"
+            - name: Instance__SidecarURL
+              value: "http://100.100.41.58:5000"
+            - name: "Instance__IpfsApi"
+              value: "http://100.102.85.102:5001"
+            - name: "Instance__IpfsGateway"
+              value: "gateway.pinata.cloud"
+            - name: Instance__InstaMode
+              value: "true"
             - name: Instance__ParallelFediversePosts
               value: "10"
             - name: Instance__UserCacheCapacity
@@ -111,9 +104,29 @@ spec:
               port: 8080
             initialDelaySeconds: 15
             periodSeconds: 10
+        - name: tailscale
+          image: ghcr.io/tailscale/tailscale:latest
+          securityContext:
+            privileged: true
+          imagePullPolicy: Always
+          env:
+            - name: "TS_KUBE_SECRET"
+              value: ""
+            - name: "TS_USERSPACE"
+              value: "false"
+            - name: "TS_STATE_DIR"
+              value: "/var/lib/tailscale"
+            - name: "TS_AUTHKEY"
+              valueFrom:
+                secretKeyRef:
+                  name: tailscale
+                  key: ts_authkey
+          volumeMounts:
+            - name: ts
+              mountPath: /var/lib/tailscale
   volumeClaimTemplates:
     - metadata:
-        name: accounts
+        name: ts
       spec:
         accessModes: [ "ReadWriteOnce" ]
         storageClassName: "csi-cinder-classic"
@@ -124,12 +137,12 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: dotmakeup
+  name: dotmakeup-kilo
 spec:
   type: NodePort
   selector:
     app: dotmakeup
-    network: twitter
+    network: instagram
   ports:
     - protocol: TCP
       port: 80

@@ -9,6 +9,7 @@ using BirdsiteLive.Common.Models;
 using BirdsiteLive.DAL.Models;
 using BirdsiteLive.DAL.Postgres.DataAccessLayers.Base;
 using BirdsiteLive.DAL.Postgres.Settings;
+using Dapper;
 using Npgsql;
 using NpgsqlTypes;
 
@@ -43,6 +44,18 @@ public abstract class SocialMediaUserPostgresDal : PostgresBase, SocialMediaUser
         {
             return await GetUserAsync(acct, null);
         }
+
+        public async Task<SyncUser[]> GetAllUsersAsync()
+        {
+            var query = $"SELECT id, acct, lastsync FROM {tableName}";
+
+            using (var dbConnection = Connection)
+            {
+                var result = await dbConnection.QueryAsync<SyncUser>(query);
+                return result.ToArray();
+            }
+        }
+
         private async Task<SyncUser> GetUserAsync(string acct, int? id)
         {
             var query = $"SELECT *, ( SELECT COUNT(*) FROM {_settings.FollowersTableName} WHERE {FollowingColumnName} @> ARRAY[{tableName}.id]) as followersCount FROM {tableName} WHERE acct = $1 OR id = $2";
@@ -339,6 +352,30 @@ public abstract class SocialMediaUserPostgresDal : PostgresBase, SocialMediaUser
                     new() { Value = key},
                     new() { Value = JsonSerializer.Serialize(value), NpgsqlDbType = NpgsqlDbType.Jsonb },
                     new() { Value = username},
+                    
+                }
+            };
+
+            await command.ExecuteNonQueryAsync();
+        }
+        public async Task UpdateUserWikidataAsync(string username, object value)
+        {
+            if(username == default) throw new ArgumentException("id");
+
+            var query = $"""
+                INSERT INTO {tableName} (acct, wikidata)
+                VALUES ($1, $2)
+                ON CONFLICT (acct)
+                DO UPDATE
+                    SET wikidata = EXCLUDED.wikidata
+""";
+            await using var connection = DataSource.CreateConnection();
+            await connection.OpenAsync();
+            await using var command = new NpgsqlCommand(query, connection) {
+                Parameters = 
+                { 
+                    new() { Value = username},
+                    new() { Value = JsonSerializer.Serialize(value), NpgsqlDbType = NpgsqlDbType.Jsonb },
                     
                 }
             };

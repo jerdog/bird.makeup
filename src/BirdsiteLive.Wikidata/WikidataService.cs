@@ -1,4 +1,5 @@
 using System.Text.Json;
+using BirdsiteLive.Common.Interfaces;
 using BirdsiteLive.DAL.Contracts;
 using BirdsiteLive.DAL.Models;
 
@@ -7,17 +8,22 @@ namespace BirdsiteLive.Wikidata;
 public class WikidataService
 {
     private ITwitterUserDal _dal;
+    private IInstagramUserDal _dalIg;
     private readonly string _endpoint;
     private HttpClient _client = new ();
 
     private const string HandleQuery = """
-                                       SELECT ?item ?handle ?fediHandle ?itemLabel ?itemDescription
+                                       SELECT ?item ?handleTwitter ?handleIG ?handleReddit ?handleFedi ?handleHN ?handleTT ?itemLabel ?itemDescription
                                        WHERE
                                        {
-                                         ?item wdt:P2002 ?handle
+                                        {?item wdt:P2002 ?handleTwitter } UNION {?item wdt:P2003 ?handleIG}
                                           OPTIONAL {?item wdt:P4033 ?fediHandle} 
+                                         OPTIONAL {?item wdt:P4265 ?handleReddit}
+                                         OPTIONAL {?item wdt:P7171 ?handleHN}
+                                         OPTIONAL {?item wdt:P7085 ?handleTT}
+                                       
                                           SERVICE wikibase:label { bd:serviceParam wikibase:language "en". }
-                                       } # LIMIT 10 
+                                       } # LIMIT 10  
                                        """;
     private const string NotableWorkQuery = """
                                        SELECT ?item ?handle ?work
@@ -28,9 +34,10 @@ public class WikidataService
                                                SERVICE wikibase:label { bd:serviceParam wikibase:language "en". }
                                        } # LIMIT 100
                                        """;
-    public WikidataService(ITwitterUserDal twitterUserDal)
+    public WikidataService(ITwitterUserDal twitterUserDal, IInstagramUserDal instagramUserDal)
     {
         _dal = twitterUserDal;
+        _dalIg = instagramUserDal;
 
         string? key = Environment.GetEnvironmentVariable("semantic");
         if (key is null)
@@ -51,14 +58,22 @@ public class WikidataService
     {
         
         var twitterUser = new HashSet<string>();
-        var twitterUserQuery = await _dal.GetAllTwitterUsersAsync();
+        var twitterUserQuery = await _dal.GetAllUsersAsync();
         Console.WriteLine("Loading twitter users");
-        foreach (SyncTwitterUser user in twitterUserQuery)
+        foreach (SyncUser user in twitterUserQuery)
         {
             twitterUser.Add(user.Acct);
         }
         Console.WriteLine($"Done loading {twitterUser.Count} twitter users");
 
+        var instagramUsers = new HashSet<string>();
+        var instagramUserQuery = await _dalIg.GetAllUsersAsync();
+        Console.WriteLine("Loading instagram users");
+        foreach (SyncUser user in instagramUserQuery)
+        {
+            instagramUsers.Add(user.Acct);
+        }
+        Console.WriteLine($"Done loading {instagramUsers.Count} instagram users");
 
         Console.WriteLine("Making Wikidata Query to " + _endpoint);
         var response = await _client.GetAsync(_endpoint + Uri.EscapeDataString(HandleQuery));
@@ -72,31 +87,52 @@ public class WikidataService
             
 
             var qcode = n.GetProperty("item").GetProperty("value").GetString()!.Replace("http://www.wikidata.org/entity/", "");
-            var acct = n.GetProperty("handle").GetProperty("value").GetString()!.ToLower().Trim().TrimEnd( '\r', '\n' );
-            string? fediHandle = null;
-            string? label = null;
-            string? description = null;
-            try
-            {
-                label = n.GetProperty("itemLabel").GetProperty("value").GetString();
-                description = n.GetProperty("itemDescription").GetProperty("value").GetString();
-                fediHandle = n.GetProperty("fediHandle").GetProperty("value").GetString();
-            } catch (KeyNotFoundException _) {}
+            var handleTwitter = ExtractValue(n, "handleTwitter", true);
+            var handleIg = ExtractValue(n, "handleIG", true);
+            var handleReddit = ExtractValue(n, "handleReddit", true);
+            var handleHn = ExtractValue(n, "handleHN", true);
+            var handleTikTok = ExtractValue(n, "handleTT", true);
 
+            // for any network
+            bool isFollowed = (handleTwitter is not null && twitterUser.Contains(handleTwitter))
+                              || (handleIg is not null && instagramUsers.Contains(handleIg));
 
-            if (twitterUser.Contains(acct))
+            if (isFollowed)
             {
-                Console.WriteLine($"{acct} with {qcode}");
                 var entry = new WikidataEntry()
                 {
-                    Description = description,
-                    Label = label,
                     QCode = qcode,
-                    FediHandle = fediHandle,
+                    Description = ExtractValue(n, "itemDescription", false),
+                    Label = ExtractValue(n, "itemLabel", false),
+                    FediHandle = ExtractValue(n, "fediHandle", false),
+                    HandleReddit = handleReddit,
+                    HandleHN = handleHn,
+                    HandleTikTok = handleTikTok,
+                    HandleTwitter = handleTwitter,
+                    HandleIG = handleIg,
                 };
-                await _dal.UpdateUserExtradataAsync(acct, "wikidata", entry);
+                Console.WriteLine($"{entry.Label} with {qcode}");
+                if (handleTwitter is not null)
+                    await _dal.UpdateUserWikidataAsync(handleTwitter, entry);
+                if (handleIg is not null)
+                    await _dalIg.UpdateUserWikidataAsync(handleIg, entry);
             }
         }
+    }
+
+    private static string? ExtractValue(JsonElement e, string value, bool extraClean)
+    {
+        string? res = null;
+
+        if (!e.TryGetProperty(value, out var prop))
+            return null;
+        
+        res = prop.GetProperty("value").GetString();
+
+        if (extraClean)
+                res = res.ToLower().Trim().TrimEnd( '\r', '\n' );
+        
+        return res;
     }
 
     public async Task SyncNotableWork()
